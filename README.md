@@ -86,12 +86,18 @@ python run_pipeline.py -t "Omniscient Reader" -c 1
 
 ---
 
-## 🚀 Roadmap
+## 🚀 Roadmap & Future Enhancements
+
 - [x] Implement MangaDex API search and waterfall logic.
 - [x] Build multi-engine OCR router (Tesseract + Manga-OCR).
-- [x] Automate the end-to-end pipeline via `run_pipeline.py`.
-- [ ] **Next Up:** Implement `summarizer.py` to translate and recap text via Gemini 2.0.
-- [ ] Build the Rails-based web interface and user database.
+- [x] Automate end-to-end pipeline via `run_pipeline.py`.
+- [x] Integrate Gemini 2.5 Flash for translation and synthesis.
+
+### 🛠️ Planned Improvements
+* **Budget & Usage Guardrail:** Create a `usage_tracker.py` to log API calls locally. Implement a "Kill Switch" that prevents script execution if the daily free-tier limit (e.g., 50 RPD) is approached, ensuring $0 spending.
+* **Bulk Processing:** Update the runner to support chapter ranges (e.g., `--range 1-10`) to automate the extraction of entire story arcs in one session.
+* **Enterprise Refactoring:** Transition from a "Script-based" architecture to a formal Python Package structure. Implement logging modules, custom Exception handling, and Unit Testing for the OCR logic.
+* **Context-Aware Multi-Chapter Summaries:** Develop advanced prompt engineering that allows the AI to read previous chapter summaries. This ensures the recap for Chapter 10 "remembers" what happened in Chapter 9, creating a cohesive narrative flow.
 
 ---
 
