@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T15:09:50.380374",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch27.0_artifact.json",
+  "summary": {
+    "chapter_number": "27.0",
+    "key_events": [
+      "Kim Dokja and his group arrive in Chungmuro, a new major scenario area.",
+      "They encounter Lee Jihye, who is a loyal follower of Yu Joong-Hyuk and refers to him as 'Master'.",
+      "Lee Jihye explains that Yu Joong-Hyuk has become the leader of their group and that she hunts monsters for food, which Yu Joong-Hyuk then cooks.",
+      "Dokja learns about the 'Alliance of Sovereigns' and the concept of 'rooms' (Green Zones) in Chungmuro, which are points of conflict and control.",
+      "Dokja observes that Yu Joong-Hyuk's actions in this 'third scenario' are deviating from the original novel, prompting him to investigate further.",
+      "Lee Gilyoung, Dokja's companion, inadvertently trespasses into a 'room' controlled by Gong Pildu.",
+      "Gong Pildu, identified by Dokja as the leader of the Alliance of Sovereigns and one of the 'Ten Calamities', confronts Lee Gilyoung, activating his 'Militarized Celestial Mark Lv. 3' and demanding coins for the intrusion."
+    ],
+    "character_updates": "Kim Dokja continues to rely on his knowledge of 'Ways of Survival' to navigate the scenarios, noting Yu Joong-Hyuk's deviations from the original plot. Yu Joong-Hyuk has established himself as a powerful leader in Chungmuro, attracting followers like Lee Jihye. Lee Jihye is confirmed to be sponsored by the Naval War God and serves Yu Joong-Hyuk. Lee Gilyoung, Dokja's companion, gets into trouble by trespassing. Gong Pildu is introduced as a powerful new antagonist, the leader of the Alliance of Sovereigns and one of the Ten Calamities, who strictly enforces his territory.",
+    "lore_and_worldbuilding": "Chungmuro is introduced as a large-scale scenario area with multiple Dokkaebi channels. The 'Alliance of Sovereigns' is a dominant faction in Chungmuro, controlling resources and led by Gong Pildu. 'Rooms' are specific areas within Chungmuro, also referred to as 'Green Zones' by the scenario, which are contested territories. The 'Ten Calamities' are mentioned as significant figures, with Gong Pildu being identified as one of them. Gong Pildu possesses a unique skill called 'Militarized Celestial Mark Lv. 3'.",
+    "ending_cliffhanger": "The chapter concludes with Lee Gilyoung trapped in Gong Pildu's territory, facing a direct threat from the powerful Gong Pildu who has activated his skill and is demanding coins, threatening to open fire if his demands are not met. This puts Dokja's group in immediate danger and sets up a direct confrontation with one of the Ten Calamities."
+  }
+}

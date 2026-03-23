@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T15:07:35.665613",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch23.0_artifact.json",
+  "summary": {
+    "chapter_number": "23.0",
+    "key_events": [
+      "Yoo Sang-ah reveals her unique characteristic: a skill that allows her to find her way using a line, which she used when kidnapped.",
+      "Kim Dok-ja attempts to use 'Character Identification' on Sang-ah but fails, realizing she is under a Star Stream contract that prohibits her from leaking information, with death as the penalty.",
+      "Dok-ja overhears Bihyung's Dokkabi communication, learning that Bihyung received a warning from the administration for shutting down his channel and letting commercials run too long, and that the 'ridiculous item box' was for Dok-ja.",
+      "Lee Hyeon-sung begins to show loyalty towards Kim Dok-ja.",
+      "An announcement is made about a daily survival fee of 100 coins, to be collected at midnight, with failure to pay resulting in death. This fee will continue until the second main scenario is completed.",
+      "Cheon In-ho activates 'Incitement Lv.2' to turn the crowd against Dok-ja, demanding his coins.",
+      "Dok-ja refuses to share his coins, reflecting on the 'Original Sin' of the first scenario and the crowd's past actions.",
+      "Several constellations, including the 'Veiled One', 'Prisoner of the Golden Headband', and 'Demon-like Judge of Fire', observe Dok-ja's decision.",
+      "Lee Gil-young attempts to connect with an insect monarch.",
+      "The crowd, incited by Cheon In-ho, attacks Dok-ja to take his coins.",
+      "Gil-young successfully summons an insect monarch, saving Dok-ja from the attacking crowd."
+    ],
+    "character_updates": "Yoo Sang-ah's unique characteristic is revealed to be a 'line' skill for navigation/escape, and she is bound by a strict Star Stream contract. Kim Dok-ja's 'Character Identification' fails on Sang-ah, and he faces a moral dilemma regarding sharing his abundant coins, ultimately refusing. Bihyung is reprimanded by the administration for channel issues. Lee Hyeon-sung begins to show loyalty to Dok-ja. Jung Hee-won's characteristic is noted to be 'about to bloom'. Lee Gil-young successfully summons an insect monarch, demonstrating a powerful new ability, though Dok-ja warns him against its immediate reuse. Cheon In-ho is established as an antagonist, using 'Incitement Lv.2' to manipulate the crowd.",
+    "lore_and_worldbuilding": "Star Stream contracts can include severe penalties like death for leaking information. Dokkabi communication has special modes, some only audible to specific individuals. The 'Administration' oversees Dokkabis and channels, issuing warnings for rule violations. A daily survival fee of 100 coins is introduced, with death as the consequence for non-payment, emphasizing coins as 'the power of this world'. The theme of the first scenario is revealed as 'Original Sin', highlighting the moral compromises made for survival. Constellations actively observe and influence events, awaiting incarnations' decisions. The existence of powerful 'insect monarchs' that can be summoned is confirmed.",
+    "ending_cliffhanger": "Just as the incited crowd attacks Kim Dok-ja for his coins, Lee Gil-young successfully summons a powerful insect monarch, saving Dok-ja from immediate danger. Dok-ja warns Gil-young not to use this ability again for a while, leaving the implications of Gil-young's new power and the unresolved conflict with the coin-hungry crowd hanging."
+  }
+}

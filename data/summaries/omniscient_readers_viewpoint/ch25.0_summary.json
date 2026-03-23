@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T15:08:34.465175",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch25.0_artifact.json",
+  "summary": {
+    "chapter_number": "25.0",
+    "key_events": [
+      "Dok-ja plans to increase Bihyung's channel level to attract more constellations and earn coins.",
+      "The group's next destination is Chungmuro, identified as a main security zone, specifically the Dongguk University Station area.",
+      "Dok-ja suggests resting at Dongguk University due to the group's fatigue and exposure to a 'venomous fog'.",
+      "The Second Main Scenario, 'The Encounter' (Difficulty E), is activated, requiring the group to pass through a tunnel and meet a survivor from the first zone.",
+      "Dok-ja embarks on a 'pilgrimage' to the statue of the Great Monk Sam-Yeong.",
+      "Dok-ja spends a total of 4,400 coins to significantly upgrade his stats: Resistance (LVL 12 -> 15), Strength (LVL 11 -> 15), Agility (LVL 10 -> 11), and Magic (LVL 8 -> 10) to maintain the White Star's Weapon Aura.",
+      "Dok-ja destroys the sealed image of the Great Monk Sam-Yeong using a shortcut from 'Ways of Survival' to quickly obtain his relic.",
+      "Dok-ja acquires the 'Great Monk Sam-Yeong's Tunic' (Rank B), which increases the wearer's sense of justice and determination.",
+      "Jung Hee-Won, referred to as the 'Judge of Evil', officially joins Dok-ja's group as a new ally.",
+      "Dok-ja distributes the coins earned from the previous night's fight among the group members.",
+      "The group prepares to leave Geumho Station for their next destination, Chungmuro."
+    ],
+    "character_updates": "Kim Dok-ja strategically plans to boost Bihyung's channel and his own power. He makes significant coin expenditures to upgrade his core stats (Resistance, Strength, Agility, Magic) and uses a risky shortcut to acquire a powerful relic (Great Monk Sam-Yeong's Tunic) by destroying a constellation's image, much to Bihyung's dismay. He also takes on a leadership role by distributing earned coins. Bihyung expresses extreme anger and concern over Dok-ja's 'abominable act' of destroying a constellation's image, fearing it will ruin his channel, but still provides Dok-ja with his share of coins. Jung Hee-Won, the 'Judge of Evil', officially joins Dok-ja's group as a new, powerful ally. Han Myeon-Goh has disappeared without a trace after the events of the previous night. The 'Constellation wearing a Tunic' is initially anxious about Dok-ja's actions, then becomes 'stunned' and 'indignant' after Dok-ja destroys the constellation's image.",
+    "lore_and_worldbuilding": "The concept of increasing a constellation channel's level to attract more constellations and earn coins is a key mechanic. The activation of the 'Second Main Scenario: The Encounter' (Difficulty E, Condition: Pass through the tunnel and meet a survivor from the first zone, Reward: 3000 coins, Failure: Death) establishes the ongoing challenges. Chungmuro is designated as the next 'Main Security Zone,' indicating important safe havens or objective locations. Constellation Images/Seals are powerful artifacts that, when broken, yield skills or items belonging to the corresponding constellation; breaking them normally takes time, but shortcuts (like those from 'Ways of Survival') exist. Coins are confirmed as the primary currency for stat upgrades and item acquisition. The mention of 'venomous fog' suggests the world contains various environmental dangers.",
+    "ending_cliffhanger": "The group is poised to depart Geumho Station for the perilous Chungmuro, with a new ally (Jung Hee-Won) and a missing member (Han Myeon-Goh). Dok-ja has significantly boosted his stats and acquired a new relic, preparing for the challenges ahead. The 'Second Main Scenario: The Encounter' has just been activated, setting the stage for their immediate next objective and potential dangers. The indignation of the 'Constellation wearing a Tunic' hints at potential repercussions for Dok-ja's actions."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T15:13:15.894146",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch30.0_artifact.json",
+  "summary": {
+    "chapter_number": "30.0",
+    "key_events": [
+      "The group struggles to find a Green Zone room in Chungmuro Station, as all suitable rooms are either occupied or too expensive.",
+      "Kim Dok-Ja presents two options for survival: Option 1, to kill the occupants of an existing Green Zone and take it, which he describes as the easiest way for everyone to survive; or Option 2, a more difficult plan where one of them might die.",
+      "Yoo Sang-Ah and Lee Hee-Won express strong moral objections to killing other survivors, with Sang-Ah admitting she has killed before but did not enjoy it, and both wanting to hear the second option.",
+      "Dok-Ja reveals the 'Second Option' (part of a larger strategy): Monsters will emerge at midnight and systematically destroy the station to reach the surface, making direct confrontation impossible.",
+      "Dok-Ja instructs the group to split up (Lee Hyeon-Sung with Yoo Sang-Ah, Lee Hee-Won with Shin Yu-Seung/Gil-Yung) to search for a suitable Green Zone, with a rendezvous point if unsuccessful within 20 minutes before the scenario begins.",
+      "The details of 'Main Scenario #3 - Green Zone (Day 3)' are revealed: Occupy a Green Zone and survive nightly monster attacks for 7 days, with a difficulty of E and a reward of 100 coins.",
+      "Kim Dok-Ja realizes that Constellations and Dokkaebis cannot see the content of his 'Ways of Survival' screen, indicating a unique property of the text he possesses.",
+      "Dok-Ja encounters Ji-Hae, a powerful individual occupying a Green Zone alone, who expresses admiration for his previous actions and hints that finding a room isn't the only way to survive the night."
+    ],
+    "character_updates": "Kim Dok-Ja continues to act as the primary strategist, presenting difficult choices and formulating complex plans based on his knowledge. He makes a critical discovery about the limitations of Constellations and Dokkaebis regarding his 'Ways of Survival' screen. Yoo Sang-Ah and Lee Hee-Won display strong moral compasses, resisting the idea of killing innocent survivors, highlighting their humanity amidst the brutal scenarios. Lee Hyeon-Sung and Shin Yu-Seung (Gil-Yung) follow Dok-Ja's instructions. Gong Pil-Du is mentioned as occupying a large Green Zone, reinforcing his status as a powerful 'Sovereign.' Ji-Hae is introduced as a formidable survivor who occupies a Green Zone alone, confident in her ability to defend it against all but the strongest, and shows interest in Dok-Ja, providing a cryptic hint about survival.",
+    "lore_and_worldbuilding": "Green Zones are confirmed as essential safe havens from monsters during nightly scenarios, varying greatly in capacity from single-person to 70-person rooms. Main Scenario #3's conditions for completion (occupy a Green Zone, survive 7 days of monster attacks at midnight), difficulty (E), and rewards (100 coins) are detailed. Monsters are confirmed to emerge at midnight and systematically destroy the station to reach the surface. A critical limitation of Constellations and Dokkaebis is revealed: they cannot perceive the content of Kim Dok-Ja's 'Ways of Survival' screen, suggesting a unique blind spot in their surveillance. The 'Ways of Survival' text is confirmed to be a unique item, possibly beyond the direct influence or perception of the system's administrators. The Alliance of Sovereigns and Yu Joong-Hyuk are reaffirmed as top-tier powerful entities within the scenario world.",
+    "ending_cliffhanger": "Ji-Hae cryptically tells Kim Dok-Ja that finding a Green Zone room is not the *only* way to survive the night, leaving the reader to wonder what alternative, potentially dangerous, method she is alluding to, especially given the explicit scenario condition to 'Occupy a Green Zone'."
+  }
+}

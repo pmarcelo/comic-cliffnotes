@@ -1,1 +1,7 @@
 data/usage_log.json
+tmp/*
+# Byte-compiled / optimized / DLL files
+core/__pycache__/*.pyc
+*.py[cod]
+*$py.class
+

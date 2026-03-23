@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T14:58:42.005822",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch17.0_artifact.json",
+  "summary": {
+    "chapter_number": "17.0",
+    "key_events": [
+      "Yu Joong-Hyuk, a regressor in his third life, left the station yesterday in a hurry, abandoning the Cheoldu group members to pursue his goals.",
+      "Kim Dok-Ja arrives at Geumho Station and is greeted by Cheon In-Ho, the leader of the dominant group.",
+      "Dok-Ja learns that Geumho Station has 87 survivors, all of whom completed the first scenario by killing someone, and is divided into a 'larger group' (led by Cheon In-Ho) and a 'smaller group'.",
+      "The 'larger group' controls food distribution, and members of the 'smaller group' sent on scavenging missions rarely return.",
+      "Lee Hyeon-Seong, a strong individual, chooses to align with the 'smaller group' due to his moral principles.",
+      "Cheon In-Ho attempts to recruit Dok-Ja into his 'larger group', offering him a high position, but Dok-Ja refuses.",
+      "Dok-Ja confronts Cheon In-Ho about monopolizing food, especially when others who scavenged with Dok-Ja are not receiving their fair share.",
+      "Kim Dok-Ja enters the area where the second scenario will be activated.",
+      "Dok-Ja is reunited with Hee-Won (the woman he saved), who expresses relief and mentions Yu Joong-Hyuk's prediction of Dok-Ja's survival."
+    ],
+    "character_updates": "Yu Joong-Hyuk is confirmed as a regressor in his third life, portrayed as a ruthless individual focused solely on his objectives, having abandoned others. His current whereabouts are unknown. Kim Dok-Ja arrives at Geumho Station, recognized as a hero, and quickly assesses the station's social dynamics. He refuses to join the dominant group and confronts their leader about unfair practices, all while being observed by the 'Veiled Conspirator' constellation. Cheon In-Ho, a former corporate director, is established as the manipulative leader of the 'larger group' at Geumho Station, monopolizing resources and attempting to recruit Dok-Ja. Lee Hyeon-Seong, a strong character, demonstrates his moral compass by choosing to be part of the 'smaller group'. Hee-Won, the woman Dok-Ja saved, is reunited with him and is part of the 'smaller group', having been sent on a scavenging mission.",
+    "lore_and_worldbuilding": "The concept of 'regressors' is reinforced through Yu Joong-Hyuk, highlighting their single-minded pursuit of goals across multiple lives. The brutal nature of the first scenario is revealed, as all survivors at Geumho Station are 'murderers' who killed to survive. The immediate formation of social hierarchies and power struggles in the apocalypse is shown, with leaders like Cheon In-Ho exploiting the weak and monopolizing resources. The text identifies the 'most dangerous type of person' in a post-apocalyptic world as someone like Cheon In-Ho, who manipulates and exploits, rather than someone driven by despair. The constant observation and influence of 'Constellations' are evident through the 'Veiled Conspirator'. The second scenario is about to begin.",
+    "ending_cliffhanger": "Kim Dok-Ja has just entered the activation area for the second scenario. He is reunited with Hee-Won, who is relieved he is alive and mentions Yu Joong-Hyuk's earlier prediction of his survival, while Yu Joong-Hyuk's current location remains unknown."
+  }
+}
