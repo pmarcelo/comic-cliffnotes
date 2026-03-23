@@ -3,15 +3,14 @@ import argparse
 import requests
 import subprocess
 import time
-from core import config  # Central Single Source of Truth
+from tqdm import tqdm  # Visual progress bar
+from core import config 
 from core.usage_tracker import check_usage
 
-# We keep this here as it is MangaDex specific, 
-# but we ensure it matches the priority in mangadex.py
 LANGUAGE_PRIORITY = ["en", "es-la", "es", "pt-br", "pt", "fr", "ja", "ko"]
 
 def get_manga_id(title):
-    """Fetches the MangaDex ID and official title for a given search query."""
+    """Fetches the MangaDex ID and official title."""
     url = "https://api.mangadex.org/manga"
     params = {"title": title, "limit": 1}
     r = requests.get(url, params=params)
@@ -22,7 +21,7 @@ def get_manga_id(title):
     return None, None
 
 def get_chapter_list(manga_id, start, end):
-    """Fetches and filters unique chapter numbers available in priority languages."""
+    """Fetches unique chapter numbers available in priority languages."""
     url = f"https://api.mangadex.org/manga/{manga_id}/feed"
     params = {
         "translatedLanguage[]": LANGUAGE_PRIORITY,
@@ -38,14 +37,12 @@ def get_chapter_list(manga_id, start, end):
         try:
             num_str = item["attributes"]["chapter"]
             if num_str is None: continue
-            
             num = float(num_str)
             if start <= num <= end:
                 chapters.append(num)
         except (TypeError, ValueError):
             continue
             
-    # Remove duplicates (MangaDex returns one entry per scanlation group/language)
     return sorted(list(set(chapters)))
 
 def main():
@@ -65,33 +62,36 @@ def main():
         print("❌ Could not find manga title.")
         return
 
-    # Use central config to get the standardized safe title (slug)
     safe_title = config.get_safe_title(m_title)
 
     # 2. Get the "Queue"
     queue = get_chapter_list(m_id, args.start, args.end)
     
     if not queue:
-        print(f"⚠️ No chapters found in the range {args.start} - {args.end} within priority languages.")
+        print(f"⚠️ No chapters found in range {args.start}-{args.end}.")
         return
 
     print(f"\n✅ Target: {m_title}")
-    print(f"📂 Storage: {config.DATA_DIR}/.../{safe_title}/")
-    print(f"📋 Found {len(queue)} chapters to process: {queue}")
+    print(f"📋 Found {len(queue)} chapters to process.")
     print("="*50)
 
-    # 3. Process the Queue
+    # 3. Process the Queue with tqdm
     success_count = 0
-    for chapter in queue:
-        # Check AI Quota before launching a full/summarize chapter task
+    
+    # Wrap the queue in tqdm for the visual bar
+    # 'unit="ch"' adds a "ch/s" speed metric to the bar
+    pbar = tqdm(queue, desc="🚀 Overall Progress", unit="ch")
+
+    for chapter in pbar:
+        # Update description to show the current active chapter
+        pbar.set_description(f"📦 Processing Ch {chapter}")
+
+        # Check AI Quota
         if args.mode in ["full", "summarize"] and not check_usage():
-            print("\n🚦 Daily AI Limit Reached. Bulk run paused.")
-            print(f"💡 Chapters remaining: {len(queue) - success_count}")
+            pbar.write("\n🚦 Daily AI Limit Reached. Bulk run paused.")
             break
 
-        print(f"\n📦 [BULK] STARTING CHAPTER {chapter}")
-        
-        # Call the orchestrator using the official title to maintain folder consistency
+        # Run the pipeline
         cmd = [
             "python", "run_pipeline.py", 
             "-t", m_title, 
@@ -99,18 +99,20 @@ def main():
             "-m", args.mode
         ]
         
+        # We use subprocess.run with capture_output=True if you want a clean bar,
+        # but here we keep it simple so you can still see the pipeline logs.
         result = subprocess.run(cmd)
         
         if result.returncode == 0:
             success_count += 1
+        else:
+            pbar.write(f"⚠️ Warning: Chapter {chapter} failed.")
         
-        # Politeness delay for API and AI Rate Limits
-        time.sleep(2)
+        time.sleep(1)
 
     print("\n" + "="*50)
     print(f"🏁 BULK RUN COMPLETE")
     print(f"✅ Successfully processed: {success_count}/{len(queue)}")
-    print(f"📂 Data saved to subfolders under: {safe_title}")
     print("="*50)
 
 if __name__ == "__main__":
