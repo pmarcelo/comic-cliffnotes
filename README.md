@@ -1,106 +1,86 @@
-Here is the full, updated **README.md** content in Markdown format. You can copy and paste this directly into your file.
-
-```markdown
 # 📚 Comic CliffNotes
 
-> **Never reread 50 chapters just to remember what happened.** > An automated, spoiler-free recap engine for manga and manhwa readers.
+> **Never reread 50 chapters just to remember what happened.**
+> An automated, spoiler-free translation and recap engine for manga and manhwa.
 
 ---
 
-## 🛑 The Problem
-In the webcomic community, "stacking chapters" is standard practice. Readers pause a series for months to let chapters build up, but by the time they return, they've forgotten the plot points, side characters, and power-scaling rules. Standard wikis are riddled with spoilers, and reading full chapter summaries takes too long.
+## 💡 The "Waterfall" Pipeline
+Comic CliffNotes uses a resilient extraction pipeline. If English chapters are unavailable, the engine automatically **"waterfalls"** through alternative languages (Spanish, Portuguese, French, or Japanese) to extract raw data. 
 
-## 💡 The Solution: The "Waterfall" Pipeline
-**Comic CliffNotes** uses a resilient extraction pipeline that prioritizes content availability over language barriers. If English chapters are removed from trackers due to official licensing, the engine automatically **"waterfalls"** through a priority list of alternative languages (Spanish, Portuguese, French, or Japanese Raws) to extract the raw plot data for the AI to process.
-
----
-
-## ⚙️ Architecture: The Ephemeral OCR Pipeline
-
-This project uses a modular Python backend designed for speed, data privacy, and cross-language compatibility:
-
-1.  **Metadata Mapping:** `mangadex.py` searches for a series and builds a `metadata.json` map, applying the language waterfall logic (**EN > ES > PT > FR > JA**).
-2.  **Ephemeral Fetch:** `extractor.py` temporarily downloads images to a `/tmp` directory.
-3.  **Intelligent Routing:** The engine detects the source language and routes the images to the optimal OCR engine:
-    * **Tesseract OCR:** Optimized for Latin-alphabet languages (English, Portuguese, Spanish, French).
-    * **Manga-OCR:** A specialized transformer-based AI model for high-accuracy Japanese text recognition.
-4.  **Artifact Generation:** Raw text is bundled into a structured JSON "Artifact" in `api/ocr/outputs/`.
-5.  **Secure Cleanup:** All raw images are immediately and permanently deleted from the server once the text is extracted.
+The **Gemini 2.5 Flash** AI then translates and synthesizes this data into professional English summaries.
 
 ---
 
-## 🛠️ Installation & Setup
-
-### 1. System Dependencies (OCR Engines)
-You must have the Tesseract engine and relevant language packs installed at the OS level.
-
-**For Linux (GitHub Codespaces / Ubuntu):**
-```bash
-sudo apt-get update
-sudo apt-get install -y tesseract-ocr tesseract-ocr-por tesseract-ocr-eng tesseract-ocr-spa tesseract-ocr-fra
+## 📂 Project Structure
+Organized for scalability and data separation:
+```text
+.
+├── core/                # The "Brains" (Logic)
+│   ├── mangadex.py      # API interaction & Waterfall logic
+│   ├── ocr_engine.py    # Image processing (Tesseract/Manga-OCR)
+│   ├── ai_agent.py      # Gemini 2.5 Flash (Translation & Synthesis)
+│   └── usage_tracker.py # $0.00 Safety Guardrail
+├── data/                # The "State" (Storage)
+│   ├── metadata/        # Series maps & chapter IDs
+│   ├── artifacts/       # Raw OCR text (JSON)
+│   └── summaries/       # Final English Recaps (JSON)
+├── run_pipeline.py      # The Orchestrator
+└── requirements.txt     
 ```
-
-**For macOS (via Homebrew):**
-```bash
-brew install tesseract
-brew install tesseract-lang
-```
-
-### 2. Python Environment
-Install the required wrappers and AI models:
-```bash
-pip install -r requirements.txt
-```
-*Note: On the first run, the system will download the `manga-ocr` model weights (~444MB).*
 
 ---
 
 ## 🚀 Usage
 
-The entire pipeline is orchestrated through a single runner script. Provide the manga title and the target chapter you wish to process.
+The pipeline is managed via `run_pipeline.py`. It is **idempotent**, meaning it will skip work that has already been completed unless forced.
 
+### Basic Command
 ```bash
 python run_pipeline.py -t "Omniscient Reader" -c 1
 ```
 
-### Output Files
-* **`tmp/`**: Contains the `metadata.json` map for the series.
-* **`api/ocr/outputs/`**: Contains the final structured JSON artifacts (e.g., `omniscientreader_ch1.0.json`) containing the raw extracted text.
+### Pipeline Modes (`-m`)
+You can decouple data ingestion from AI synthesis to manage your API quota:
 
----
+| Mode | Action | Use Case |
+| :--- | :--- | :--- |
+| `full` | Metadata → OCR → AI | Standard run (Default). |
+| `extract` | Metadata → OCR | Use when Wi-Fi is fast but AI quota is low. |
+| `summarize` | AI Only | Use to process "pre-extracted" artifacts. |
 
-## 📂 Project Structure
-```text
-.
-├── api/
-│   ├── mangadex/
-│   │   └── mangadex.py     # API interaction & Waterfall logic
-│   └── ocr/
-│       ├── outputs/        # Final JSON text artifacts
-│       └── extractor.py    # Image downloading & OCR routing
-├── tmp/                    # Temporary storage (Auto-cleaned)
-├── run_pipeline.py         # End-to-end Orchestrator
-├── requirements.txt        # Python dependencies
-└── README.md
+**Example (Extract only):**
+```bash
+python run_pipeline.py -t "Omniscient Reader" -c 1 -m extract
 ```
 
----
+### Force Refresh (`-f`)
+To re-run a chapter and overwrite existing files (e.g., after updating the AI prompt):
+```bash
+python run_pipeline.py -t "Omniscient Reader" -c 1 -f
+```
 
-## 🚀 Roadmap & Future Enhancements
-
-- [x] Implement MangaDex API search and waterfall logic.
-- [x] Build multi-engine OCR router (Tesseract + Manga-OCR).
-- [x] Automate end-to-end pipeline via `run_pipeline.py`.
-- [x] Integrate Gemini 2.5 Flash for translation and synthesis.
-
-### 🛠️ Planned Improvements
-* **Budget & Usage Guardrail:** Create a `usage_tracker.py` to log API calls locally. Implement a "Kill Switch" that prevents script execution if the daily free-tier limit (e.g., 50 RPD) is approached, ensuring $0 spending.
-* **Bulk Processing:** Update the runner to support chapter ranges (e.g., `--range 1-10`) to automate the extraction of entire story arcs in one session.
-* **Enterprise Refactoring:** Transition from a "Script-based" architecture to a formal Python Package structure. Implement logging modules, custom Exception handling, and Unit Testing for the OCR logic.
-* **Context-Aware Multi-Chapter Summaries:** Develop advanced prompt engineering that allows the AI to read previous chapter summaries. This ensures the recap for Chapter 10 "remembers" what happened in Chapter 9, creating a cohesive narrative flow.
+### Bulk Processing
+Process a range of chapters automatically. The runner fetches the actual chapter list from MangaDex to ensure accuracy.
+```bash
+python bulk_runner.py -t "Title" -s [start] -e [end] -m [mode]
 
 ---
 
-## 📝 Disclaimer
-This project does not host, distribute, or store copyrighted images. Image processing is performed entirely in temporary storage for the sole purpose of text extraction and analysis, after which the source files are immediately destroyed.
+## 🛡️ Budget & Safety Guardrails
+This project is designed to run on the **Google AI Free Tier**.
+* **Usage Tracker:** Every successful AI run is logged in `data/usage_log.json`.
+* **Kill Switch:** The pipeline will automatically halt the AI step if you exceed your daily safety limit (Default: 200 chapters).
+* **Spend Cap:** Recommended to set a $1.00 safety cap in Google Cloud Console as a "belt and suspenders" measure.
+
+---
+
+## 🚀 Roadmap
+- [x] Multi-engine OCR router (Tesseract + Manga-OCR).
+- [x] Idempotent "Smart" pipeline logic.
+- [x] Gemini 2.5 Flash integration with 2026 SDK.
+- [x] Decoupled `extract` vs `summarize` modes.
+- [ ] **Bulk Processing:** Support for `--range 1-10`.
+- [ ] **Context Memory:** Allow AI to read previous summaries for better continuity.
+- [ ] **Rails Integration:** Build the frontend dashboard to display summaries.
 ```

@@ -29,8 +29,6 @@ TESSERACT_MAP = {
     "de": "deu"
 }
 
-LATIN_LANGS = list(TESSERACT_MAP.keys())
-
 def get_installed_tess_langs():
     """Checks the system to see what Tesseract packs are actually installed."""
     try:
@@ -73,7 +71,6 @@ def download_chapter_images(uuid: str, tmp_dir: str):
 def extract_text_from_chapter(metadata_path: str, target_chapter: str):
     """The main pipeline: Download -> Dynamic OCR Routing -> Cleanup -> Return Text."""
     
-    # 1. Read the Metadata
     if not os.path.exists(metadata_path):
         print(f"❌ Metadata file not found: {metadata_path}")
         return None
@@ -81,7 +78,15 @@ def extract_text_from_chapter(metadata_path: str, target_chapter: str):
     with open(metadata_path, 'r', encoding='utf-8') as f:
         metadata = json.load(f)
         
-    chapter_data = metadata["chapter_map"].get(str(target_chapter))
+    # The new metadata structure stores the target chapter info at the top level
+    # We double-check the chapter matches for safety
+    if str(metadata.get("target_chapter")) != str(target_chapter):
+        print(f"⚠️ Warning: Metadata target ({metadata.get('target_chapter')}) mismatch with args ({target_chapter}).")
+
+    # In our new ch-specific metadata, we use the specific chapter info
+    chapter_key = str(target_chapter)
+    chapter_data = metadata["chapter_map"].get(chapter_key)
+    
     if not chapter_data:
         print(f"❌ Chapter {target_chapter} not found in the provided metadata map.")
         return None
@@ -113,14 +118,11 @@ def extract_text_from_chapter(metadata_path: str, target_chapter: str):
                 if tess_code in installed_langs:
                     text = pytesseract.image_to_string(str(img_path), lang=tess_code)
                 else:
-                    print(f"⚠️ System missing Tesseract pack: {tess_code}. Defaulting to 'eng'.")
                     text = pytesseract.image_to_string(str(img_path), lang='eng')
             else:
-                # Fallback for untracked languages
                 text = pytesseract.image_to_string(str(img_path), lang='eng')
 
             if text.strip():
-                # Remove extra newlines/whitespace common in OCR
                 clean_text = " ".join(text.split())
                 extracted_text.append(clean_text)
                 
@@ -139,20 +141,18 @@ def extract_text_from_chapter(metadata_path: str, target_chapter: str):
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="OCR Extractor for Comic-CliffNotes")
-    parser.add_argument("-m", "--metadata", type=str, required=True, help="Path to the metadata.json file")
-    parser.add_argument("-c", "--chapter", type=str, required=True, help="Chapter number to extract (e.g. 1.0)")
+    parser.add_argument("-m", "--metadata", type=str, required=True, help="Path to the metadata JSON")
+    parser.add_argument("-c", "--chapter", type=str, required=True, help="Chapter number (e.g. 1.0)")
     
     args = parser.parse_args()
 
-    # 1. Perform Extraction
     raw_script = extract_text_from_chapter(args.metadata, args.chapter)
     
     if raw_script:
-        # 2. Reload metadata for the JSON artifact
         with open(args.metadata, 'r') as f:
             meta = json.load(f)
 
-        # 3. Build Structured Artifact
+        # Build Structured Artifact
         artifact = {
             "manga_title": meta["manga_title"],
             "manga_id": meta["manga_id"],
@@ -162,13 +162,17 @@ if __name__ == "__main__":
             "extracted_at": time.strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # 4. Save to Disk
-        output_dir = "./data/artifacts"
+        # --- NEW ORGANIZED FOLDER LOGIC ---
+        # 1. Standardized Title Slug
+        raw_title = meta["manga_title"]
+        safe_title = "".join([c for c in raw_title if c.isalpha() or c.isspace()]).replace(" ", "_").lower()
+        
+        # 2. Create nested directory: data/artifacts/[series_title]/
+        output_dir = os.path.join("./data/artifacts", safe_title)
         os.makedirs(output_dir, exist_ok=True)
         
-        # Create a safe filename
-        safe_title = "".join([c for c in meta["manga_title"] if c.isalnum()]).lower()
-        filename = f"{safe_title}_ch{args.chapter}.json"
+        # 3. Create standardized filename: ch1.0_artifact.json
+        filename = f"ch{args.chapter}_artifact.json"
         file_path = os.path.join(output_dir, filename)
         
         with open(file_path, "w", encoding="utf-8") as f:

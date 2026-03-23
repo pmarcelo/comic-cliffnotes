@@ -19,6 +19,7 @@ def search_manga_by_title(title: str):
         
     data = response.json()["data"][0]
     manga_id = data["id"]
+    # Get the primary title (usually the first one in the dictionary)
     manga_title = list(data["attributes"]["title"].values())[0]
     
     print(f"✅ Found: {manga_title} (ID: {manga_id})")
@@ -32,7 +33,6 @@ def build_chapter_map(manga_id: str, manga_title: str, target_chapter: float):
     offset = 0
     limit = 500
     
-    # 1. Paginate through the API to get all relevant chapters
     while True:
         params = {
             "translatedLanguage[]": LANGUAGE_PRIORITY,
@@ -55,9 +55,8 @@ def build_chapter_map(manga_id: str, manga_title: str, target_chapter: float):
             break
             
         offset += limit
-        time.sleep(0.3) # Be polite to the API
+        time.sleep(0.3)
 
-    # 2. Build the Waterfall Dictionary
     raw_map = {}
     
     for ch in all_chapters:
@@ -75,27 +74,32 @@ def build_chapter_map(manga_id: str, manga_title: str, target_chapter: float):
         if ch_num > target_chapter:
             continue
             
-        # Format the chapter key nicely (e.g., "1.0", "1.5")
         ch_key = str(ch_num)
         
-        # If we already have a chapter stored for this number, check if this new one is a better language
+        # Waterfall Logic: Only replace if the new language has a higher priority (lower index)
         if ch_key in raw_map:
             current_best_lang = raw_map[ch_key]["lang"]
-            # Compare index in our priority list (lower index = higher priority)
             if LANGUAGE_PRIORITY.index(lang) < LANGUAGE_PRIORITY.index(current_best_lang):
-                raw_map[ch_key] = {"lang": lang, "uuid": ch["id"]}
+                raw_map[ch_key] = {
+                    "lang": lang, 
+                    "uuid": ch["id"],
+                    "pages": ch["attributes"]["data"],
+                    "hash": ch["attributes"]["hash"]
+                }
         else:
-            raw_map[ch_key] = {"lang": lang, "uuid": ch["id"]}
+            raw_map[ch_key] = {
+                "lang": lang, 
+                "uuid": ch["id"],
+                "pages": ch["attributes"]["data"],
+                "hash": ch["attributes"]["hash"]
+            }
 
-    # 3. Check for missing chapters
     missing_chapters = []
-    # Create a list of expected whole numbers (e.g., 1.0, 2.0, 3.0) up to the target
     for i in range(1, int(target_chapter) + 1):
         expected_key = f"{float(i)}"
         if expected_key not in raw_map:
             missing_chapters.append(float(i))
 
-    # 4. Construct the final JSON structure
     metadata = {
         "manga_title": manga_title,
         "manga_id": manga_id,
@@ -107,18 +111,23 @@ def build_chapter_map(manga_id: str, manga_title: str, target_chapter: float):
     
     return metadata
 
-def save_metadata(metadata: dict):
-    """Saves the generated metadata map to a JSON file."""
-    os.makedirs("./data/metadata", exist_ok=True) 
+def save_metadata(metadata: dict, chapter_num: float):
+    """Saves the metadata map to a title-specific subfolder."""
+    # 1. Standardized Safe Title Slug
+    raw_title = metadata["manga_title"]
+    safe_title = "".join([c for c in raw_title if c.isalpha() or c.isspace()]).replace(" ", "_").lower()
     
-    # Create a safe filename (e.g., "tmp/omniscient_readers_viewpoint_metadata.json")
-    safe_title = "".join([c for c in metadata["manga_title"] if c.isalpha() or c.isspace()]).replace(" ", "_").lower()
-    file_path = f"./data/metadata/{safe_title}_metadata.json"
+    # 2. Create the directory: data/metadata/[series_title]/
+    output_dir = os.path.join("./data/metadata", safe_title)
+    os.makedirs(output_dir, exist_ok=True) 
+    
+    # 3. Create the chapter-specific filename
+    file_path = os.path.join(output_dir, f"ch{chapter_num}_metadata.json")
     
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
         
-    print(f"\n💾 Metadata successfully saved to: {file_path}")
+    print(f"💾 Metadata successfully saved to: {file_path}")
     return file_path
 
 
@@ -136,10 +145,13 @@ if __name__ == "__main__":
         # Generate the mapped metadata
         metadata = build_chapter_map(m_id, m_title, args.chapter)
         
-        # Save it to disk
-        save_metadata(metadata)
+        # Save it to disk in the organized structure
+        save_metadata(metadata, args.chapter)
         
-        # Print a quick summary to the console
+        # Final Summary Print
         found_count = len(metadata["chapter_map"])
         missing_count = len(metadata["missing_chapters"])
-        print(f"📊 Summary: Found {found_count} chapters. Missing {missing_count} chapters.")
+        print(f"\n📊 SUMMARY FOR {m_title}:")
+        print(f"   - Found Chapters: {found_count}")
+        print(f"   - Missing Chapters: {missing_count}")
+        print(f"   - Workflow: Ready for OCR/Summarization.\n")
