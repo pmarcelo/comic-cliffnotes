@@ -48,13 +48,13 @@ def main():
         else:
             # 1. Metadata Fetching
             if not metadata_file.exists() or args.force:
-                run_command(["python", "core/mangadex.py", "-t", args.title, "-c", chapter_str])
+                run_command(["python", "-m", "core.mangadex", "-t", args.title, "-c", chapter_str])
             
             # 2. OCR Ingestion
             if metadata_file.exists():
                 if not artifact_file.exists() or args.force:
                     # Pass the path as a string to the subprocess
-                    run_command(["python", "core/ocr_engine.py", "-m", str(metadata_file), "-c", chapter_str])
+                    run_command(["python", "-m", "core.ocr_engine", "-m", str(metadata_file), "-c", chapter_str])
             else:
                 print(f"❌ Aborting OCR: Metadata file missing at {metadata_file}")
 
@@ -81,7 +81,7 @@ def main():
         time.sleep(THROTTLE_TIME)
         
         # We pass the artifact path string to the AI agent
-        if run_command(["python", "core/ai_agent.py", "-f", str(artifact_file)]):
+        if run_command(["python", "-m", "core.ai_agent", "-f", str(artifact_file)]):
             log_success() 
 
     print("\n✨ PIPELINE STEP COMPLETE ✨\n")

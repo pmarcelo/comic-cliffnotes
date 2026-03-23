@@ -1,0 +1,11 @@
+{
+  "manga_title": "Omniscient Reader's Viewpoint",
+  "manga_id": "9a414441-bbad-43f1-a3a7-dc262ca790a3",
+  "target_chapter": 5.0,
+  "chapter_map": {
+    "5.0": {
+      "lang": "pt-br",
+      "uuid": "5fb6bfa1-7e43-48c9-a5f4-4e8e13ec9c26"
+    }
+  }
+}
