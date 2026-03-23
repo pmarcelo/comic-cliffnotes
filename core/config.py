@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- API SETTINGS ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-TARGET_MODEL = os.getenv("TARGET_MODEL", "gemini-2.5-flash") 
+TARGET_MODEL = os.getenv("TARGET_MODEL", "gemini-2.5-flash-8b") 
 SCHEMA_VERSION = "1.0"
 
 # --- DIRECTORY MAPPING ---
