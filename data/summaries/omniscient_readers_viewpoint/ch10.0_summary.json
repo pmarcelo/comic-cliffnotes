@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T03:55:42.992480",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch10.0_artifact.json",
+  "summary": {
+    "chapter_number": "10.0",
+    "key_events": [
+      "Dok-Ja attempts to use 'Omniscient Reader's Point of View' on an Evil Spirit but fails because it lacks consciousness.",
+      "Dok-Ja realizes his 'Character Identification' skill fails on Yoo Sang-Ah and Han Myun-Goh because they are not 'characters' from 'Ways of Survival'.",
+      "Facing a collapsing bridge and a time limit, Dok-Ja considers desperate measures.",
+      "Kim Nam-Woon arrives, seemingly empowered, and Dok-Ja partially activates his 'Marking No. 1' skill, though at a reduced duration and partial effectiveness.",
+      "The bridge collapses, leaving Dok-Ja, Yoo Sang-Ah, and Han Myun-Goh stranded.",
+      "A child character (implied to be Lee Gilyoung) successfully crosses the bridge, protected by a Constellation.",
+      "Dok-Ja realizes Yoo Sang-Ah might have received a 'Deus Ex Machina' intervention from a Constellation, prompting him to re-attempt 'Character Identification' on her."
+    ],
+    "character_updates": "Dok-Ja struggles with his skills, realizing 'Omniscient Reader's Point of View' fails on unconscious beings and 'Character Identification' only works on 'Ways of Survival' characters, leaving him unable to identify Yoo Sang-Ah and Han Myun-Goh. Yoo Sang-Ah shows distress and anger, later implied to be receiving a 'Deus Ex Machina' intervention. Kim Nam-Woon arrives, seemingly empowered, and Dok-Ja partially activates his 'Marking No. 1' skill. A child character (implied to be Lee Gilyoung) successfully crosses the bridge under Constellation protection.",
+    "lore_and_worldbuilding": "Evil Spirits are defined as Tier 9 non-human mutants lacking consciousness, making them immune to certain skills. A crucial revelation is that Dok-Ja's 'Character Identification' skill is limited to characters from the novel 'Ways of Survival.' The concept of 'Deus Ex Machina' is introduced as a rare and costly direct intervention by Constellations in scenarios. Dok-Ja receives a 100-coin sponsorship from the 'Conspirator' Constellation, and a new 'Marking' skill, possibly from Kim Nam-Woon, is introduced, allowing partial skill activation based on Dok-Ja's understanding.",
+    "ending_cliffhanger": "Dok-Ja is left stranded with Yoo Sang-Ah and Han Myun-Goh after the bridge collapses, realizing that Yoo Sang-Ah might be receiving a 'Deus Ex Machina' intervention from a powerful Constellation, prompting him to re-attempt 'Character Identification' on her to uncover her celestial sponsor."
+  }
+}
