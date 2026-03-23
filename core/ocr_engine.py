@@ -1,12 +1,12 @@
-import os
-import json
-import shutil
-import requests
 import time
 import argparse
+import requests
+import logging
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from core import config 
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
+
+from core import config, helpers
 
 # --- OCR Engines ---
 import pytesseract
@@ -16,154 +16,117 @@ try:
 except ImportError:
     mocr = None
 
-# --- Configuration ---
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
 TESSERACT_MAP = {
     "en": "eng", "pt-br": "por", "pt": "por",
     "es-la": "spa", "es": "spa", "fr": "fra",
-    "it": "ita", "deu": "deu"
+    "it": "ita", "deu": "deu", "ja": "jpn"
 }
 
-# Optimization Settings
 MAX_DOWNLOAD_WORKERS = 10  
 MAX_OCR_WORKERS = 4        
 
-def get_installed_tess_langs():
-    try:
-        return pytesseract.get_languages(config='')
-    except Exception:
-        return []
-
-def download_single_image(url, path):
-    """Worker function for parallel downloads."""
-    try:
-        res = requests.get(url, timeout=10)
-        if res.status_code == 200:
-            with open(path, 'wb') as f:
-                f.write(res.content)
-            return True
-    except Exception as e:
-        print(f"⚠️ Download error: {e}")
-    return False
-
 def download_chapter_images(uuid: str, tmp_dir: str):
-    """Downloads images using a ThreadPool for high speed."""
-    print(f"📡 Routing UUID: {uuid}...")
-    response = requests.get(f"https://api.mangadex.org/at-home/server/{uuid}")
-    if response.status_code != 200: return False
+    logger.info(f"Routing MangaDex UUID: {uuid}")
+    try:
+        response = requests.get(f"{config.MANGADEX_API_URL}/at-home/server/{uuid}")
+        response.raise_for_status()
+        data = response.json()
+    except Exception as e:
+        logger.error(f"MangaDex API error: {e}")
+        return False
         
-    data = response.json()
     base_url, chapter_hash = data['baseUrl'], data['chapter']['hash']
     filenames = data['chapter']['data']
-    os.makedirs(tmp_dir, exist_ok=True)
-
-    print(f"⬇️ Downloading {len(filenames)} pages (Parallel)...")
     
-    tasks = []
+    helpers.ensure_directory(tmp_dir)
+    session = requests.Session()
+    
     with ThreadPoolExecutor(max_workers=MAX_DOWNLOAD_WORKERS) as executor:
+        tasks = []
         for filename in filenames:
-            img_url = f"{base_url}/data/{chapter_hash}/{filename}"
-            img_path = os.path.join(tmp_dir, filename)
-            tasks.append(executor.submit(download_single_image, img_url, img_path))
+            url = f"{base_url}/data/{chapter_hash}/{filename}"
+            path = Path(tmp_dir) / filename
+            tasks.append(executor.submit(helpers.download_image, session, url, path))
         
-        for _ in as_completed(tasks): pass
+        for _ in tqdm(tasks, desc="⬇️ Downloading", unit="img"): pass
             
     return True
 
 def ocr_worker(img_path, lang, installed_langs):
-    """Worker function for parallel OCR (Tesseract only)."""
+    tess_code = TESSERACT_MAP.get(lang, 'eng')
+    actual_lang = tess_code if tess_code in installed_langs else 'eng'
     try:
-        if lang in TESSERACT_MAP:
-            tess_code = TESSERACT_MAP[lang]
-            actual_lang = tess_code if tess_code in installed_langs else 'eng'
-            text = pytesseract.image_to_string(str(img_path), lang=actual_lang)
-            return " ".join(text.split())
-    except Exception:
-        pass
-    return ""
+        text = pytesseract.image_to_string(str(img_path), lang=actual_lang, config=r'--psm 6')
+        return " ".join(text.split())
+    except: return ""
 
 def extract_text_from_chapter(metadata_path: str, target_chapter: str):
-    """Downloads images and extracts text while measuring performance."""
     start_total = time.perf_counter()
     
-    if not os.path.exists(metadata_path): return None, {}
-
-    with open(metadata_path, 'r', encoding='utf-8') as f:
-        metadata = json.load(f)
+    meta = helpers.load_json(metadata_path)
+    if not meta:
+        logger.error("Metadata not found.")
+        return None, {}
         
-    chapter_data = metadata["chapter_map"].get(str(target_chapter))
-    if not chapter_data: return None, {}
+    chapter_data = meta["chapter_map"].get(str(target_chapter))
+    if not chapter_data:
+        logger.error(f"Chapter {target_chapter} not found in metadata.")
+        return None, {}
 
     lang, uuid = chapter_data["lang"], chapter_data["uuid"]
-    tmp_dir = f"./tmp/{uuid}"
-    installed_langs = get_installed_tess_langs()
+    tmp_dir = Path(f"./tmp/{uuid}")
+    installed_langs = helpers.get_tesseract_langs()
     
-    # --- DOWNLOAD PHASE ---
-    start_download = time.perf_counter()
-    if not download_chapter_images(uuid, tmp_dir): return None, {}
-    download_duration = time.perf_counter() - start_download
+    # 1. Download
+    start_dl = time.perf_counter()
+    if not download_chapter_images(uuid, str(tmp_dir)): return None, {}
+    dl_time = time.perf_counter() - start_dl
 
-    # --- OCR PHASE ---
-    print(f"📖 Scanning pages (Language: {lang})...")
+    # 2. OCR
+    image_files = sorted([f for f in tmp_dir.iterdir() if f.is_file()])
     start_ocr = time.perf_counter()
-    image_files = sorted([f for f in Path(tmp_dir).iterdir() if f.is_file()])
-    extracted_text = []
-
+    
     if lang == "ja" and mocr:
-        for img in image_files:
-            extracted_text.append(mocr(img))
+        extracted = [mocr(img) for img in tqdm(image_files, desc="📖 Manga-OCR")]
     else:
-        with ThreadPoolExecutor(max_workers=MAX_OCR_WORKERS) as executor:
-            future_to_img = {executor.submit(ocr_worker, img, lang, installed_langs): img for img in image_files}
-            for future in as_completed(future_to_img):
-                text = future.result()
-                if text: extracted_text.append(text)
+        with ThreadPoolExecutor(max_workers=MAX_OCR_WORKERS) as ex:
+            results = list(tqdm(ex.map(lambda p: ocr_worker(p, lang, installed_langs), image_files), 
+                                total=len(image_files), desc=f"📖 Tesseract ({lang})"))
+            extracted = [r for r in results if r]
 
-    ocr_duration = time.perf_counter() - start_ocr
-    full_text = " ".join(extracted_text)
+    ocr_time = time.perf_counter() - start_ocr
+    helpers.cleanup_directory(tmp_dir) 
     
-    # Cleanup
-    if os.path.exists(tmp_dir): shutil.rmtree(tmp_dir)
-    
-    total_duration = time.perf_counter() - start_total
-    
-    # Compile Performance Metrics
     metrics = {
-        "download_time": round(download_duration, 2),
-        "ocr_time": round(ocr_duration, 2),
-        "total_extraction_time": round(total_duration, 2),
-        "pages_processed": len(image_files)
+        "download_time": round(dl_time, 2),
+        "ocr_time": round(ocr_time, 2),
+        "total_time": round(time.perf_counter() - start_total, 2),
+        "pages": len(image_files)
     }
-        
-    return full_text, metrics
+    return "\n\n".join(extracted), metrics
 
-# --- MAIN EXECUTION ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--metadata", required=True)
     parser.add_argument("-c", "--chapter", required=True)
     args = parser.parse_args()
 
-    # 1. Perform Extraction with Metrics
-    raw_script, metrics = extract_text_from_chapter(args.metadata, args.chapter)
+    raw_text, metrics = extract_text_from_chapter(args.metadata, args.chapter)
     
-    if raw_script:
-        with open(args.metadata, 'r') as f: meta = json.load(f)
+    if raw_text:
+        meta = helpers.load_json(args.metadata)
+        paths = helpers.get_paths(meta["manga_title"], args.chapter)
         
-        # 2. Build Structured Artifact with Metrics
         artifact = {
             "manga_title": meta["manga_title"],
             "chapter_number": args.chapter,
-            "raw_text": raw_script,
-            "extracted_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "performance_metrics": metrics
+            "source_language": meta["chapter_map"][args.chapter]["lang"],
+            "raw_text": raw_text,
+            "metrics": metrics
         }
         
-        # 3. Save to Disk
-        paths = config.get_paths(meta["manga_title"], args.chapter)
-        with open(paths["artifact"], "w", encoding="utf-8") as f:
-            json.dump(artifact, f, indent=2, ensure_ascii=False)
-            
-        print("-" * 50)
-        print(f"✅ Extraction Complete!")
-        print(f"⏱️  Performance: DL {metrics['download_time']}s | OCR {metrics['ocr_time']}s | Total {metrics['total_extraction_time']}s")
-        print(f"💾 Artifact: {paths['artifact']}")
+        helpers.save_json(artifact, paths["artifact"])
+        print(f"✅ Chapter {args.chapter} OCR complete. Total time: {metrics['total_time']}s")
