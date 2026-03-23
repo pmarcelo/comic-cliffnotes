@@ -20,12 +20,12 @@ except ImportError:
 TESSERACT_MAP = {
     "en": "eng", "pt-br": "por", "pt": "por",
     "es-la": "spa", "es": "spa", "fr": "fra",
-    "it": "ita", "de": "deu"
+    "it": "ita", "deu": "deu"
 }
 
 # Optimization Settings
-MAX_DOWNLOAD_WORKERS = 10  # Parallel downloads
-MAX_OCR_WORKERS = 4        # Parallel Tesseract processes (Match your CPU cores)
+MAX_DOWNLOAD_WORKERS = 10  
+MAX_OCR_WORKERS = 4        
 
 def get_installed_tess_langs():
     try:
@@ -65,7 +65,6 @@ def download_chapter_images(uuid: str, tmp_dir: str):
             img_path = os.path.join(tmp_dir, filename)
             tasks.append(executor.submit(download_single_image, img_url, img_path))
         
-        # Wait for all to complete
         for _ in as_completed(tasks): pass
             
     return True
@@ -83,42 +82,59 @@ def ocr_worker(img_path, lang, installed_langs):
     return ""
 
 def extract_text_from_chapter(metadata_path: str, target_chapter: str):
-    if not os.path.exists(metadata_path): return None
+    """Downloads images and extracts text while measuring performance."""
+    start_total = time.perf_counter()
+    
+    if not os.path.exists(metadata_path): return None, {}
 
     with open(metadata_path, 'r', encoding='utf-8') as f:
         metadata = json.load(f)
         
     chapter_data = metadata["chapter_map"].get(str(target_chapter))
-    if not chapter_data: return None
+    if not chapter_data: return None, {}
 
     lang, uuid = chapter_data["lang"], chapter_data["uuid"]
     tmp_dir = f"./tmp/{uuid}"
     installed_langs = get_installed_tess_langs()
     
-    if not download_chapter_images(uuid, tmp_dir): return None
+    # --- DOWNLOAD PHASE ---
+    start_download = time.perf_counter()
+    if not download_chapter_images(uuid, tmp_dir): return None, {}
+    download_duration = time.perf_counter() - start_download
 
+    # --- OCR PHASE ---
     print(f"📖 Scanning pages (Language: {lang})...")
+    start_ocr = time.perf_counter()
     image_files = sorted([f for f in Path(tmp_dir).iterdir() if f.is_file()])
     extracted_text = []
 
-    # --- PERFORMANCE BRANCHING ---
     if lang == "ja" and mocr:
-        # Manga-OCR is a heavy AI model; we process it sequentially 
-        # to avoid crashing memory, but it's very fast on its own.
         for img in image_files:
             extracted_text.append(mocr(img))
     else:
-        # Tesseract is lightweight; run it in parallel!
         with ThreadPoolExecutor(max_workers=MAX_OCR_WORKERS) as executor:
             future_to_img = {executor.submit(ocr_worker, img, lang, installed_langs): img for img in image_files}
             for future in as_completed(future_to_img):
                 text = future.result()
                 if text: extracted_text.append(text)
 
+    ocr_duration = time.perf_counter() - start_ocr
     full_text = " ".join(extracted_text)
+    
+    # Cleanup
     if os.path.exists(tmp_dir): shutil.rmtree(tmp_dir)
+    
+    total_duration = time.perf_counter() - start_total
+    
+    # Compile Performance Metrics
+    metrics = {
+        "download_time": round(download_duration, 2),
+        "ocr_time": round(ocr_duration, 2),
+        "total_extraction_time": round(total_duration, 2),
+        "pages_processed": len(image_files)
+    }
         
-    return full_text
+    return full_text, metrics
 
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
@@ -127,19 +143,27 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--chapter", required=True)
     args = parser.parse_args()
 
-    raw_script = extract_text_from_chapter(args.metadata, args.chapter)
+    # 1. Perform Extraction with Metrics
+    raw_script, metrics = extract_text_from_chapter(args.metadata, args.chapter)
     
     if raw_script:
         with open(args.metadata, 'r') as f: meta = json.load(f)
+        
+        # 2. Build Structured Artifact with Metrics
         artifact = {
             "manga_title": meta["manga_title"],
             "chapter_number": args.chapter,
             "raw_text": raw_script,
-            "extracted_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            "extracted_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "performance_metrics": metrics
         }
         
+        # 3. Save to Disk
         paths = config.get_paths(meta["manga_title"], args.chapter)
         with open(paths["artifact"], "w", encoding="utf-8") as f:
             json.dump(artifact, f, indent=2, ensure_ascii=False)
             
-        print(f"✅ Extraction Complete! (Artifact: {paths['artifact']})")
+        print("-" * 50)
+        print(f"✅ Extraction Complete!")
+        print(f"⏱️  Performance: DL {metrics['download_time']}s | OCR {metrics['ocr_time']}s | Total {metrics['total_extraction_time']}s")
+        print(f"💾 Artifact: {paths['artifact']}")
