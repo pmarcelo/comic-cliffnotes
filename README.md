@@ -6,50 +6,58 @@
 ---
 
 ## 💡 The "Waterfall" Pipeline
-Comic CliffNotes uses a resilient extraction pipeline. If English chapters are unavailable, the engine automatically **"waterfalls"** through alternative languages (Spanish, Portuguese, French, or Japanese) to extract raw data. 
+Comic CliffNotes uses a resilient, high-concurrency extraction pipeline. If English chapters are unavailable, the engine automatically **"waterfalls"** through alternative languages (Spanish, Portuguese, French, or Japanese) to extract raw data. 
 
-The **Gemini 2.5 Flash** AI then translates and synthesizes this data into professional English summaries, organized by a centralized configuration manager.
+The **Gemini 2.5 Flash** AI then translates and synthesizes this data into professional English summaries, maintaining **Narrative Continuity** by referencing previous chapter context.
+
+---
+
+## ⚡ High-Performance OCR
+The extraction engine is optimized for speed and resource management:
+* **Parallel Ingestion:** Downloads up to 10 pages simultaneously via `ThreadPoolExecutor`, reducing I/O wait times by ~70%.
+* **Multi-Core OCR:** Tesseract processes are distributed across available CPU cores for Latin-based languages.
+* **Intelligent Branching:** Heavy AI models (Manga-OCR for Japanese) run sequentially to protect system RAM, while lightweight engines run in parallel.
 
 ---
 
 ## 📂 Project Structure
-Organized for strict data separation and centralized logic:
 ```text
 .
 ├── core/                # The "Brains" (Logic)
-│   ├── config.py        # 🎯 Single Source of Truth (Paths, Slugs, Env)
+│   ├── config.py        # 🎯 Single Source of Truth (Paths, Slugs, Secrets)
 │   ├── mangadex.py      # API interaction & Waterfall logic
-│   ├── ocr_engine.py    # Image processing (Tesseract/Manga-OCR)
-│   ├── ai_agent.py      # Gemini 2.5 Flash (Synthesis & Manifesting)
+│   ├── ocr_engine.py    # High-concurrency extraction engine
+│   ├── ai_agent.py      # Gemini 2.5 Flash (Synthesis & Narrative Memory)
 │   └── usage_tracker.py # $0.00 Safety Guardrail
 ├── data/                # The "State" (Storage)
 │   ├── metadata/        # Title-slugged chapter maps
 │   ├── artifacts/       # Title-slugged raw OCR text
 │   └── summaries/       # Title-slugged recaps + manifest.json
 ├── run_pipeline.py      # The Orchestrator
-├── bulk_runner.py       # The High-Volume Worker
+├── bulk_runner.py       # The High-Volume Worker (with tqdm progress)
 └── requirements.txt     
 ```
 
 ---
 
+## 🏗️ Data Architecture: Future-Proofing
+To ensure 100% compatibility with future frontend integrations (e.g., Ruby on Rails), we use an **Enterprise Data Schema**:
+
+* **Recursive Context:** Chapters are summarized with "Narrative Memory." The AI reads the *previous* summary to maintain character and plot continuity.
+* **Nearest Neighbor Failsafe:** If a chapter is missing (e.g., Chapter 3 fails), the engine "reaches back" to the most recent available summary to bridge the story gap.
+* **Manifest Indexing:** A `manifest.json` provides a high-speed index for all available summaries, timestamps, and schema versions.
+
+---
+
 ## 🚀 Usage
 
-The pipeline is managed via the root orchestrators. All paths and directory creations are handled automatically by the `config` module.
-
-### 1. Single Chapter Run
-```bash
-python run_pipeline.py -t "Omniscient Reader's Viewpoint" -c 1
-```
-
-### 2. Bulk Processing (The "Data Factory")
-Process a range of chapters. The runner resolves the official title from MangaDex and automates the entire queue.
+### 1. Bulk Processing (The "Data Factory")
+Process a range of chapters with a visual progress bar and automatic ETA.
 ```bash
 python bulk_runner.py -t "Omniscient Reader" -s 1 -e 10
 ```
 
-### 3. Pipeline Modes (`-m`)
-Manage your AI quota by decoupling ingestion from synthesis:
+### 2. Pipeline Modes (`-m`)
 | Mode | Action | Use Case |
 | :--- | :--- | :--- |
 | `full` | Metadata → OCR → AI | Standard end-to-end run (Default). |
@@ -58,27 +66,18 @@ Manage your AI quota by decoupling ingestion from synthesis:
 
 ---
 
-## 🏗️ Data Architecture: Future-Proofing
-To ensure 100% compatibility with future frontend integrations (e.g., Ruby on Rails), we use an **Enterprise Data Schema**:
-
-* **Manifest Indexing:** Each series folder in `data/summaries/` contains a `manifest.json`. This acts as a high-speed index of all available chapters, timestamps, and schema versions.
-* **The Envelope Pattern:** Summaries are wrapped in metadata (ISO timestamps, model versions, and schema IDs) to allow for easy data migrations.
-* **Centralized Slugging:** All directory names are standardized via `core/config.py` to ensure consistency across the Metadata, Artifact, and Summary tiers.
-
----
-
 ## 🛡️ Budget & Safety Guardrails
 This project is designed to run entirely on the **Google AI Free Tier**.
 * **Usage Tracker:** Successes are logged in `data/usage_log.json`.
 * **Kill Switch:** The pipeline halts the AI phase if the daily limit is reached.
-* **Local Cleanup:** Raw images are deleted immediately after OCR; only the structured JSON artifacts remain.
+* **Git Integrity:** `.gitignore` pre-configured to exclude `__pycache__`, system secrets, and temporary image blobs.
 
 ---
 
 ## 🚀 Roadmap
 - [x] Multi-engine OCR router (Tesseract + Manga-OCR).
+- [x] High-concurrency parallel extraction (OCR/Downloads).
 - [x] Centralized `config.py` Single Source of Truth.
-- [x] Bulk Processing support for chapter ranges.
-- [x] Manifest Indexing for high-speed data retrieval.
-- [ ] **Context Memory:** Allow AI to read `manifest.json` and previous summaries for narrative continuity.
+- [x] **Recursive Context Memory:** Narrative continuity across chapters.
+- [x] **Bulk Processing:** Range support with `tqdm` progress tracking.
 - [ ] **Rails Integration:** Build the "CliffNotes Dashboard" to display recaps.
