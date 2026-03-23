@@ -9,7 +9,7 @@ from core import mangadex
 from core import ocr_engine
 from core import ai_agent
 
-THROTTLE_TIME = 5 
+THROTTLE_TIME = 0
 
 def run_chapter_pipeline(title: str, chapter_str: str, mode: str = "full", force: bool = False) -> bool:
     chapter_float = float(chapter_str)
