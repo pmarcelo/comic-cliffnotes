@@ -1,31 +1,34 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-load_dotenv()
+# Try to load dotenv, but don't crash if it's missing 
+# (Since your key is in the system secrets anyway!)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # --- PROJECT ROOT ---
-# This ensures paths work regardless of where you run the script from
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- API KEYS & LIMITS ---
+# --- API SETTINGS (Pulled from System Secrets) ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-DAILY_CHAPTER_LIMIT = int(os.getenv("DAILY_CHAPTER_LIMIT", 200))
 TARGET_MODEL = os.getenv("TARGET_MODEL", "gemini-2.5-flash")
+SCHEMA_VERSION = "1.0"
 
-# --- DIRECTORY STRUCTURE ---
+# --- DIRECTORY MAPPING ---
 DATA_DIR = BASE_DIR / "data"
 METADATA_BASE = DATA_DIR / "metadata"
 ARTIFACT_BASE = DATA_DIR / "artifacts"
 SUMMARY_BASE = DATA_DIR / "summaries"
 
-# --- HELPER LOGIC (The "SSoT" for Slug Naming) ---
 def get_safe_title(title: str) -> str:
-    """The one and only place title slugging logic is defined."""
+    """The central logic for slugging manga titles."""
     return "".join([c for c in title if c.isalpha() or c.isspace()]).replace(" ", "_").lower()
 
 def get_paths(title: str, chapter: str):
-    """Returns a dictionary of all relevant paths for a specific chapter."""
+    """Generates all necessary file paths for a specific chapter."""
     slug = get_safe_title(title)
     
     # Ensure folders exist
