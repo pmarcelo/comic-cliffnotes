@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T23:01:52.209678",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch49.0_artifact.json",
+  "summary": {
+    "chapter_number": "49.0",
+    "key_events": [
+      "Kim Dok-Ja (impersonating Yoo Joong-hyuk) leaves the tent to confront Lee Seongguk and overhears a conversation between Prophets Jung Minseob and another unnamed Prophet using 'Enhanced Hearing' (Lv. 1), which he obtained and activated for 2000 coins.",
+      "Dok-Ja learns that Jung Minseob was the 1089th person to stop reading 'Ways of Survival' and that there are approximately 48 Prophets in total, many of whom died early due to not realizing the 'Revelations' were real.",
+      "Jung Minseob questions Dok-Ja's identity as Yoo Joong-hyuk, noting the absence of Kim Nam-woon and the presence of an unknown female companion (likely Lee Gilyoung or Shin Yoosung).",
+      "Dok-Ja reveals that Kim Nam-woon is dead, killed by a Prophet who knows the future better than them and has monopolized secret scenarios, likely operating near Chungmuro.",
+      "The Prophets (Lee Seongguk and Jung Minseob) propose an alliance with Dok-Ja to stop 'The 12 Apostles,' a faction of Prophets who read past chapter 50 of 'Ways of Survival' and aim to dominate the world.",
+      "Dok-Ja agrees to the alliance but demands Changsin Station, which the Prophets reveal is occupied by the 'Tyrant King,' one of the 'Seven Kings of Seoul' and a formidable opponent.",
+      "Dok-Ja activates 'Blue Flag Benefits' for 3500 coins, enabling group chat communication with his companions, and explains his acquisition of Dongdaemun and Cheonggu stations.",
+      "The Prophets inform Dok-Ja about a 'powerful weapon' being prepared to neutralize the Tyrant King and the 12 Apostles, to be revealed at the 'Night of the Prophets' meeting tomorrow.",
+      "Dok-Ja confronts Han Donghoon, removes the hypnosis placed on him by Lee Seongguk, and proposes an alliance.",
+      "The 'Capture the Flag' main scenario is revealed, with Changsin Station as the target for Dok-Ja's group.",
+      "Jung Hee-won intervenes in a fight, almost killing someone, and is scolded by Dok-Ja for her impulsiveness."
+    ],
+    "character_updates": "Kim Dok-Ja continues his masterful impersonation of Yoo Joong-hyuk, strategically revealing information to manipulate the Prophets and secure alliances. He gains 'Enhanced Hearing' and 'Blue Flag Benefits,' and frees Han Donghoon from hypnosis, proposing friendship. Lee Seongguk and Jung Minseob are further manipulated by Dok-Ja's revelations and seek his help against 'The 12 Apostles.' Han Donghoon is freed from hypnosis and is now aware of Dok-Ja's (as Yoo Joong-hyuk's) presence. Jung Hee-won is shown to be impulsive, almost killing someone, and is scolded by Dok-Ja. The 'Tyrant King' is introduced as a powerful new antagonist occupying Changsin Station.",
+    "lore_and_worldbuilding": "The 'Book of Revelations' is confirmed to be 'Ways of Survival.' The Prophets are revealed to be a diverse group of approximately 48 individuals, divided into factions: the main group (who stopped reading earlier) and 'The 12 Apostles' (who read past chapter 50 and seek world domination). The 'Capture the Flag' main scenario is introduced, requiring groups to capture and defend stations, with Changsin Station being a key objective. The 'Tyrant King' is established as one of the 'Seven Kings of Seoul,' a powerful figure whose strength increased due to early Prophet errors. 'Enhanced Hearing' and 'Blue Flag Benefits' are new exclusive skills/items.",
+    "ending_cliffhanger": "The person Jung Hee-won almost killed apologizes to Dok-Ja, addressing him as 'Yu Joong-hyuk-nim.' Dok-Ja, recognizing the address, immediately questions if this individual is also a Prophet, hinting at the continued emergence of new Prophet characters and further complicating the already intricate web of alliances and conflicts."
+  }
+}

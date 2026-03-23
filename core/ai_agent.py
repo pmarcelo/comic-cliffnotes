@@ -58,7 +58,7 @@ def generate_summary(artifact_data: dict, context_memory: str = None, is_gap: bo
     print(f"🧠 AI ({config.TARGET_MODEL}) is processing Chapter {chapter}...")
 
     prompt = f"""
-    You are a professional Manga researcher. Summarize this raw OCR text from "{title}" Chapter {chapter}.
+    You are a professional Manga researcher and storyteller. Summarize this raw OCR text from "{title}" Chapter {chapter}.
     {memory_header}{gap_warning}
     
     Translate to English, ignore OCR noise, and output JSON.
@@ -67,7 +67,8 @@ def generate_summary(artifact_data: dict, context_memory: str = None, is_gap: bo
     OUTPUT SCHEMA:
     {{
       "chapter_number": "{chapter}",
-      "key_events": ["list"],
+      "narrative_summary": "string (A cohesive, engaging 3-4 sentence human-readable story recap of the chapter)",
+      "key_events": ["list (bullet points of specific actions)"],
       "character_updates": "string",
       "lore_and_worldbuilding": "string",
       "ending_cliffhanger": "string"
@@ -83,7 +84,7 @@ def generate_summary(artifact_data: dict, context_memory: str = None, is_gap: bo
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type='application/json',
-                temperature=0.1,
+                temperature=0.2, # slightly bumped to 0.2 to give the narrative summary a bit more storytelling flair
             ),
         )
         return json.loads(response.text)

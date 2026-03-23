@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T22:55:02.549741",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch31.0_artifact.json",
+  "summary": {
+    "chapter_number": "31.0",
+    "key_events": [
+      "The Third Scenario officially begins at midnight, prompting the group to initiate Kim Dok-Ja's plan.",
+      "Kim Dok-Ja instructs his group to run towards Dongguk University Station, away from the emerging monsters, to find a hidden Green Zone.",
+      "The 'API Penalty' for the area is deactivated, suggesting unique conditions for this part of the scenario.",
+      "Dok-Ja directs someone (implied to be Gil-Yung, 'the dock child') to retrieve a specific 'herb'.",
+      "The Main Scenario #3 difficulty is updated from E to C, and the duration is set to 8 hours, requiring survival for 7 days.",
+      "The group successfully activates a 'Secret Area: Refuge of the Brave' within Chungmuro Station."
+    ],
+    "character_updates": "Kim Dok-Ja continues to strategize using his knowledge of 'Ways of Survival,' noting that he is ahead of Yoo Joong-Hyuk's regression timeline in finding a secret Green Zone. He grapples with his motivations for helping the group, acknowledging that it would be easier to go alone but still committing to their survival, promising Gil-Yung won't die. He maintains his self-perception as not a hero or protagonist. Yoo Sang-Ah expresses her willingness to be left behind for the group's survival and questions Dok-Ja's motives for helping them, recognizing he'd be safer alone. Lee Hyeon-Sung's status is updated, showing he's activating 'Marker Number One' under the 'Inciter Cheon In-Ho' constellation. Ji-Hae continues to observe and taunt Dok-Ja, reiterating her cryptic advice that there are other ways to survive besides a room and implying his current path is dangerous.",
+    "lore_and_worldbuilding": "It is confirmed that 'hidden Green Zones' exist within the Third Scenario, not just the explicitly designated rooms. The 'API Penalty' for certain areas can be deactivated, indicating specific scenario conditions or unique properties of locations. The difficulty of Main Scenario #3 has increased from E to C, making survival significantly harder. A new constellation, 'Bald Leader of the Aldebaran Army,' is introduced, observing Dok-Ja alongside Uriel ('Demon-like Judge of Fire'). The activation of a 'Secret Area: Refuge of the Brave' confirms the existence of special, hidden locations that can be utilized for survival.",
+    "ending_cliffhanger": "The group successfully activates the 'Secret Area: Refuge of the Brave' just as the Third Scenario begins, leaving the reader to wonder if this hidden zone will truly protect them from the monster attacks and what challenges lie within this specific refuge, especially with the increased scenario difficulty and Ji-Hae's ominous warnings."
+  }
+}

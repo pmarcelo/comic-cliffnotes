@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T22:56:13.274198",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch34.0_artifact.json",
+  "summary": {
+    "chapter_number": "34.0",
+    "key_events": [
+      "Kim Dok-Ja continues to build trust with Lee Hyeon-Sung, who expresses gratitude and a newfound sense of purpose, feeling Dok-Ja knows him well.",
+      "Dok-Ja invests 1200 coins each into Resistance (LVL 15 -> 18) and Strength (LVL 15 -> 18) to prepare for the confrontation.",
+      "Dok-Ja strategically deploys Jung Hee-Won, Yoo Sang-Ah, and Lee Gil-Yung to Platform 4.",
+      "The battle against Gong Pil-Du begins, with Lee Hyeon-Sung activating his Stigma 'Great Mountain Push LVL.1' and Gong Pil-Du activating his 'Militarized Zone LVL.4'.",
+      "Dok-Ja is injured by a long sword, prompting him to encourage Hyeon-Sung to 'show them hell'.",
+      "Lee Hyeon-Sung's characteristic fully awakens, granting him the new Stigma 'Great Mountain Destruction LVL.1'.",
+      "Hyeon-Sung's awakened power demolishes Gong Pil-Du's 'Private Property', leading to the defeat of Pil-Du and his subordinates."
+    ],
+    "character_updates": "Lee Hyeon-Sung undergoes significant emotional growth, expressing gratitude and a newfound sense of responsibility, and his unique characteristic fully awakens, granting him the powerful Stigma 'Great Mountain Destruction LVL.1'. He develops a deeper bond with Kim Dok-Ja, expressing a genuine desire to know Dok-Ja's personal story. Kim Dok-Ja successfully executes his plan to awaken Hyeon-Sung's characteristic and defeat Gong Pil-Du, strategically managing his resources and group. He is momentarily surprised by Hyeon-Sung's personal interest in him. Gong Pil-Du's 'Militarized Zone' and 'Private Property' skills are showcased but ultimately overcome, leading to his defeat.",
+    "lore_and_worldbuilding": "The chapter highlights the importance of 'characteristics blooming' as a key mechanism for character power-ups, exemplified by Lee Hyeon-Sung's awakening of the 'Great Mountain Destruction LVL.1' Stigma. It further details the system of coin investment for skill upgrades (Resistance, Strength) and demonstrates the destructive power of awakened Stigmas against established 'Private Property' zones.",
+    "ending_cliffhanger": "Despite his successful characteristic awakening and the defeat of Gong Pil-Du, Lee Hyeon-Sung expresses lingering self-doubt about his capabilities, even as he voices a strong desire to know Kim Dok-Ja's personal story, creating a moment of unexpected intimacy and vulnerability for Dok-Ja."
+  }
+}

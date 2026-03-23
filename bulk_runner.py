@@ -3,7 +3,9 @@ import time
 from tqdm import tqdm 
 from core import config, helpers
 
-# Failsafe in case usage_tracker is missing or causing silent errors
+# Import the pipeline natively!
+from run_pipeline import run_chapter_pipeline
+
 try:
     from core.usage_tracker import check_usage
 except ImportError:
@@ -39,7 +41,6 @@ def main():
     success_count = 0
     pbar = tqdm(queue, desc="🚀 Overall Progress", unit="ch")
     
-    # --- START BULK TIMER ---
     bulk_start_time = time.perf_counter()
 
     for chapter in pbar:
@@ -49,16 +50,21 @@ def main():
             pbar.write("\n🚦 Daily AI Limit Reached. Bulk run paused.")
             break
 
-        cmd = ["python", "run_pipeline.py", "-t", m_title, "-c", str(chapter), "-m", args.mode]
+        # Execute natively in the exact same Python process
+        success = run_chapter_pipeline(
+            title=m_title, 
+            chapter_str=str(chapter), 
+            mode=args.mode, 
+            force=False
+        )
         
-        if helpers.run_command(cmd):
+        if success:
             success_count += 1
         else:
             pbar.write(f"⚠️ Warning: Chapter {chapter} failed.")
         
         time.sleep(1)
 
-    # --- END BULK TIMER & CALCULATE METRICS ---
     bulk_total_time = time.perf_counter() - bulk_start_time
     mins, secs = divmod(bulk_total_time, 60)
     avg_time = bulk_total_time / len(queue) if queue else 0

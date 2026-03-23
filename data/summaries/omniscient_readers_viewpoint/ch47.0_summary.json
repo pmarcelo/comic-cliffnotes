@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-23T23:00:58.685017",
+  "model_used": "gemini-2.5-flash",
+  "source_artifact": "/workspaces/comic-cliffnotes/data/artifacts/omniscient_readers_viewpoint/ch47.0_artifact.json",
+  "summary": {
+    "chapter_number": "47.0",
+    "key_events": [
+      "Kim Dok-Ja's group arrives at Dongdaemun History & Culture Park Station, finding it deserted.",
+      "Dok-Ja deduces that 'The Prophets' (the Myeong-dong attackers) are other 'readers' of 'Ways of Survival' who were targeting him specifically and intended to dominate Myeong-dong and Dongdaemun while his group was away.",
+      "Dok-Ja encounters Lee Seongguk, the Vice-Representative of Dongmyo Station, who is also a 'reader' of 'Ways of Survival' and has been impersonating Yoo Joong-hyuk.",
+      "Dok-Ja uses intimidation to force Lee Seongguk to immediately transfer Dongdaemun Station to him and then demands Dongmyo Station as well.",
+      "Lee Seongguk, under duress, transfers Dongdaemun and makes a 'King's Honor' promise of safe passage for Dok-Ja to meet their leader at Dongmyo.",
+      "Dok-Ja officially appoints Lee Sang-ah as the Vice-Representative of Chungmuro Station, granting her authority to manage the group and punish members in his stead."
+    ],
+    "character_updates": "Kim Dok-Ja continues to strategically leverage his knowledge of 'Ways of Survival' and employs intimidation tactics to expand his territory. He confirms his suspicions about 'The Prophets' being other readers and targets. Lee Sang-ah is officially recognized and empowered by Dok-Ja, becoming the Vice-Representative of Chungmuro Station, a role that grants her significant authority and acknowledges her capabilities beyond combat. Lee Ji-hye shows a more personal side, sharing an anecdote about her younger brother and drawing parallels to Dok-Ja's relationship with Yoo Joong-hyuk. Lee Seongguk is introduced as the Vice-Representative of Dongmyo Station and is revealed to be another 'reader' of 'Ways of Survival' who has been impersonating Yoo Joong-hyuk, quickly succumbing to Dok-Ja's threats.",
+    "lore_and_worldbuilding": "The 'Path of the King' hidden scenario is reiterated, requiring Dok-Ja to dominate 10 stations in 10 days, with a daily station domination requirement to avoid a group-wide death penalty. The 'Main Scenario' for the 'Capture the Flag' event is detailed, outlining rules for flag placement, station domination, leader succession, and identifying 'Changshin Station' as the group's target within a 2-day time limit. The existence of other 'readers' of 'Ways of Survival' is confirmed through the encounter with Lee Seongguk, indicating a larger network of individuals with meta-knowledge. The 'King's Honor' promise is introduced as a binding oath within the scenario, carrying severe penalties for breaking it. Dok-Ja's 'Character Profile' skill is shown to be blockable by certain individuals, and his 'Fourth Wall' skill blocks 'Attribute Search', hinting at advanced skills or unique attributes possessed by some characters.",
+    "ending_cliffhanger": "Kim Dok-Ja has successfully secured Dongdaemun Station and is now heading to Dongmyo Station, having forced its Vice-Representative, Lee Seongguk, to promise safe passage to meet their leader. The imminent encounter with the Dongmyo leader, another 'reader' and 'loser' from 'Ways of Survival', sets the stage for Dok-Ja to acquire more stations and advance in the 'Path of the King' scenario."
+  }
+}
