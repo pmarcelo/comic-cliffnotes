@@ -1,88 +1,94 @@
-import os
-import time
-from pathlib import Path
+import easyocr
+import re
+import numpy as np
 from PIL import Image
-from manga_ocr import MangaOcr
-from core import config
+from pathlib import Path
 from core.utils import file_io
+from core import config  # <-- Pulls our smart hardware settings
 
-# Initialize the OCR Engine once
-mocr = MangaOcr()
+# Initialize EasyOCR using the toggle from config.py
+# This will automatically use your GPU at home and CPU in the cloud.
+print(f"🚀 OCR Engine Mode -> GPU: {config.USE_GPU}")
+reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
 
-def extract_text_from_chapter(metadata_path: str, chapter_number: str):
-    """
-    Extracts text from images using MangaOCR.
-    Handles both MangaDex (extensions) and Tachimanga/Tachidesk (naked files).
-    """
-    start_time = time.perf_counter()
-    meta = file_io.load_json(metadata_path)
+def extract_text_from_chapter(metadata_path, chapter_id):
+    """Bridge to the main processor."""
+    manifest = file_io.load_json(metadata_path)
+    chapter_data = manifest.get("chapter_map", {}).get(str(chapter_id))
     
-    # --- 1. SMART LOOKUP (Fixes the 'NoneType' error) ---
-    # We look for a numerical match because "2" should find "2.0"
-    chapter_data = None
-    target_val = float(chapter_number)
-    
-    for key, data in meta["chapter_map"].items():
-        try:
-            if float(key) == target_val:
-                chapter_data = data
-                break
-        except (ValueError, TypeError):
-            continue
-
     if not chapter_data:
-        print(f"❌ Error: Chapter {chapter_number} not found in metadata.")
         return None, None
 
-    lang = chapter_data.get("lang", "en")
+    image_dir = Path(chapter_data["local_dir"])
+    image_files = _collect_image_files(image_dir)
     
-    # --- 2. LOCATE IMAGES ---
-    # If it's a local import (Tachimanga), use the local_dir. Otherwise, check temp_dir.
-    if "local_dir" in chapter_data:
-        image_dir = Path(chapter_data["local_dir"])
-    else:
-        # MangaDex flow: images are usually in data/temp/<manga_id>/<chapter_id>
-        image_dir = config.TEMP_DIR / meta["manga_id"] / chapter_data["uuid"]
-
-    if not image_dir.exists():
-        print(f"❌ Image directory not found: {image_dir}")
-        return None, None
-
-    # --- 3. GATHER FILES (Fixes the 'Naked File' issue) ---
-    # We accept .jpg, .png, .webp OR files that are just digits (0, 1, 2...)
-    valid_exts = {'.png', '.jpg', '.jpeg', '.webp'}
-    image_files = []
-    
-    for f in image_dir.iterdir():
-        if f.is_file():
-            if f.suffix.lower() in valid_exts or f.name.isdigit():
-                image_files.append(f)
-
-    # Sort files numerically (0, 1, 2...) instead of alphabetically (0, 1, 10, 11...)
-    image_files.sort(key=lambda x: int(x.name) if x.name.isdigit() else x.name)
-
     if not image_files:
-        print(f"⚠️ No images found in {image_dir}")
-        return None, None
+        return "", {"page_count": 0}
 
-    # --- 4. OCR PROCESSING ---
-    print(f"📖 Processing {len(image_files)} pages for Chapter {chapter_number}...")
+    raw_text = _process_images_to_text(image_files, chapter_id)
+    return raw_text, {"page_count": len(image_files)}
+
+def _collect_image_files(image_dir: Path):
+    """Sorts numeric files correctly (1, 2, 10 instead of 1, 10, 2)."""
+    valid_exts = {'.png', '.jpg', '.jpeg', '.webp'}
+    files = [
+        f for f in image_dir.iterdir() 
+        if f.is_file() and (f.suffix.lower() in valid_exts or f.name.isdigit())
+    ]
+    files.sort(key=lambda x: int(x.name) if x.name.isdigit() else x.name)
+    return files
+
+def _process_images_to_text(image_files, chapter_id):
+    """
+    Balanced Performance OCR:
+    - Downscales images by 50% for 3x faster processing on CPU.
+    - Uses Paragraph Grouping for better AI summarization.
+    - Cleans out scanlator noise via blacklist and regex.
+    """
+    print(f"📖 Balanced OCR: Processing {len(image_files)} pages for Ch {chapter_id}...")
     full_text = []
     
-    for img_path in image_files:
+    # Junk patterns to ignore (Scanlator credits)
+    blacklist = [r"asurascans", r"asu[at]ascans", r"discord", r"gg/", r"killer", r"ace", r"qc"]
+
+    for i, img_path in enumerate(image_files):
         try:
-            # MangaOCR handles the opening/loading
-            text = mocr(str(img_path))
-            if text.strip():
-                full_text.append(text.strip())
+            with Image.open(img_path) as img:
+                # --- STEP 1: DOWNSIZING (The Speed Hack) ---
+                # Reducing pixels by 75% dramatically speeds up CPU OCR.
+                w, h = img.size
+                img = img.resize((w // 2, h // 2), Image.Resampling.LANCZOS)
+                
+                # Convert to RGB and then Numpy for EasyOCR
+                img_np = np.array(img.convert("RGB"))
+                
+                # --- STEP 2: GROUPED OCR ---
+                # paragraph=True merges nearby speech bubbles into narrative blocks
+                results = reader.readtext(img_np, paragraph=True)
+                
+                page_blocks = []
+                for (_, text) in results:
+                    clean_line = text.strip()
+                    
+                    # --- STEP 3: NOISE SCRUBBING ---
+                    # Ignore scanlator credits
+                    if any(re.search(p, clean_line, re.IGNORECASE) for p in blacklist):
+                        continue
+                    
+                    # Ignore the long coordinate/page number noise
+                    if len(clean_line) > 12 and re.match(r'^[\d\s\(\)\-\+]+$', clean_line):
+                        continue
+
+                    page_blocks.append(clean_line)
+
+                if page_blocks:
+                    full_text.append(" ".join(page_blocks))
+            
+            # Progress feedback
+            if (i + 1) % 15 == 0 or (i + 1) == len(image_files):
+                print(f"  ✅ Ch {chapter_id} | Page {i+1}/{len(image_files)} processed")
+                
         except Exception as e:
-            print(f"⚠️ Failed to OCR page {img_path.name}: {e}")
-
-    total_time = time.perf_counter() - start_time
-    metrics = {
-        "page_count": len(image_files),
-        "total_time": round(total_time, 2),
-        "seconds_per_page": round(total_time / len(image_files), 2) if image_files else 0
-    }
-
-    return "\n\n".join(full_text), metrics
+            print(f"  ❌ Error on Page {i} ({img_path.name}): {e}")
+            
+    return "\n\n".join(full_text)

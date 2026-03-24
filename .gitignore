@@ -1,5 +1,6 @@
 data/usage_log.json
 data/temp/*
+data/extracted_images/
 tmp/*
 # Byte-compiled / optimized / DLL files
 *.py[cod]
