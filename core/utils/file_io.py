@@ -3,6 +3,7 @@ import os
 import shutil
 from pathlib import Path
 from core import config
+import zipfile
 
 def get_safe_title(title):
     """Turns a title into a filesystem-friendly slug."""
@@ -48,7 +49,7 @@ def cleanup_directory(directory_path):
     else:
         path.mkdir(parents=True, exist_ok=True)
 
-def save_json(path, data):
+def save_json(data, path):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
@@ -56,3 +57,24 @@ def load_json(path):
     if not os.path.exists(path): return None
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
+
+def ensure_directory(directory_path):
+    """
+    Ensures a directory exists. Creates it if it doesn't.
+    """
+    path = Path(directory_path)
+    path.mkdir(parents=True, exist_ok=True)
+
+def extract_archive(zip_path, extract_dir):
+    """
+    Unzips an archive to a target directory.
+    Returns True if successful, False otherwise.
+    """
+    try:
+        print(f"📦 Extracting {zip_path} to {extract_dir}...")
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+        return True
+    except Exception as e:
+        print(f"❌ Extraction error: {e}")
+        return False
