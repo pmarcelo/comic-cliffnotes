@@ -1,71 +1,103 @@
-import time
 import requests
-import logging
+import sys
 from core import config
-from core.utils import file_io
-
-logger = logging.getLogger(__name__)
-
-def resolve_title(manga_data: dict) -> str:
-    attrs = manga_data.get("attributes", {})
-    titles = attrs.get("title", {})
-    alt_titles = attrs.get("altTitles", [])
-    if "en" in titles: return titles["en"]
-    for alt in alt_titles:
-        if "en" in alt: return alt["en"]
-    return list(titles.values())[0] if titles else "Unknown Title"
 
 def fetch_manga_id_and_title(title: str):
-    params = {"title": title, "limit": 1}
-    res = requests.get(f"{config.MANGADEX_API_URL}/manga", params=params)
-    if res.status_code == 200 and res.json().get("data"):
-        data = res.json()["data"][0]
-        return data["id"], resolve_title(data)
-    return None, None
+    """Searches MangaDex and handles multi-language titles."""
+    params = {
+        "title": title,
+        "limit": 10,
+        "contentRating[]": config.CONTENT_RATING
+    }
+    
+    try:
+        res = requests.get(f"{config.MANGADEX_API_URL}/manga", params=params)
+        res.raise_for_status()
+        data = res.json().get("data", [])
+    except Exception as e:
+        print(f"❌ API Error: {e}")
+        return None, None
+    
+    if not data:
+        print(f"❌ No results found for '{title}'.")
+        return None, None
+
+    if len(data) > 1:
+        print(f"\n🔍 Found multiple matches for '{title}':")
+        print("=" * 95)
+        for i, entry in enumerate(data):
+            attr = entry["attributes"]
+            m_id = entry["id"]
+            titles = attr.get("title", {})
+            m_title = titles.get("en") or titles.get("ja-ro") or list(titles.values())[0]
+            m_year = attr.get("year", "N/A")
+            print(f"  [{i}] {m_title[:40]:<40} ({m_year}) | ID: ({m_id})")
+        print("=" * 95)
+        
+        choice = input(f"👉 Select 0-{len(data)-1} (q to quit): ").strip().lower()
+        if choice == 'q': sys.exit(0)
+        selected = data[int(choice)]
+    else:
+        selected = data[0]
+
+    final_titles = selected["attributes"]["title"]
+    final_title = final_titles.get("en") or final_titles.get("ja-ro") or list(final_titles.values())[0]
+    return selected["id"], final_title
 
 def fetch_chapter_map(manga_id: str):
-    all_chapters = []
-    offset = 0
-    limit = 500
-    while True:
-        params = {
-            "translatedLanguage[]": config.LANGUAGE_PRIORITY,
-            "order[chapter]": "asc",
-            "limit": limit,
-            "offset": offset
-        }
-        res = requests.get(f"{config.MANGADEX_API_URL}/manga/{manga_id}/feed", params=params)
-        if res.status_code != 200: break
-        data = res.json().get("data", [])
-        if not data: break
-        all_chapters.extend(data)
-        if len(data) < limit: break
-        offset += limit
-        time.sleep(0.2)
+    """
+    Fetches chapters using the global language priority list.
+    If a chapter exists in multiple languages, it prefers the one higher in the list.
+    """
+    url = f"{config.MANGADEX_API_URL}/manga/{manga_id}/feed"
+    params = {
+        "translatedLanguage[]": config.LANGUAGE_PRIORITY,
+        "limit": 500,
+        "order[chapter]": "asc",
+        "contentRating[]": config.CONTENT_RATING
+    }
+    
+    try:
+        res = requests.get(url, params=params)
+        res.raise_for_status()
+        chapters = res.json().get("data", [])
+    except Exception as e:
+        print(f"❌ API Error: {e}")
+        return {}
 
-    raw_map = {}
-    for ch in all_chapters:
-        ch_num_str = ch["attributes"]["chapter"]
-        lang = ch["attributes"]["translatedLanguage"]
-        if ch_num_str is None: continue
-        try: ch_num = float(ch_num_str)
-        except ValueError: continue
+    print(f"DEBUG: Found {len(chapters)} chapters across prioritized languages.")
+    
+    chapter_map = {}
+    for ch in chapters:
+        attr = ch["attributes"]
+        ch_num = attr.get("chapter")
+        lang = attr["translatedLanguage"]
         
-        if ch_num in raw_map:
-            current_best_lang = raw_map[ch_num]["lang"]
-            if config.LANGUAGE_PRIORITY.index(lang) < config.LANGUAGE_PRIORITY.index(current_best_lang):
-                raw_map[ch_num] = {"lang": lang, "uuid": ch["id"]}
-        else:
-            raw_map[ch_num] = {"lang": lang, "uuid": ch["id"]}
-    return raw_map
+        if ch_num is not None:
+            try:
+                num_float = float(ch_num)
+                
+                # Logic: If we already have this chapter, only overwrite it if 
+                # this new version is higher in our LANGUAGE_PRIORITY list.
+                if num_float in chapter_map:
+                    current_lang = chapter_map[num_float]["lang"]
+                    if config.LANGUAGE_PRIORITY.index(lang) < config.LANGUAGE_PRIORITY.index(current_lang):
+                        chapter_map[num_float] = {"uuid": ch["id"], "lang": lang, "title": attr.get("title")}
+                else:
+                    chapter_map[num_float] = {"uuid": ch["id"], "lang": lang, "title": attr.get("title")}
+            except ValueError:
+                continue
+
+    if chapter_map:
+        sorted_keys = sorted(chapter_map.keys())
+        print(f"DEBUG: Global Chapter Range: {sorted_keys[0]} to {sorted_keys[-1]}")
+    return chapter_map
 
 def build_metadata(manga_id: str, title: str, target_chapter: float):
-    print(f"📚 Fetching feeds for Chapter {target_chapter}...")
-    full_map = fetch_chapter_map(manga_id)
-    if target_chapter not in full_map: return {}
+    ch_map = fetch_chapter_map(manga_id)
     return {
-        "manga_title": title,
         "manga_id": manga_id,
+        "manga_title": title,
         "target_chapter": target_chapter,
-        "chapter_map": {str(target_chapter): full_map[target_chapter]}
+        "chapter_map": {str(k): v for k, v in ch_map.items()}
     }

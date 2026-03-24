@@ -39,6 +39,7 @@ google-api-python-client==2.193.0
 google-auth==2.49.1
 google-auth-httplib2==0.3.0
 google-genai==1.68.0
+google-generativeai==0.8.6
 googleapis-common-protos==1.73.0
 grpcio==1.78.0
 grpcio-status==1.71.2
@@ -107,6 +108,7 @@ packaging==25.0
 pandocfilters==1.5.1
 parso==0.8.5
 pexpect==4.9.0
+pick==2.6.0
 pillow==12.1.1
 platformdirs==4.5.0
 prometheus_client==0.23.1
