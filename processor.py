@@ -9,13 +9,14 @@ from core.processors import ocr_engine
 from core.intelligence import ai_agent
 
 class BatchProcessor:
-    def __init__(self, title):
+    def __init__(self, title, start_chapter=1):
         self.title = title
         self.slug = file_io.get_safe_title(title)
         self.manga_dir = config.ARTIFACTS_DIR / self.slug
         self.metadata_path = self.manga_dir / "metadata.json"
         self.extract_dir = config.DATA_DIR / "extracted_images" / self.slug
         self.manifest = self._load_or_create_manifest()
+        self.start_chapter = start_chapter # Narrative starting point
 
     def _load_or_create_manifest(self):
         if self.metadata_path.exists():
@@ -23,38 +24,27 @@ class BatchProcessor:
         return {"manga_title": self.title, "chapter_map": {}}
 
     def tier_1_ingest(self, url):
-        """STATION 1: Ingest logic (Now smarter about existing files)."""
+        """STATION 1: Ingest logic"""
         if self.metadata_path.exists():
             print(f"⏩ Tier 1: Metadata exists. Skipping.")
             return True
 
-        # Just call it. The new logic in cloud_drive.py will handle the 'Skip'
-        success = cloud_drive.process_archive(self.title, "MASTER_BATCH", url)
+        print(f"📥 Tier 1: Downloading master archive...")
+        # 🚀 Pass the CLI argument down to cloud_drive
+        success = cloud_drive.process_archive(self.title, "MASTER_BATCH", url, self.start_chapter)
         
         if success:
-            # Reload the manifest once the scan is finished
             self.manifest = file_io.load_json(self.metadata_path)
             
-        return success
-        
-        if self.extract_dir.exists() and any(self.extract_dir.iterdir()):
-            print(f"📍 Tier 1: Detected existing extracted images. Generating metadata map...")
-            # If images exist but metadata doesn't, just run the scan logic
-            success = cloud_drive.process_archive(self.title, "MASTER_BATCH", url)
-            if success:
-                self.manifest = file_io.load_json(self.metadata_path)
-            return success
-
-        print(f"📥 Tier 1: Downloading master archive...")
-        success = cloud_drive.process_archive(self.title, "MASTER_BATCH", url)
-        if success:
-            self.manifest = file_io.load_json(self.metadata_path)
         return success
 
     def tier_2_ocr(self):
         """STATION 2: Turn Pixels to Text."""
         chapters = self.manifest.get("chapter_map", {})
-        todo = [id for id, data in chapters.items() if not data.get("ocr_completed")]
+        
+        # Sort folders numerically to ensure chronological processing
+        all_sorted_ids = sorted(chapters.keys(), key=lambda x: int(x) if str(x).isdigit() else x)
+        todo = [id for id in all_sorted_ids if not chapters[id].get("ocr_completed")]
 
         if not todo:
             print("⏩ Tier 2: OCR complete. Skipping.")
@@ -76,7 +66,10 @@ class BatchProcessor:
     def tier_3_ai(self):
         """STATION 3: Summarize and Map Identity."""
         chapters = self.manifest.get("chapter_map", {})
-        todo = [id for id, data in chapters.items() if data.get("ocr_completed") and not data.get("ai_completed")]
+        
+        # Sort ALL folders to maintain the master chronological index
+        all_sorted_ids = sorted(chapters.keys(), key=lambda x: int(x) if str(x).isdigit() else x)
+        todo = [id for id in all_sorted_ids if chapters[id].get("ocr_completed") and not chapters[id].get("ai_completed")]
 
         if not todo:
             print("⏩ Tier 3: AI summaries complete. Skipping.")
@@ -84,20 +77,26 @@ class BatchProcessor:
 
         print(f"🧠 Tier 3: Running AI Discovery for {len(todo)} chapters...")
         for count, ch_id in enumerate(todo, 1):
+            
+            # 🚀 Read the chapter directly from the Manifest
+            narrative_chapter = chapters[ch_id].get("target_chapter")
+
             paths = file_io.get_paths(self.title, ch_id)
             with open(paths["raw_text"], "r", encoding="utf-8") as f:
                 ocr_text = f.read()
 
             ai_results = ai_agent.generate_summary(ocr_text)
             if ai_results:
+                # 🚀 FORCE the manifest chapter number into the AI's result
+                ai_results["identified_chapter_num"] = str(narrative_chapter)
+                
                 file_io.save_json(ai_results, paths["summary"])
                 self.manifest["chapter_map"][ch_id].update({
-                    "ai_chapter_num": ai_results.get("identified_chapter_num"),
-                    "ai_title": ai_results.get("identified_title"),
+                    "ai_chapter_num": str(narrative_chapter),
                     "ai_completed": True
                 })
                 file_io.save_json(self.manifest, self.metadata_path)
-                print(f"✅ Folder {ch_id} -> Chapter {ai_results.get('identified_chapter_num')}")
+                print(f"✅ Folder {ch_id} -> Saved Summary for Chapter {narrative_chapter}")
 
     def tier_4_cleanup(self):
         """STATION 4: Reclaim Disk Space."""
@@ -105,7 +104,6 @@ class BatchProcessor:
         total = len(chapters)
         completed = sum(1 for data in chapters.values() if data.get("ai_completed"))
 
-        # Safety Check: Only delete if EVERY chapter in the manifest is finished
         if total > 0 and completed == total:
             print(f"\n🧹 Tier 4: All {total} chapters processed. Cleaning up images...")
             if self.extract_dir.exists():
@@ -129,7 +127,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--title", required=True)
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
+    parser.add_argument("-c", "--start-chapter", type=int, default=1, help="Starting narrative chapter number") # <-- Added Flag
     args = parser.parse_args()
 
-    processor = BatchProcessor(args.title)
+    processor = BatchProcessor(args.title, start_chapter=args.start_chapter)
     processor.run_full_pipeline(url=args.url)

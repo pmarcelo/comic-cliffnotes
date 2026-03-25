@@ -33,7 +33,7 @@ CONTENT_RATING = ["safe", "suggestive", "erotica"]
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 USE_GPU = os.getenv("USE_GPU", "False").lower() == "true"  # <-- ADDED
 
-TARGET_MODEL = "gemini-2.0-flash"
+TARGET_MODEL = "gemini-2.5-flash"
 SCHEMA_VERSION = "2.1"
 
 # --- SYSTEM SETTINGS ---
