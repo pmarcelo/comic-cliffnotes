@@ -1,0 +1,996 @@
+{
+    "manga_title": "The Novel's Extra",
+    "manga_id": "local_archive",
+    "chapter_map": {
+        "63865": {
+            "lang": "en",
+            "uuid": "local_63865",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63865",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 66,
+            "target_chapter": "1",
+            "ai_chapter_num": "1"
+        },
+        "63866": {
+            "lang": "en",
+            "uuid": "local_63866",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63866",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 70,
+            "target_chapter": "2",
+            "ai_chapter_num": "2"
+        },
+        "63867": {
+            "lang": "en",
+            "uuid": "local_63867",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63867",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 75,
+            "target_chapter": "3",
+            "ai_chapter_num": "3"
+        },
+        "63868": {
+            "lang": "en",
+            "uuid": "local_63868",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63868",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 76,
+            "target_chapter": "4",
+            "ai_chapter_num": "4"
+        },
+        "63869": {
+            "lang": "en",
+            "uuid": "local_63869",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63869",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 69,
+            "target_chapter": "5",
+            "ai_chapter_num": "5"
+        },
+        "63870": {
+            "lang": "en",
+            "uuid": "local_63870",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63870",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 63,
+            "target_chapter": "6",
+            "ai_chapter_num": "6"
+        },
+        "63871": {
+            "lang": "en",
+            "uuid": "local_63871",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63871",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 69,
+            "target_chapter": "7",
+            "ai_chapter_num": "7"
+        },
+        "63872": {
+            "lang": "en",
+            "uuid": "local_63872",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63872",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 64,
+            "target_chapter": "8",
+            "ai_chapter_num": "8"
+        },
+        "63873": {
+            "lang": "en",
+            "uuid": "local_63873",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63873",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 73,
+            "target_chapter": "9",
+            "ai_chapter_num": "9"
+        },
+        "63874": {
+            "lang": "en",
+            "uuid": "local_63874",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63874",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 50,
+            "target_chapter": "10",
+            "ai_chapter_num": "10"
+        },
+        "63875": {
+            "lang": "en",
+            "uuid": "local_63875",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63875",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "11",
+            "ai_chapter_num": "11"
+        },
+        "63876": {
+            "lang": "en",
+            "uuid": "local_63876",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63876",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 58,
+            "target_chapter": "12",
+            "ai_chapter_num": "12"
+        },
+        "63877": {
+            "lang": "en",
+            "uuid": "local_63877",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63877",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 76,
+            "target_chapter": "13",
+            "ai_chapter_num": "13"
+        },
+        "63878": {
+            "lang": "en",
+            "uuid": "local_63878",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63878",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 71,
+            "target_chapter": "14",
+            "ai_chapter_num": "14"
+        },
+        "63879": {
+            "lang": "en",
+            "uuid": "local_63879",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63879",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 71,
+            "target_chapter": "15",
+            "ai_chapter_num": "15"
+        },
+        "63880": {
+            "lang": "en",
+            "uuid": "local_63880",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63880",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 63,
+            "target_chapter": "16",
+            "ai_chapter_num": "16"
+        },
+        "63881": {
+            "lang": "en",
+            "uuid": "local_63881",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63881",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 63,
+            "target_chapter": "17",
+            "ai_chapter_num": "17"
+        },
+        "63882": {
+            "lang": "en",
+            "uuid": "local_63882",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63882",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 72,
+            "target_chapter": "18",
+            "ai_chapter_num": "18"
+        },
+        "63883": {
+            "lang": "en",
+            "uuid": "local_63883",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63883",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 61,
+            "target_chapter": "19",
+            "ai_chapter_num": "19"
+        },
+        "63884": {
+            "lang": "en",
+            "uuid": "local_63884",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63884",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 66,
+            "target_chapter": "20",
+            "ai_chapter_num": "20"
+        },
+        "63885": {
+            "lang": "en",
+            "uuid": "local_63885",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63885",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "21",
+            "ai_chapter_num": "21"
+        },
+        "63886": {
+            "lang": "en",
+            "uuid": "local_63886",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63886",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "22",
+            "ai_chapter_num": "22"
+        },
+        "63887": {
+            "lang": "en",
+            "uuid": "local_63887",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63887",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "23",
+            "ai_chapter_num": "23"
+        },
+        "63888": {
+            "lang": "en",
+            "uuid": "local_63888",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63888",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "24",
+            "ai_chapter_num": "24"
+        },
+        "63889": {
+            "lang": "en",
+            "uuid": "local_63889",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63889",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "25",
+            "ai_chapter_num": "25"
+        },
+        "63890": {
+            "lang": "en",
+            "uuid": "local_63890",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63890",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "26",
+            "ai_chapter_num": "26"
+        },
+        "63891": {
+            "lang": "en",
+            "uuid": "local_63891",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63891",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 12,
+            "target_chapter": "27",
+            "ai_chapter_num": "27"
+        },
+        "63892": {
+            "lang": "en",
+            "uuid": "local_63892",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63892",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "28",
+            "ai_chapter_num": "28"
+        },
+        "63893": {
+            "lang": "en",
+            "uuid": "local_63893",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63893",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 12,
+            "target_chapter": "29",
+            "ai_chapter_num": "29"
+        },
+        "63894": {
+            "lang": "en",
+            "uuid": "local_63894",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63894",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 11,
+            "target_chapter": "30",
+            "ai_chapter_num": "30"
+        },
+        "63895": {
+            "lang": "en",
+            "uuid": "local_63895",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63895",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "31",
+            "ai_chapter_num": "31"
+        },
+        "63896": {
+            "lang": "en",
+            "uuid": "local_63896",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63896",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "32",
+            "ai_chapter_num": "32"
+        },
+        "63897": {
+            "lang": "en",
+            "uuid": "local_63897",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63897",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "33",
+            "ai_chapter_num": "33"
+        },
+        "63898": {
+            "lang": "en",
+            "uuid": "local_63898",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63898",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "34",
+            "ai_chapter_num": "34"
+        },
+        "63899": {
+            "lang": "en",
+            "uuid": "local_63899",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63899",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "35",
+            "ai_chapter_num": "35"
+        },
+        "63900": {
+            "lang": "en",
+            "uuid": "local_63900",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63900",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "36",
+            "ai_chapter_num": "36"
+        },
+        "63901": {
+            "lang": "en",
+            "uuid": "local_63901",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63901",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "37",
+            "ai_chapter_num": "37"
+        },
+        "63902": {
+            "lang": "en",
+            "uuid": "local_63902",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63902",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 26,
+            "target_chapter": "38",
+            "ai_chapter_num": "38"
+        },
+        "63903": {
+            "lang": "en",
+            "uuid": "local_63903",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63903",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 12,
+            "target_chapter": "39",
+            "ai_chapter_num": "39"
+        },
+        "63904": {
+            "lang": "en",
+            "uuid": "local_63904",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63904",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "40",
+            "ai_chapter_num": "40"
+        },
+        "63905": {
+            "lang": "en",
+            "uuid": "local_63905",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63905",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "41",
+            "ai_chapter_num": "41"
+        },
+        "63906": {
+            "lang": "en",
+            "uuid": "local_63906",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63906",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 17,
+            "target_chapter": "42",
+            "ai_chapter_num": "42"
+        },
+        "63907": {
+            "lang": "en",
+            "uuid": "local_63907",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63907",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "43",
+            "ai_chapter_num": "43"
+        },
+        "63908": {
+            "lang": "en",
+            "uuid": "local_63908",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63908",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 20,
+            "target_chapter": "44",
+            "ai_chapter_num": "44"
+        },
+        "63909": {
+            "lang": "en",
+            "uuid": "local_63909",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63909",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 11,
+            "target_chapter": "45",
+            "ai_chapter_num": "45"
+        },
+        "63910": {
+            "lang": "en",
+            "uuid": "local_63910",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63910",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "46",
+            "ai_chapter_num": "46"
+        },
+        "63911": {
+            "lang": "en",
+            "uuid": "local_63911",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63911",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 11,
+            "target_chapter": "47",
+            "ai_chapter_num": "47"
+        },
+        "63912": {
+            "lang": "en",
+            "uuid": "local_63912",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63912",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "48",
+            "ai_chapter_num": "48"
+        },
+        "63913": {
+            "lang": "en",
+            "uuid": "local_63913",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63913",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "49",
+            "ai_chapter_num": "49"
+        },
+        "63914": {
+            "lang": "en",
+            "uuid": "local_63914",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63914",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "50",
+            "ai_chapter_num": "50"
+        },
+        "63915": {
+            "lang": "en",
+            "uuid": "local_63915",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63915",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "51",
+            "ai_chapter_num": "51"
+        },
+        "63916": {
+            "lang": "en",
+            "uuid": "local_63916",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63916",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "52",
+            "ai_chapter_num": "52"
+        },
+        "63917": {
+            "lang": "en",
+            "uuid": "local_63917",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63917",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 18,
+            "target_chapter": "53",
+            "ai_chapter_num": "53"
+        },
+        "63918": {
+            "lang": "en",
+            "uuid": "local_63918",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63918",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 18,
+            "target_chapter": "54",
+            "ai_chapter_num": "54"
+        },
+        "63919": {
+            "lang": "en",
+            "uuid": "local_63919",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63919",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "55",
+            "ai_chapter_num": "55"
+        },
+        "63920": {
+            "lang": "en",
+            "uuid": "local_63920",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63920",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 18,
+            "target_chapter": "56",
+            "ai_chapter_num": "56"
+        },
+        "63921": {
+            "lang": "en",
+            "uuid": "local_63921",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63921",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 18,
+            "target_chapter": "57",
+            "ai_chapter_num": "57"
+        },
+        "63922": {
+            "lang": "en",
+            "uuid": "local_63922",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63922",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 17,
+            "target_chapter": "58",
+            "ai_chapter_num": "58"
+        },
+        "63923": {
+            "lang": "en",
+            "uuid": "local_63923",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63923",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "59",
+            "ai_chapter_num": "59"
+        },
+        "63924": {
+            "lang": "en",
+            "uuid": "local_63924",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63924",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 20,
+            "target_chapter": "60",
+            "ai_chapter_num": "60"
+        },
+        "63925": {
+            "lang": "en",
+            "uuid": "local_63925",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63925",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 21,
+            "target_chapter": "61",
+            "ai_chapter_num": "61"
+        },
+        "63926": {
+            "lang": "en",
+            "uuid": "local_63926",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63926",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 23,
+            "target_chapter": "62",
+            "ai_chapter_num": "62"
+        },
+        "63927": {
+            "lang": "en",
+            "uuid": "local_63927",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63927",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "63",
+            "ai_chapter_num": "63"
+        },
+        "63928": {
+            "lang": "en",
+            "uuid": "local_63928",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63928",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 21,
+            "target_chapter": "64",
+            "ai_chapter_num": "64"
+        },
+        "63929": {
+            "lang": "en",
+            "uuid": "local_63929",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63929",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 19,
+            "target_chapter": "65",
+            "ai_chapter_num": "65"
+        },
+        "63930": {
+            "lang": "en",
+            "uuid": "local_63930",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63930",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 23,
+            "target_chapter": "66",
+            "ai_chapter_num": "66"
+        },
+        "63931": {
+            "lang": "en",
+            "uuid": "local_63931",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63931",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "67",
+            "ai_chapter_num": "67"
+        },
+        "63932": {
+            "lang": "en",
+            "uuid": "local_63932",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63932",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 20,
+            "target_chapter": "68",
+            "ai_chapter_num": "68"
+        },
+        "63933": {
+            "lang": "en",
+            "uuid": "local_63933",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63933",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 22,
+            "target_chapter": "69",
+            "ai_chapter_num": "69"
+        },
+        "63934": {
+            "lang": "en",
+            "uuid": "local_63934",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63934",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 13,
+            "target_chapter": "70",
+            "ai_chapter_num": "70"
+        },
+        "63935": {
+            "lang": "en",
+            "uuid": "local_63935",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63935",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "71",
+            "ai_chapter_num": "71"
+        },
+        "63936": {
+            "lang": "en",
+            "uuid": "local_63936",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63936",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "72",
+            "ai_chapter_num": "72"
+        },
+        "63937": {
+            "lang": "en",
+            "uuid": "local_63937",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63937",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 20,
+            "target_chapter": "73",
+            "ai_chapter_num": "73"
+        },
+        "63938": {
+            "lang": "en",
+            "uuid": "local_63938",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63938",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "74",
+            "ai_chapter_num": "74"
+        },
+        "63939": {
+            "lang": "en",
+            "uuid": "local_63939",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63939",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 12,
+            "target_chapter": "75",
+            "ai_chapter_num": "75"
+        },
+        "63940": {
+            "lang": "en",
+            "uuid": "local_63940",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63940",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "76",
+            "ai_chapter_num": "76"
+        },
+        "63941": {
+            "lang": "en",
+            "uuid": "local_63941",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63941",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "77"
+        },
+        "63942": {
+            "lang": "en",
+            "uuid": "local_63942",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63942",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "78",
+            "ai_chapter_num": "78"
+        },
+        "63943": {
+            "lang": "en",
+            "uuid": "local_63943",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63943",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "79",
+            "ai_chapter_num": "79"
+        },
+        "63944": {
+            "lang": "en",
+            "uuid": "local_63944",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63944",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 19,
+            "target_chapter": "80",
+            "ai_chapter_num": "80"
+        },
+        "63945": {
+            "lang": "en",
+            "uuid": "local_63945",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63945",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "81",
+            "ai_chapter_num": "81"
+        },
+        "63946": {
+            "lang": "en",
+            "uuid": "local_63946",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63946",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 21,
+            "target_chapter": "82",
+            "ai_chapter_num": "82"
+        },
+        "63947": {
+            "lang": "en",
+            "uuid": "local_63947",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63947",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 17,
+            "target_chapter": "83",
+            "ai_chapter_num": "83"
+        },
+        "63948": {
+            "lang": "en",
+            "uuid": "local_63948",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63948",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "84",
+            "ai_chapter_num": "84"
+        },
+        "63949": {
+            "lang": "en",
+            "uuid": "local_63949",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63949",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "85",
+            "ai_chapter_num": "85"
+        },
+        "63950": {
+            "lang": "en",
+            "uuid": "local_63950",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63950",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 17,
+            "target_chapter": "86",
+            "ai_chapter_num": "86"
+        },
+        "63951": {
+            "lang": "en",
+            "uuid": "local_63951",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63951",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 14,
+            "target_chapter": "87",
+            "ai_chapter_num": "87"
+        },
+        "63952": {
+            "lang": "en",
+            "uuid": "local_63952",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63952",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "88",
+            "ai_chapter_num": "88"
+        },
+        "63953": {
+            "lang": "en",
+            "uuid": "local_63953",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63953",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 21,
+            "target_chapter": "89",
+            "ai_chapter_num": "89"
+        },
+        "63954": {
+            "lang": "en",
+            "uuid": "local_63954",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63954",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 15,
+            "target_chapter": "90",
+            "ai_chapter_num": "90"
+        },
+        "63955": {
+            "lang": "en",
+            "uuid": "local_63955",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63955",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "91",
+            "ai_chapter_num": "91"
+        },
+        "63956": {
+            "lang": "en",
+            "uuid": "local_63956",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63956",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 20,
+            "target_chapter": "92",
+            "ai_chapter_num": "92"
+        },
+        "63957": {
+            "lang": "en",
+            "uuid": "local_63957",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63957",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "93",
+            "ai_chapter_num": "93"
+        },
+        "63958": {
+            "lang": "en",
+            "uuid": "local_63958",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63958",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "94",
+            "ai_chapter_num": "94"
+        },
+        "63959": {
+            "lang": "en",
+            "uuid": "local_63959",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63959",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 25,
+            "target_chapter": "95",
+            "ai_chapter_num": "95"
+        },
+        "63960": {
+            "lang": "en",
+            "uuid": "local_63960",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63960",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 22,
+            "target_chapter": "96",
+            "ai_chapter_num": "96"
+        },
+        "63961": {
+            "lang": "en",
+            "uuid": "local_63961",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63961",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 16,
+            "target_chapter": "97",
+            "ai_chapter_num": "97"
+        },
+        "63962": {
+            "lang": "en",
+            "uuid": "local_63962",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63962",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 17,
+            "target_chapter": "98",
+            "ai_chapter_num": "98"
+        },
+        "63963": {
+            "lang": "en",
+            "uuid": "local_63963",
+            "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63963",
+            "ocr_completed": true,
+            "ai_completed": true,
+            "image_count": 23,
+            "target_chapter": "99",
+            "ai_chapter_num": "99"
+        }
+    },
+    "target_chapter": 0.0
+}
