@@ -25,11 +25,12 @@ class BatchProcessor:
 
     def tier_1_ingest(self, url):
         """STATION 1: Ingest logic"""
-        if self.metadata_path.exists():
-            print(f"⏩ Tier 1: Metadata exists. Skipping.")
+        # 🚀 ONLY skip if the manifest exists AND the user didn't provide a new download link
+        if not url and self.metadata_path.exists():
+            print(f"⏩ Tier 1: Metadata exists and no new URL provided. Skipping.")
             return True
 
-        print(f"📥 Tier 1: Downloading master archive...")
+        print(f"📥 Tier 1: Downloading/Processing archive...")
         # 🚀 Pass the CLI argument down to cloud_drive
         success = cloud_drive.process_archive(self.title, "MASTER_BATCH", url, self.start_chapter)
         

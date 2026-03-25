@@ -12,11 +12,10 @@ def process_archive(title: str, chapter_str: str, url: str, start_chapter: int =
     slug = file_io.get_safe_title(title)
     
     archive_dir = config.DATA_DIR / "raw_archives"
-    # Note: We look one level deeper for the MASTER_BATCH folder
     extract_dir = config.DATA_DIR / "extracted_images" / slug / f"ch{chapter_str}"
     zip_path = archive_dir / f"{slug}_ch{chapter_str}.zip"
 
-    # --- THE FIX: Skip Prep/Download if images are already there ---
+    # --- Skip Prep/Download if images are already there ---
     if extract_dir.exists() and any(extract_dir.iterdir()):
         print(f"📍 Images detected in {extract_dir}. Skipping cleanup and download.")
     else:
@@ -29,8 +28,7 @@ def process_archive(title: str, chapter_str: str, url: str, start_chapter: int =
         if not _unpack_archive(zip_path, extract_dir):
             return False
 
-    # This will now run the scan on the existing (or newly downloaded) images
-    # 🚀 Passing start_chapter down the chain
+    # 🚀 Pass start_chapter down to the registration logic
     _register_local_metadata(title, chapter_str, extract_dir, paths, lang, start_chapter)
     
     return True
@@ -59,60 +57,63 @@ def _unpack_archive(zip_path: Path, extract_dir: Path) -> bool:
 
 def _register_local_metadata(title: str, chapter_str: str, extract_dir: Path, paths: dict, lang: str, start_chapter: int):
     """
-    Creates the JSON metadata. If chapter_str is 'MASTER_BATCH', 
-    it scans subfolders to build a sequentially mapped bulk list.
+    Loads existing metadata if available, scans for NEW chapters, 
+    and appends them to the manifest securely.
     """
-    metadata = {
-        "manga_title": title,
-        "manga_id": "local_archive",
-        "chapter_map": {}
-    }
+    # 1. 🚀 LOAD EXISTING MANIFEST
+    if os.path.exists(paths["metadata"]):
+        metadata = file_io.load_json(paths["metadata"])
+        print(f"📂 Loaded existing manifest with {len(metadata.get('chapter_map', {}))} chapters.")
+    else:
+        metadata = {
+            "manga_title": title,
+            "manga_id": "local_archive",
+            "chapter_map": {}
+        }
 
     if chapter_str == "MASTER_BATCH":
-        # New Logic: Scan the entire extraction and inject target chapters
-        print("🔍 Scanning extracted files for chapter IDs...")
-        metadata["chapter_map"] = _scan_for_chapters(extract_dir, lang, start_chapter)
-        metadata["target_chapter"] = 0.0 # Placeholder for batch
+        print("🔍 Scanning extracted files for NEW chapter IDs...")
+        existing_map = metadata.get("chapter_map", {})
+        
+        # 2. 🚀 SCAN AND FILTER
+        new_chapters = _scan_for_chapters(extract_dir, lang, start_chapter, existing_map)
+        
+        # 3. 🚀 APPEND NEW DATA TO THE MASTER MAP
+        metadata["chapter_map"].update(new_chapters)
+        metadata["target_chapter"] = 0.0 
     else:
-        # Standard single-chapter logic
         metadata["target_chapter"] = float(chapter_str)
-        metadata["chapter_map"] = {
-            chapter_str: {
-                "lang": lang, 
-                "uuid": "local_import", 
-                "local_dir": str(extract_dir)
-            }
+        metadata["chapter_map"][chapter_str] = {
+            "lang": lang, 
+            "uuid": "local_import", 
+            "local_dir": str(extract_dir)
         }
 
     file_io.save_json(metadata, paths["metadata"])
 
-def _scan_for_chapters(base_dir: Path, lang: str, start_chapter: int):
+def _scan_for_chapters(base_dir: Path, lang: str, start_chapter: int, existing_map: dict):
     """
-    Recursively crawls deep nesting to find folders containing images.
-    Sorts folders chronologically and assigns a sequential target_chapter.
+    Recursively crawls nesting to find folders containing images.
+    Ignores folders already in the existing_map to prevent overwrites.
     """
-    unsorted_map = {}
+    unsorted_new_map = {}
     valid_extensions = {'.jpg', '.jpeg', '.png', '.webp'}
     
-    print(f"🔍 Deep scanning for chapters in: {base_dir}")
-    
     for root, dirs, files in os.walk(base_dir):
-        # 1. Skip system/junk folders (like __MACOSX)
         if "__MACOSX" in root:
             continue
 
-        # 2. Identify 'images'
-        image_files = [
-            f for f in files 
-            if f.isdigit() or Path(f).suffix.lower() in valid_extensions
-        ]
+        image_files = [f for f in files if f.isdigit() or Path(f).suffix.lower() in valid_extensions]
 
-        # 3. If a folder has images and NO subdirectories, it's a chapter leaf
         if image_files and not dirs:
             folder_path = Path(root)
-            ch_id = folder_path.name # The '63730' or '1' anchor
+            ch_id = folder_path.name 
             
-            unsorted_map[ch_id] = {
+            # 🚀 MAGIC CHECK: If folder is already in the database, skip it!
+            if ch_id in existing_map:
+                continue
+            
+            unsorted_new_map[ch_id] = {
                 "lang": lang,
                 "uuid": f"local_{ch_id}",
                 "local_dir": str(folder_path),
@@ -121,19 +122,18 @@ def _scan_for_chapters(base_dir: Path, lang: str, start_chapter: int):
                 "image_count": len(image_files) 
             }
             
-    # 4. Numerically sort the dictionary keys to guarantee chronological order
-    sorted_keys = sorted(unsorted_map.keys(), key=lambda x: int(x) if str(x).isdigit() else x)
+    # Numerically sort ONLY the brand new folders
+    sorted_keys = sorted(unsorted_new_map.keys(), key=lambda x: int(x) if str(x).isdigit() else x)
     
-    chapter_map = {}
-    current_chapter = start_chapter # Start the counter
+    new_chapter_map = {}
+    current_chapter = start_chapter 
     
-    # 5. Rebuild the dictionary with the target_chapter injected
     for k in sorted_keys:
-        data = unsorted_map[k]
-        data["target_chapter"] = str(current_chapter) # 🚀 INJECTED HERE
-        chapter_map[k] = data
+        data = unsorted_new_map[k]
+        data["target_chapter"] = str(current_chapter) 
+        new_chapter_map[k] = data
         
-        print(f"  ✅ Mapped Folder {k} -> Chapter {current_chapter} ({data['image_count']} pages)")
-        current_chapter += 1 # Increment for the next folder
+        print(f"  ✅ ADDED Folder {k} -> Chapter {current_chapter} ({data['image_count']} pages)")
+        current_chapter += 1 
         
-    return chapter_map
+    return new_chapter_map
