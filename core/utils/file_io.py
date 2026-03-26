@@ -20,14 +20,18 @@ def get_paths(title, chapter_str):
     manga_dir = config.ARTIFACTS_DIR / slug
     chapter_dir = manga_dir / ch_slug
     
+    # 🚀 THE FIX: Isolate the summaries by title slug
+    summary_dir = config.SUMMARIES_DIR / slug
+    
+    # Ensure all required directories exist before we return paths
     chapter_dir.mkdir(parents=True, exist_ok=True)
-    config.SUMMARIES_DIR.mkdir(parents=True, exist_ok=True)
+    summary_dir.mkdir(parents=True, exist_ok=True)
 
     return {
         "metadata": manga_dir / "metadata.json",
         "raw_text": chapter_dir / "raw_ocr.txt",
-        # CHANGED: 'processed_json' -> 'summary' to fix the KeyError
-        "summary": config.SUMMARIES_DIR / f"{slug}_{ch_slug}.json"
+        # 🚀 Now points to data/summaries/title_slug/chapter_X.json
+        "summary": summary_dir / f"chapter_{chapter_str}.json"
     }
 
 def update_chapter_metadata(metadata_path, original_id, ai_data):
@@ -38,7 +42,7 @@ def update_chapter_metadata(metadata_path, original_id, ai_data):
         data["chapter_map"][original_id]["ai_chapter_num"] = ai_data.get("identified_chapter_num")
         data["chapter_map"][original_id]["ai_title"] = ai_data.get("identified_title")
         data["chapter_map"][original_id]["processed"] = True
-        save_json(metadata_path, data)
+        save_json(data, metadata_path)
 
 def cleanup_directory(directory_path):
     path = Path(directory_path)

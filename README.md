@@ -15,11 +15,11 @@ Comic CliffNotes uses a custom-tuned, hardware-agnostic extraction engine built 
 
 ---
 
-## 🧠 AI Synthesis (Gemini 2.0 Flash)
-The **Gemini 2.0 Flash** AI translates and synthesizes the raw OCR data into professional English summaries, maintaining **Narrative Continuity** by referencing previous chapter context.
+## 🧠 AI Synthesis (Gemini 3.1 Flash)
+The **Gemini 3.1 Flash** AI translates and synthesizes the raw OCR data into professional English summaries, utilizing strict JSON enforcement.
 
-* **Recursive Context:** Chapters are summarized with "Narrative Memory." The AI reads the *previous* summary to maintain character and plot continuity.
-* **Strict JSON Schemas:** Summaries are output in a strict, predictable JSON format (Chapter Num, Summary, Key Moments, Characters Present) for easy database ingestion.
+* **Dumb AI, Smart Pipeline:** The AI is strictly responsible for creative synthesis (writing the summary). The Python orchestrator handles all mathematical chapter mapping to ensure sequential integrity.
+* **Strict JSON Schemas:** Summaries are forced into a rigid JSON structure (`application/json` MIME type) to guarantee zero parsing errors during database ingestion.
 
 ---
 
@@ -29,15 +29,17 @@ The **Gemini 2.0 Flash** AI translates and synthesizes the raw OCR data into pro
 ├── .env                 # 🛑 Hardware Toggles & API Keys (Git Ignored)
 ├── core/                # The "Brains" (Logic)
 │   ├── config.py        # 🎯 Smart Config (Loads .env, sets paths/limits)
-│   ├── ocr_engine.py    # EasyOCR extraction & Image Pre-processing
-│   ├── ai_agent.py      # Gemini 2.0 Flash (Synthesis & Narrative Memory)
-│   └── utils/
-│       └── file_io.py   # JSON and file handlers
+│   ├── extractors/      # Google Drive ingestion logic
+│   ├── processors/      # EasyOCR extraction & Image Pre-processing
+│   ├── intelligence/    # Gemini 3.1 Flash Synthesis
+│   └── utils/           # JSON and file handlers
 ├── data/                # The "State" (Storage)
-│   ├── artifacts/       # Title-slugged folders with raw_ocr.txt
-│   └── summaries/       # Title-slugged folders with summary.json
+│   ├── artifacts/       # Master manifest.json and Title-slugged metadata
+│   ├── extracted_images/# Temporary workspace for Tier 1
+│   ├── raw_archives/    # Downloaded ZIP files
+│   └── summaries/       # Final AI .json outputs
 ├── processor.py         # The Main Orchestrator
-└── requirements.txt     
+└── requirements.txt     # Clean, OS-Agnostic Dependencies
 ```
 
 ---
@@ -45,6 +47,17 @@ The **Gemini 2.0 Flash** AI translates and synthesizes the raw OCR data into pro
 ## 🚀 Setup & Usage
 
 ### 1. Environment Setup
+Clone the repository and create an isolated Python virtual environment:
+```bash
+python -m venv venv
+
+# Activate the environment:
+# On Windows:
+.\venv\Scripts\activate
+# On Mac/Linux (or Codespaces):
+source venv/bin/activate
+```
+
 Create a `.env` file in the root directory:
 ```bash
 # Hardware Toggle: Set to False for Cloud/CPU, True for Local NVIDIA GPU
@@ -54,32 +67,52 @@ USE_GPU=False
 GEMINI_API_KEY=your_actual_key_goes_here
 ```
 
-### 2. Install Dependencies
+### 2. Install Base Dependencies
+Install the clean, cross-platform requirements:
 ```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu  # Or /cu118 for GPU
-pip install easyocr numpy pillow opencv-python-headless python-dotenv google-genai
+pip install -r requirements.txt
 ```
 
-### 3. Run the Pipeline
-Process your local chapters through the OCR and AI engines:
+### 3. ⚡ Optional: NVIDIA GPU Acceleration (Windows PC)
+If you have a local NVIDIA graphics card and want to supercharge the OCR extraction speed, install the CUDA-enabled version of PyTorch **before** running the pipeline.
 ```bash
-python processor.py
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
+*(Don't forget to set `USE_GPU=True` in your `.env` file!)*
+
+### 4. Run the Pipeline
+The `processor.py` orchestrator uses command-line arguments to build your database sequentially. 
+
+**Standard Run (New Series):**
+```bash
+python processor.py -t "Series Title" -u "Google_Drive_URL" -c 1
+```
+
+**Continuous Update Mode (Appending new chapters):**
+If you later download Chapters 91-120, point the orchestrator to the new URL and tell it where to start counting. It will automatically merge them into your existing manifest:
+```bash
+python processor.py -t "Series Title" -u "New_Drive_URL" -c 91
+```
+
+**Flags:**
+* `-t` / `--title`: The name of the Manga/Manhwa.
+* `-u` / `--url`: The Google Drive sharing link containing the ZIP archive.
+* `-c` / `--start-chapter`: The narrative integer to start mapping from (Defaults to 1).
 
 ---
 
 ## 🏗️ Data Architecture: Future-Proofing
 To ensure 100% compatibility with future frontend integrations (e.g., Ruby on Rails, Next.js), we use an **Enterprise Data Schema**:
 
-* **Nearest Neighbor Failsafe:** If a chapter is missing (e.g., Chapter 3 fails), the engine "reaches back" to the most recent available summary to bridge the story gap.
-* **Manifest Indexing:** A `manifest.json` provides a high-speed index for all available summaries, local directories, and schema versions.
+* **Strict Sequencing:** Folder hashes are chronologically sorted and mapped to sequential integers during Tier 1 ingestion.
+* **Manifest Indexing:** A master `manifest.json` acts as the single source of truth, tracking extraction progress, AI completion status, and local file paths.
 
 ---
 
 ## 🛡️ Budget & Safety Guardrails
 This project is designed to run efficiently on the **Google AI Free Tier**.
 * **Regex Pre-Cleaning:** Strips out junk data before the AI sees it, drastically reducing token usage.
-* **Git Integrity:** `.gitignore` pre-configured to exclude `__pycache__`, the `.env` file, and temporary image blobs.
+* **Rate Limit Immunity:** Local processing bottlenecks inherently protect against API rate limits by pacing requests automatically.
 
 ---
 
@@ -88,5 +121,6 @@ This project is designed to run efficiently on the **Google AI Free Tier**.
 - [x] Build the "Portable Pipeline" (.env hardware toggles for CPU/GPU).
 - [x] Implement Paragraph-Aware spatial grouping for better AI context.
 - [x] Add Regex Blacklisting to remove scanlator watermarks.
-- [x] **Recursive Context Memory:** Narrative continuity across chapters.
+- [x] **Continuous Update Mode:** Smart manifest merging for new chapter batches.
+- [ ] **Arc Summarizer:** Standalone macro-script to generate "Story Thus Far" recaps.
 - [ ] **Rails Integration:** Build the "CliffNotes Dashboard" to display recaps.
