@@ -26,3 +26,11 @@
 - [ ] Configure the daemon to query the target Google Drive folder for new `.zip` or `.cbz` files.
 - [ ] Add logic to cross-reference found files with the `metadata.json` master lists.
 - [ ] Automatically trigger `processor.py` for any new, unprocessed archives.
+
+## 🗄️ 5. State Management: Checksum-Validated Ledger Sync (CVLS)
+- [ ] **Ledger Expansion:** Update `metadata.json` schema to include an `ingested_archives` list.
+- [ ] **Fingerprinting:** Implement MD5 checksum tracking using Google Drive's native `md5Checksum` field.
+- [ ] **Delta Logic:** Build a "Comparison Engine" in `watcher.py` that identifies the delta between Drive files and the local ledger.
+- [ ] **Partial Ingest Support:** Modify `processor.py` to allow appending new chapters to an existing title without wiping existing AI summaries.
+- [ ] **Stability Check:** Implement a 5-minute "Cool Down" timer for newly detected files to prevent processing partial uploads.
+- [ ] **(Future Exploration):** Evaluate migrating the JSON ledger to a local SQLite DB for faster lookups once the library exceeds 1,000 chapters.
