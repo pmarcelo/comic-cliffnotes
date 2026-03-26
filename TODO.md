@@ -1,31 +1,39 @@
 # 🗺️ Comic Cliffnotes - Master Roadmap
 
-## 📊 1. Telemetry & Audit Logging
+## 📊 1. Telemetry & Audit Logging (The Paper Trail)
 - [ ] Create `run_logs/` directory for historical JSON metrics.
-- [ ] Log **Tier 1 (Ingest):** Download speed and extraction time.
-- [ ] Log **Tier 2 (OCR):** Images processed, avg time per page, and GPU VRAM spikes.
-- [ ] Log **Tier 3 (AI):** API success rate, response latency, and token consumption.
+- [ ] **Ingest Metrics:** Track download speed and archive extraction time.
+- [ ] **OCR Metrics:** Track total images, average time per page, and GPU VRAM spikes.
+- [ ] **AI Metrics:** Track API success rate, response latency, and token consumption.
 
 ## 🛑 2. "Fail Fast" Circuit Breaker
-- [ ] Update `ai_agent.py` to catch `429 RESOURCE_EXHAUSTED` specifically.
-- [ ] Raise a custom `RateLimitExhaustedError` to halt the loop immediately.
-- [ ] Ensure the manifest saves the current state before the script exits.
+- [ ] Update `ai_agent.py` to catch `429 RESOURCE_EXHAUSTED` errors.
+- [ ] Implement a custom `RateLimitExhaustedError` to halt Tier 3 immediately.
+- [ ] Ensure the manifest saves the current "Resume Point" before the script exits.
 
-## ⏱️ 3. Smart Rate Limiting
-- [ ] Replace `sleep(8)` with a dynamic timestamp-based throttler.
-- [ ] Calculate the exact millisecond delay needed to hit 15 RPM perfectly.
+## ⏱️ 3. Smart Rate Limiting (The Throttle)
+- [ ] Replace hardcoded `sleep(8)` with a dynamic timestamp-based throttler.
+- [ ] Calculate the exact millisecond delay needed to hit 15 Requests Per Minute (RPM) perfectly.
 
 ## 🔐 4. Identity & Permissions (The Robot Upgrade)
 - [ ] Create a Google Cloud Service Account and download the JSON key.
 - [ ] Share the target GDrive folder with the Service Account email as 'Editor'.
-- [ ] Migrate `cloud_drive.py` from public `gdown` links to authenticated API calls.
+- [ ] Refactor `cloud_drive.py` to use authenticated API calls instead of public links.
 
-## 🗄️ 5. State Management: The Hybrid Ledger
+## 🗄️ 5. State Management: The Hybrid Ledger (CVLS)
 - [ ] **Ledger Expansion:** Add `ingested_archives` (ID + MD5) to `metadata.json`.
-- [ ] **Stability Check:** Implement 5-minute cooldown for new files.
-- [ ] **Archive Move:** Build the `move_file_to_processed` logic to clean the inbound folder.
+- [ ] **Fingerprinting:** Use MD5 checksums to prevent processing the same data twice.
+- [ ] **Stability Check:** Implement 5-minute cooldown for new files to ensure upload completion.
+- [ ] **Archive Move:** Build logic to move finished zips from `/inbound` to `/processed`.
 
-## 🤖 6. The Watcher Daemon
-- [ ] Write `watcher.py` as an infinite loop polling script.
-- [ ] Implement cross-referencing logic between Drive and the local Ledger.
-- [ ] (Optional) Set up Windows Task Scheduler to trigger the watcher on boot.
+## 🖥️ 6. Mission Control GUI (Streamlit Dashboard)
+- [ ] **Systems Header:** Indicators for GPU (CUDA) status, API health, and Drive connection.
+- [ ] **Queue Manager:** Table of detected zips in Drive with a manual "Process Now" override.
+- [ ] **Pipeline Visualizer:** Real-time progress bars for OCR and AI stages.
+- [ ] **Live Preview:** A scrolling window showing the latest AI summaries as they generate.
+- [ ] **Manual Knobs:** Sliders to adjust API delay and toggles to run specific Tiers (e.g., "OCR Only").
+- [ ] **Emergency Stop:** A "Big Red Button" to safely kill the process and save state.
+
+## 🤖 7. The Watcher Daemon (Background Logic)
+- [ ] Write `watcher.py` as a non-blocking loop that powers the GUI's "Auto-Scan" feature.
+- [ ] Implement the "Self-Healing" pattern (Global Try-Except) to prevent network glitches from killing the app.
