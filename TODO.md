@@ -1,36 +1,31 @@
-# 🗺️ Comic Cliffnotes - Pipeline Roadmap
+# 🗺️ Comic Cliffnotes - Master Roadmap
 
-## 📊 1. Telemetry & Audit Logging (Performance Metrics)
-- [ ] Create a `run_logs/` directory to store historical execution data.
-- [ ] Build a logger that generates a `run_YYYYMMDD_HHMMSS.json` at the end of each execution.
-- [ ] **Track Global Metrics:** Capture `manga_title` and `total_chapters_processed`.
-- [ ] **Track Tier 1 (Ingest):** Log download speed and extraction time.
-- [ ] **Track Tier 2 (OCR):** Log total images processed, average time per page, and GPU VRAM spikes.
-- [ ] **Track Tier 3 (AI):** Log total API requests made, success/fail rate, average response latency, and token consumption.
+## 📊 1. Telemetry & Audit Logging
+- [ ] Create `run_logs/` directory for historical JSON metrics.
+- [ ] Log **Tier 1 (Ingest):** Download speed and extraction time.
+- [ ] Log **Tier 2 (OCR):** Images processed, avg time per page, and GPU VRAM spikes.
+- [ ] Log **Tier 3 (AI):** API success rate, response latency, and token consumption.
 
-## 🛑 2. The "Fail Fast" Circuit Breaker (API Limits)
-- [ ] Update `ai_agent.py` to explicitly catch the `429 RESOURCE_EXHAUSTED` status code.
-- [ ] Create a custom `RateLimitExhaustedError` instead of returning `None`.
-- [ ] Update the Tier 3 loop to catch this new error and gracefully halt the AI processing.
-- [ ] Ensure the manifest state saves properly before the script safely exits to prevent data loss.
+## 🛑 2. "Fail Fast" Circuit Breaker
+- [ ] Update `ai_agent.py` to catch `429 RESOURCE_EXHAUSTED` specifically.
+- [ ] Raise a custom `RateLimitExhaustedError` to halt the loop immediately.
+- [ ] Ensure the manifest saves the current state before the script exits.
 
-## ⏱️ 3. Smart Rate Limiting (Bolstering the Throttle)
-- [ ] Remove the hardcoded `time.sleep(8)` that blindly waits *after* a response.
-- [ ] Implement a dynamic request throttler (Token Bucket or Timestamp Checker).
-- [ ] Record the exact timestamp when a request is fired.
-- [ ] Before firing the *next* request, calculate the exact millisecond difference to guarantee a safe, perfectly optimized 15 Requests Per Minute.
+## ⏱️ 3. Smart Rate Limiting
+- [ ] Replace `sleep(8)` with a dynamic timestamp-based throttler.
+- [ ] Calculate the exact millisecond delay needed to hit 15 RPM perfectly.
 
-## 🤖 4. Full Automation (The 'Drive Daemon')
-- [ ] Write a lightweight wrapper script (`watcher.py`).
-- [ ] Set up a background polling daemon (via Windows Task Scheduler or a python infinite loop with a 15-minute sleep).
-- [ ] Configure the daemon to query the target Google Drive folder for new `.zip` or `.cbz` files.
-- [ ] Add logic to cross-reference found files with the `metadata.json` master lists.
-- [ ] Automatically trigger `processor.py` for any new, unprocessed archives.
+## 🔐 4. Identity & Permissions (The Robot Upgrade)
+- [ ] Create a Google Cloud Service Account and download the JSON key.
+- [ ] Share the target GDrive folder with the Service Account email as 'Editor'.
+- [ ] Migrate `cloud_drive.py` from public `gdown` links to authenticated API calls.
 
-## 🗄️ 5. State Management: Checksum-Validated Ledger Sync (CVLS)
-- [ ] **Ledger Expansion:** Update `metadata.json` schema to include an `ingested_archives` list.
-- [ ] **Fingerprinting:** Implement MD5 checksum tracking using Google Drive's native `md5Checksum` field.
-- [ ] **Delta Logic:** Build a "Comparison Engine" in `watcher.py` that identifies the delta between Drive files and the local ledger.
-- [ ] **Partial Ingest Support:** Modify `processor.py` to allow appending new chapters to an existing title without wiping existing AI summaries.
-- [ ] **Stability Check:** Implement a 5-minute "Cool Down" timer for newly detected files to prevent processing partial uploads.
-- [ ] **(Future Exploration):** Evaluate migrating the JSON ledger to a local SQLite DB for faster lookups once the library exceeds 1,000 chapters.
+## 🗄️ 5. State Management: The Hybrid Ledger
+- [ ] **Ledger Expansion:** Add `ingested_archives` (ID + MD5) to `metadata.json`.
+- [ ] **Stability Check:** Implement 5-minute cooldown for new files.
+- [ ] **Archive Move:** Build the `move_file_to_processed` logic to clean the inbound folder.
+
+## 🤖 6. The Watcher Daemon
+- [ ] Write `watcher.py` as an infinite loop polling script.
+- [ ] Implement cross-referencing logic between Drive and the local Ledger.
+- [ ] (Optional) Set up Windows Task Scheduler to trigger the watcher on boot.
