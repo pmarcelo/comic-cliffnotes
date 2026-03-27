@@ -767,9 +767,10 @@
             "uuid": "local_63941",
             "local_dir": "/workspaces/comic-cliffnotes/data/extracted_images/the_novels_extra/chMASTER_BATCH/The NovelΓÇÖs Extra_batch/35/3035/63941",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 15,
-            "target_chapter": "77"
+            "target_chapter": "77",
+            "ai_chapter_num": "77"
         },
         "63942": {
             "lang": "en",

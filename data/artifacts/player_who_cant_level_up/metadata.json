@@ -1,0 +1,1258 @@
+{
+    "manga_title": "Player Who Can't Level Up",
+    "manga_id": "local_archive",
+    "chapter_map": {
+        "20963": {
+            "lang": "en",
+            "uuid": "local_20963",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20963",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 21,
+            "target_chapter": "1"
+        },
+        "20964": {
+            "lang": "en",
+            "uuid": "local_20964",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20964",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "2"
+        },
+        "20965": {
+            "lang": "en",
+            "uuid": "local_20965",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20965",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "3"
+        },
+        "20966": {
+            "lang": "en",
+            "uuid": "local_20966",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20966",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "4"
+        },
+        "20967": {
+            "lang": "en",
+            "uuid": "local_20967",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20967",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "5"
+        },
+        "20968": {
+            "lang": "en",
+            "uuid": "local_20968",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20968",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 6,
+            "target_chapter": "6"
+        },
+        "20969": {
+            "lang": "en",
+            "uuid": "local_20969",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20969",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "7"
+        },
+        "20970": {
+            "lang": "en",
+            "uuid": "local_20970",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20970",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "8"
+        },
+        "20971": {
+            "lang": "en",
+            "uuid": "local_20971",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20971",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "9"
+        },
+        "20972": {
+            "lang": "en",
+            "uuid": "local_20972",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20972",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "10"
+        },
+        "20973": {
+            "lang": "en",
+            "uuid": "local_20973",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20973",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "11"
+        },
+        "20974": {
+            "lang": "en",
+            "uuid": "local_20974",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20974",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "12"
+        },
+        "20975": {
+            "lang": "en",
+            "uuid": "local_20975",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20975",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "13"
+        },
+        "20976": {
+            "lang": "en",
+            "uuid": "local_20976",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20976",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "14"
+        },
+        "20977": {
+            "lang": "en",
+            "uuid": "local_20977",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20977",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "15"
+        },
+        "20978": {
+            "lang": "en",
+            "uuid": "local_20978",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20978",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "16"
+        },
+        "20979": {
+            "lang": "en",
+            "uuid": "local_20979",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20979",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "17"
+        },
+        "20980": {
+            "lang": "en",
+            "uuid": "local_20980",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20980",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "18"
+        },
+        "20981": {
+            "lang": "en",
+            "uuid": "local_20981",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20981",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 16,
+            "target_chapter": "19"
+        },
+        "20982": {
+            "lang": "en",
+            "uuid": "local_20982",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20982",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "20"
+        },
+        "20983": {
+            "lang": "en",
+            "uuid": "local_20983",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20983",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "21"
+        },
+        "20984": {
+            "lang": "en",
+            "uuid": "local_20984",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20984",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "22"
+        },
+        "20985": {
+            "lang": "en",
+            "uuid": "local_20985",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20985",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "23"
+        },
+        "20986": {
+            "lang": "en",
+            "uuid": "local_20986",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20986",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "24"
+        },
+        "20987": {
+            "lang": "en",
+            "uuid": "local_20987",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20987",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "25"
+        },
+        "20988": {
+            "lang": "en",
+            "uuid": "local_20988",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20988",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 31,
+            "target_chapter": "26"
+        },
+        "20989": {
+            "lang": "en",
+            "uuid": "local_20989",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20989",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "27"
+        },
+        "20990": {
+            "lang": "en",
+            "uuid": "local_20990",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20990",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "28"
+        },
+        "20991": {
+            "lang": "en",
+            "uuid": "local_20991",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20991",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "29"
+        },
+        "20992": {
+            "lang": "en",
+            "uuid": "local_20992",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20992",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 7,
+            "target_chapter": "30"
+        },
+        "20993": {
+            "lang": "en",
+            "uuid": "local_20993",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20993",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "31"
+        },
+        "20994": {
+            "lang": "en",
+            "uuid": "local_20994",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20994",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 7,
+            "target_chapter": "32"
+        },
+        "20995": {
+            "lang": "en",
+            "uuid": "local_20995",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20995",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "33"
+        },
+        "20996": {
+            "lang": "en",
+            "uuid": "local_20996",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20996",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "34"
+        },
+        "20997": {
+            "lang": "en",
+            "uuid": "local_20997",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20997",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "35"
+        },
+        "20998": {
+            "lang": "en",
+            "uuid": "local_20998",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20998",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "36"
+        },
+        "20999": {
+            "lang": "en",
+            "uuid": "local_20999",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\20999",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 25,
+            "target_chapter": "37"
+        },
+        "21000": {
+            "lang": "en",
+            "uuid": "local_21000",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21000",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "38"
+        },
+        "21001": {
+            "lang": "en",
+            "uuid": "local_21001",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21001",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "39"
+        },
+        "21002": {
+            "lang": "en",
+            "uuid": "local_21002",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21002",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "40"
+        },
+        "21003": {
+            "lang": "en",
+            "uuid": "local_21003",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21003",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "41"
+        },
+        "21004": {
+            "lang": "en",
+            "uuid": "local_21004",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21004",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 25,
+            "target_chapter": "42"
+        },
+        "21005": {
+            "lang": "en",
+            "uuid": "local_21005",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21005",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "43"
+        },
+        "21006": {
+            "lang": "en",
+            "uuid": "local_21006",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21006",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "44"
+        },
+        "21007": {
+            "lang": "en",
+            "uuid": "local_21007",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21007",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "45"
+        },
+        "21008": {
+            "lang": "en",
+            "uuid": "local_21008",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21008",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "46"
+        },
+        "21009": {
+            "lang": "en",
+            "uuid": "local_21009",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21009",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "47"
+        },
+        "21010": {
+            "lang": "en",
+            "uuid": "local_21010",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21010",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "48"
+        },
+        "21011": {
+            "lang": "en",
+            "uuid": "local_21011",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21011",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "49"
+        },
+        "21012": {
+            "lang": "en",
+            "uuid": "local_21012",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21012",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "50"
+        },
+        "21013": {
+            "lang": "en",
+            "uuid": "local_21013",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21013",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "51"
+        },
+        "21014": {
+            "lang": "en",
+            "uuid": "local_21014",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21014",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 8,
+            "target_chapter": "52"
+        },
+        "21015": {
+            "lang": "en",
+            "uuid": "local_21015",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21015",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "53"
+        },
+        "21016": {
+            "lang": "en",
+            "uuid": "local_21016",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21016",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "54"
+        },
+        "21017": {
+            "lang": "en",
+            "uuid": "local_21017",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21017",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "55"
+        },
+        "21018": {
+            "lang": "en",
+            "uuid": "local_21018",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21018",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 7,
+            "target_chapter": "56"
+        },
+        "21019": {
+            "lang": "en",
+            "uuid": "local_21019",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21019",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "57"
+        },
+        "21020": {
+            "lang": "en",
+            "uuid": "local_21020",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21020",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "58"
+        },
+        "21021": {
+            "lang": "en",
+            "uuid": "local_21021",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21021",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "59"
+        },
+        "21022": {
+            "lang": "en",
+            "uuid": "local_21022",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21022",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "60"
+        },
+        "21023": {
+            "lang": "en",
+            "uuid": "local_21023",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21023",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "61"
+        },
+        "21024": {
+            "lang": "en",
+            "uuid": "local_21024",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21024",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "62"
+        },
+        "21025": {
+            "lang": "en",
+            "uuid": "local_21025",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21025",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "63"
+        },
+        "21026": {
+            "lang": "en",
+            "uuid": "local_21026",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21026",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "64"
+        },
+        "21027": {
+            "lang": "en",
+            "uuid": "local_21027",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21027",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "65"
+        },
+        "21028": {
+            "lang": "en",
+            "uuid": "local_21028",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21028",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "66"
+        },
+        "21029": {
+            "lang": "en",
+            "uuid": "local_21029",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21029",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "67"
+        },
+        "21030": {
+            "lang": "en",
+            "uuid": "local_21030",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21030",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "68"
+        },
+        "21031": {
+            "lang": "en",
+            "uuid": "local_21031",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21031",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "69"
+        },
+        "21032": {
+            "lang": "en",
+            "uuid": "local_21032",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21032",
+            "ocr_completed": true,
+            "ai_completed": false,
+            "image_count": 22,
+            "target_chapter": "70"
+        },
+        "21033": {
+            "lang": "en",
+            "uuid": "local_21033",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21033",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 22,
+            "target_chapter": "71"
+        },
+        "21034": {
+            "lang": "en",
+            "uuid": "local_21034",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21034",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 16,
+            "target_chapter": "72"
+        },
+        "21035": {
+            "lang": "en",
+            "uuid": "local_21035",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21035",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "73"
+        },
+        "21036": {
+            "lang": "en",
+            "uuid": "local_21036",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21036",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 22,
+            "target_chapter": "74"
+        },
+        "21037": {
+            "lang": "en",
+            "uuid": "local_21037",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21037",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "75"
+        },
+        "21038": {
+            "lang": "en",
+            "uuid": "local_21038",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21038",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "76"
+        },
+        "21039": {
+            "lang": "en",
+            "uuid": "local_21039",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21039",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "77"
+        },
+        "21040": {
+            "lang": "en",
+            "uuid": "local_21040",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21040",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "78"
+        },
+        "21041": {
+            "lang": "en",
+            "uuid": "local_21041",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21041",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "79"
+        },
+        "21042": {
+            "lang": "en",
+            "uuid": "local_21042",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21042",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "80"
+        },
+        "21043": {
+            "lang": "en",
+            "uuid": "local_21043",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21043",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "81"
+        },
+        "21045": {
+            "lang": "en",
+            "uuid": "local_21045",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21045",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "82"
+        },
+        "21046": {
+            "lang": "en",
+            "uuid": "local_21046",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21046",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "83"
+        },
+        "21047": {
+            "lang": "en",
+            "uuid": "local_21047",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21047",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "84"
+        },
+        "21048": {
+            "lang": "en",
+            "uuid": "local_21048",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21048",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "85"
+        },
+        "21049": {
+            "lang": "en",
+            "uuid": "local_21049",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21049",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "86"
+        },
+        "21050": {
+            "lang": "en",
+            "uuid": "local_21050",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21050",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "87"
+        },
+        "21051": {
+            "lang": "en",
+            "uuid": "local_21051",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21051",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "88"
+        },
+        "21052": {
+            "lang": "en",
+            "uuid": "local_21052",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21052",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "89"
+        },
+        "21053": {
+            "lang": "en",
+            "uuid": "local_21053",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21053",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "90"
+        },
+        "21054": {
+            "lang": "en",
+            "uuid": "local_21054",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21054",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 9,
+            "target_chapter": "91"
+        },
+        "21055": {
+            "lang": "en",
+            "uuid": "local_21055",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21055",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "92"
+        },
+        "21056": {
+            "lang": "en",
+            "uuid": "local_21056",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21056",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "93"
+        },
+        "21057": {
+            "lang": "en",
+            "uuid": "local_21057",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21057",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "94"
+        },
+        "21058": {
+            "lang": "en",
+            "uuid": "local_21058",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21058",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "95"
+        },
+        "21059": {
+            "lang": "en",
+            "uuid": "local_21059",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21059",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "96"
+        },
+        "21060": {
+            "lang": "en",
+            "uuid": "local_21060",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21060",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 71,
+            "target_chapter": "97"
+        },
+        "21061": {
+            "lang": "en",
+            "uuid": "local_21061",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21061",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "98"
+        },
+        "21062": {
+            "lang": "en",
+            "uuid": "local_21062",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21062",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 81,
+            "target_chapter": "99"
+        },
+        "21063": {
+            "lang": "en",
+            "uuid": "local_21063",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21063",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "100"
+        },
+        "21064": {
+            "lang": "en",
+            "uuid": "local_21064",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21064",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "101"
+        },
+        "21065": {
+            "lang": "en",
+            "uuid": "local_21065",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21065",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "102"
+        },
+        "21066": {
+            "lang": "en",
+            "uuid": "local_21066",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21066",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "103"
+        },
+        "21067": {
+            "lang": "en",
+            "uuid": "local_21067",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21067",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 77,
+            "target_chapter": "104"
+        },
+        "21068": {
+            "lang": "en",
+            "uuid": "local_21068",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21068",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 76,
+            "target_chapter": "105"
+        },
+        "21069": {
+            "lang": "en",
+            "uuid": "local_21069",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21069",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 77,
+            "target_chapter": "106"
+        },
+        "21070": {
+            "lang": "en",
+            "uuid": "local_21070",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21070",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 5,
+            "target_chapter": "107"
+        },
+        "21071": {
+            "lang": "en",
+            "uuid": "local_21071",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21071",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "108"
+        },
+        "21073": {
+            "lang": "en",
+            "uuid": "local_21073",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21073",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "109"
+        },
+        "21074": {
+            "lang": "en",
+            "uuid": "local_21074",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21074",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "110"
+        },
+        "21075": {
+            "lang": "en",
+            "uuid": "local_21075",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21075",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 76,
+            "target_chapter": "111"
+        },
+        "21076": {
+            "lang": "en",
+            "uuid": "local_21076",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21076",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 75,
+            "target_chapter": "112"
+        },
+        "21077": {
+            "lang": "en",
+            "uuid": "local_21077",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21077",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "113"
+        },
+        "21078": {
+            "lang": "en",
+            "uuid": "local_21078",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21078",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "114"
+        },
+        "21079": {
+            "lang": "en",
+            "uuid": "local_21079",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21079",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "115"
+        },
+        "21080": {
+            "lang": "en",
+            "uuid": "local_21080",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21080",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 67,
+            "target_chapter": "116"
+        },
+        "21081": {
+            "lang": "en",
+            "uuid": "local_21081",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21081",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 77,
+            "target_chapter": "117"
+        },
+        "21082": {
+            "lang": "en",
+            "uuid": "local_21082",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21082",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 24,
+            "target_chapter": "118"
+        },
+        "21083": {
+            "lang": "en",
+            "uuid": "local_21083",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21083",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "119"
+        },
+        "21084": {
+            "lang": "en",
+            "uuid": "local_21084",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21084",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 76,
+            "target_chapter": "120"
+        },
+        "21085": {
+            "lang": "en",
+            "uuid": "local_21085",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21085",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "121"
+        },
+        "21086": {
+            "lang": "en",
+            "uuid": "local_21086",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21086",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "122"
+        },
+        "21087": {
+            "lang": "en",
+            "uuid": "local_21087",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21087",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "123"
+        },
+        "21088": {
+            "lang": "en",
+            "uuid": "local_21088",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21088",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "124"
+        },
+        "21089": {
+            "lang": "en",
+            "uuid": "local_21089",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21089",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "125"
+        },
+        "21090": {
+            "lang": "en",
+            "uuid": "local_21090",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21090",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 10,
+            "target_chapter": "126"
+        },
+        "21091": {
+            "lang": "en",
+            "uuid": "local_21091",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21091",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "127"
+        },
+        "21092": {
+            "lang": "en",
+            "uuid": "local_21092",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21092",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 15,
+            "target_chapter": "128"
+        },
+        "21093": {
+            "lang": "en",
+            "uuid": "local_21093",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21093",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "129"
+        },
+        "21094": {
+            "lang": "en",
+            "uuid": "local_21094",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21094",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "130"
+        },
+        "21095": {
+            "lang": "en",
+            "uuid": "local_21095",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21095",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 17,
+            "target_chapter": "131"
+        },
+        "21099": {
+            "lang": "en",
+            "uuid": "local_21099",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21099",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 16,
+            "target_chapter": "132"
+        },
+        "21100": {
+            "lang": "en",
+            "uuid": "local_21100",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21100",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 12,
+            "target_chapter": "133"
+        },
+        "21101": {
+            "lang": "en",
+            "uuid": "local_21101",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21101",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 11,
+            "target_chapter": "134"
+        },
+        "21102": {
+            "lang": "en",
+            "uuid": "local_21102",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21102",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "135"
+        },
+        "21103": {
+            "lang": "en",
+            "uuid": "local_21103",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21103",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 16,
+            "target_chapter": "136"
+        },
+        "21104": {
+            "lang": "en",
+            "uuid": "local_21104",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21104",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 13,
+            "target_chapter": "137"
+        },
+        "21105": {
+            "lang": "en",
+            "uuid": "local_21105",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21105",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "138"
+        },
+        "21106": {
+            "lang": "en",
+            "uuid": "local_21106",
+            "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\player_who_cant_level_up\\chMASTER_BATCH\\Player Who CanΓÇÖt Level Up_batch\\41\\2041\\21106",
+            "ocr_completed": false,
+            "ai_completed": false,
+            "image_count": 14,
+            "target_chapter": "139"
+        }
+    },
+    "target_chapter": 0.0
+}

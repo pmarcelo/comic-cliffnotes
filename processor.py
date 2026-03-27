@@ -1,6 +1,7 @@
 import os
 import argparse
 import shutil
+import time  # 🚀 Added for API rate limiting
 from pathlib import Path
 from core import config
 from core.utils import file_io
@@ -98,6 +99,12 @@ class BatchProcessor:
                 })
                 file_io.save_json(self.manifest, self.metadata_path)
                 print(f"✅ Folder {ch_id} -> Saved Summary for Chapter {narrative_chapter}")
+                
+            # 🚀 THE FIX: This is un-indented so it aligns with 'if ai_results:'
+            # It will now pause EVERY time, even if Google throws an error.
+            # Bumped to 10 seconds to ensure a maximum of 6 requests per minute.
+            print("⏳ Pacing API to avoid rate limits (waiting 10 seconds)...")
+            time.sleep(10)
 
     def tier_4_cleanup(self):
         """STATION 4: Reclaim Disk Space."""
@@ -113,13 +120,19 @@ class BatchProcessor:
         else:
             print(f"\n⏳ Tier 4: Cleanup skipped ({completed}/{total} chapters finished).")
 
-    def run_full_pipeline(self, url=None):
+    def run_full_pipeline(self, url=None, skip_ai=False): # <-- Updated method signature
         print(f"\n🚀 BATCH PROCESSOR: {self.title}")
         print("-" * 40)
         
         if not self.tier_1_ingest(url): return
         self.tier_2_ocr()
-        self.tier_3_ai()
+        
+        # 🚀 NEW LOGIC: Respect the skip flag
+        if skip_ai:
+            print("\n🛑 AI Processing Skipped (--skip-ai flag active).")
+        else:
+            self.tier_3_ai()
+            
         self.tier_4_cleanup()
         
         print("\n✨ ALL TIERS COMPLETE ✨")
@@ -128,8 +141,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--title", required=True)
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
-    parser.add_argument("-c", "--start-chapter", type=int, default=1, help="Starting narrative chapter number") # <-- Added Flag
+    parser.add_argument("-c", "--start-chapter", type=int, default=1, help="Starting narrative chapter number")
+    parser.add_argument("--skip-ai", action="store_true", help="Run ingest and OCR only, skipping Gemini AI requests") # <-- Added Flag
     args = parser.parse_args()
 
     processor = BatchProcessor(args.title, start_chapter=args.start_chapter)
-    processor.run_full_pipeline(url=args.url)
+    processor.run_full_pipeline(url=args.url, skip_ai=args.skip_ai) # <-- Pass flag to pipeline

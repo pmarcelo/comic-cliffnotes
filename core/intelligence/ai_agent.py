@@ -1,9 +1,11 @@
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from core import config
 
 # --- CONFIGURATION ---
-genai.configure(api_key=config.GEMINI_API_KEY)
+# Initialize the client with the new SDK structure
+client = genai.Client(api_key=config.GEMINI_API_KEY)
 
 # --- PROMPT TEMPLATES ---
 SUMMARY_PROMPT_TEMPLATE = """
@@ -26,14 +28,14 @@ def generate_summary(ocr_text):
     """
     Sends OCR text to the Gemini model to identify chapter metadata and generate a summary.
     """
-    model = genai.GenerativeModel(config.TARGET_MODEL)
     prompt = SUMMARY_PROMPT_TEMPLATE.format(ocr_text=ocr_text)
 
     try:
-        # 🚀 THE SILVER BULLET: Force the API to return strictly valid JSON
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        # 🚀 THE NEW SDK METHOD: Force the API to return strictly valid JSON
+        response = client.models.generate_content(
+            model=config.TARGET_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
             )
         )
@@ -44,7 +46,8 @@ def generate_summary(ocr_text):
     except json.JSONDecodeError as je:
         # This should theoretically never trigger now, but kept for absolute safety
         print(f"❌ JSON Parsing Error: {je}")
-        print(f"Raw Output: {response.text[:200]}")
+        if hasattr(response, 'text'):
+            print(f"Raw Output: {response.text[:200]}")
         return None
     except Exception as e:
         print(f"❌ Gemini AI Error: {e}")
