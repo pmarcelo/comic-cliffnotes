@@ -7,153 +7,170 @@
             "uuid": "local_24726",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24726",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 43,
-            "target_chapter": "1"
+            "target_chapter": "1",
+            "ai_chapter_num": "1"
         },
         "24727": {
             "lang": "en",
             "uuid": "local_24727",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24727",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 36,
-            "target_chapter": "2"
+            "target_chapter": "2",
+            "ai_chapter_num": "2"
         },
         "24728": {
             "lang": "en",
             "uuid": "local_24728",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24728",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 42,
-            "target_chapter": "3"
+            "target_chapter": "3",
+            "ai_chapter_num": "3"
         },
         "24729": {
             "lang": "en",
             "uuid": "local_24729",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24729",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 37,
-            "target_chapter": "4"
+            "target_chapter": "4",
+            "ai_chapter_num": "4"
         },
         "24730": {
             "lang": "en",
             "uuid": "local_24730",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24730",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 37,
-            "target_chapter": "5"
+            "target_chapter": "5",
+            "ai_chapter_num": "5"
         },
         "24731": {
             "lang": "en",
             "uuid": "local_24731",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24731",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 33,
-            "target_chapter": "6"
+            "target_chapter": "6",
+            "ai_chapter_num": "6"
         },
         "24732": {
             "lang": "en",
             "uuid": "local_24732",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24732",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 31,
-            "target_chapter": "7"
+            "target_chapter": "7",
+            "ai_chapter_num": "7"
         },
         "24733": {
             "lang": "en",
             "uuid": "local_24733",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24733",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 31,
-            "target_chapter": "8"
+            "target_chapter": "8",
+            "ai_chapter_num": "8"
         },
         "24734": {
             "lang": "en",
             "uuid": "local_24734",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24734",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 37,
-            "target_chapter": "9"
+            "target_chapter": "9",
+            "ai_chapter_num": "9"
         },
         "24735": {
             "lang": "en",
             "uuid": "local_24735",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24735",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 37,
-            "target_chapter": "10"
+            "target_chapter": "10",
+            "ai_chapter_num": "10"
         },
         "24736": {
             "lang": "en",
             "uuid": "local_24736",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24736",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 40,
-            "target_chapter": "11"
+            "target_chapter": "11",
+            "ai_chapter_num": "11"
         },
         "24737": {
             "lang": "en",
             "uuid": "local_24737",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24737",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 36,
-            "target_chapter": "12"
+            "target_chapter": "12",
+            "ai_chapter_num": "12"
         },
         "24738": {
             "lang": "en",
             "uuid": "local_24738",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24738",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 33,
-            "target_chapter": "13"
+            "target_chapter": "13",
+            "ai_chapter_num": "13"
         },
         "24739": {
             "lang": "en",
             "uuid": "local_24739",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24739",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 33,
-            "target_chapter": "14"
+            "target_chapter": "14",
+            "ai_chapter_num": "14"
         },
         "24740": {
             "lang": "en",
             "uuid": "local_24740",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24740",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 45,
-            "target_chapter": "15"
+            "target_chapter": "15",
+            "ai_chapter_num": "15"
         },
         "24741": {
             "lang": "en",
             "uuid": "local_24741",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24741",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 37,
-            "target_chapter": "16"
+            "target_chapter": "16",
+            "ai_chapter_num": "16"
         },
         "24742": {
             "lang": "en",
             "uuid": "local_24742",
             "local_dir": "C:\\Users\\peter\\src\\comic-cliffnotes\\data\\extracted_images\\rankers_return\\chMASTER_BATCH\\Ranker's Return_batch\\51\\1351\\24742",
             "ocr_completed": true,
-            "ai_completed": false,
+            "ai_completed": true,
             "image_count": 32,
-            "target_chapter": "17"
+            "target_chapter": "17",
+            "ai_chapter_num": "17"
         },
         "24743": {
             "lang": "en",
