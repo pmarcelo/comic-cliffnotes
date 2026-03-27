@@ -6,14 +6,14 @@
 - [ ] **OCR Metrics:** Track total images, average time per page, and GPU VRAM spikes.
 - [ ] **AI Metrics:** Track API success rate, response latency, and token consumption.
 
-## 🛑 2. "Fail Fast" Circuit Breaker
-- [ ] Update `ai_agent.py` to catch `429 RESOURCE_EXHAUSTED` errors.
-- [ ] Implement a custom `RateLimitExhaustedError` to halt Tier 3 immediately.
-- [ ] Ensure the manifest saves the current "Resume Point" before the script exits.
+## 🛑 2. "Fail Fast" Circuit Breaker (✅ COMPLETED)
+- [x] Update `ai_agent.py` to catch `429 RESOURCE_EXHAUSTED` errors.
+- [x] Implement logic to halt Tier 3 immediately to prevent infinite loops.
+- [x] Ensure the manifest saves the current "Resume Point" before the script exits.
 
 ## ⏱️ 3. Smart Rate Limiting (The Throttle)
-- [ ] Replace hardcoded `sleep(8)` with a dynamic timestamp-based throttler.
-- [ ] Calculate the exact millisecond delay needed to hit 15 Requests Per Minute (RPM) perfectly.
+- [ ] Replace hardcoded `sleep(10)` with a dynamic timestamp-based throttler.
+- [ ] Calculate the exact millisecond delay needed to hit specific RPMs perfectly.
 
 ## 🔐 4. Identity & Permissions (The Robot Upgrade)
 - [ ] Create a Google Cloud Service Account and download the JSON key.
@@ -37,3 +37,9 @@
 ## 🤖 7. The Watcher Daemon (Background Logic)
 - [ ] Write `watcher.py` as a non-blocking loop that powers the GUI's "Auto-Scan" feature.
 - [ ] Implement the "Self-Healing" pattern (Global Try-Except) to prevent network glitches from killing the app.
+
+## 🧠 8. Dual-Engine AI Routing (The Off-Grid Option)
+- [ ] **Local Agent:** Create `local_agent.py` in `core/intelligence` to interface with the Ollama API.
+- [ ] **Pipeline Router:** Update `tier_3_ai` to dynamically switch between Gemini Cloud and the Local LLM.
+- [ ] **CLI Control:** Add a `--local-ai` flag to `processor.py` to force the pipeline off-grid.
+- [ ] **Infrastructure Setup:** Install the Ollama Windows app and pull the `llama3.2` model.
