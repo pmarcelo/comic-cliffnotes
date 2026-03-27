@@ -51,6 +51,9 @@ def generate_summary(ocr_text):
         return None
     except Exception as e:
         print(f"❌ Gemini AI Error: {e}")
+        # 🚀 NEW: If it's a quota/rate limit error, throw it back to the orchestrator!
+        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+            raise e
         return None
 
 # Keep any other helper functions (get_nearest_context, etc.) below this line

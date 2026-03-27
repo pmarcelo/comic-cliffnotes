@@ -87,7 +87,14 @@ class BatchProcessor:
             with open(paths["raw_text"], "r", encoding="utf-8") as f:
                 ocr_text = f.read()
 
-            ai_results = ai_agent.generate_summary(ocr_text)
+            # 🚀 THE NEW FAIL FAST LOGIC
+            try:
+                ai_results = ai_agent.generate_summary(ocr_text)
+            except Exception as e:
+                print("\n🛑 FATAL: Google API Limit/Quota Reached.")
+                print("🛑 Halting AI Batch Processor immediately to prevent infinite loops.")
+                break  # Instantly exits the 'for' loop
+            
             if ai_results:
                 # 🚀 FORCE the manifest chapter number into the AI's result
                 ai_results["identified_chapter_num"] = str(narrative_chapter)
@@ -100,8 +107,6 @@ class BatchProcessor:
                 file_io.save_json(self.manifest, self.metadata_path)
                 print(f"✅ Folder {ch_id} -> Saved Summary for Chapter {narrative_chapter}")
                 
-            # 🚀 THE FIX: This is un-indented so it aligns with 'if ai_results:'
-            # It will now pause EVERY time, even if Google throws an error.
             # Bumped to 10 seconds to ensure a maximum of 6 requests per minute.
             print("⏳ Pacing API to avoid rate limits (waiting 10 seconds)...")
             time.sleep(10)
@@ -120,14 +125,14 @@ class BatchProcessor:
         else:
             print(f"\n⏳ Tier 4: Cleanup skipped ({completed}/{total} chapters finished).")
 
-    def run_full_pipeline(self, url=None, skip_ai=False): # <-- Updated method signature
+    def run_full_pipeline(self, url=None, skip_ai=False):
         print(f"\n🚀 BATCH PROCESSOR: {self.title}")
         print("-" * 40)
         
         if not self.tier_1_ingest(url): return
         self.tier_2_ocr()
         
-        # 🚀 NEW LOGIC: Respect the skip flag
+        # 🚀 Respect the skip flag
         if skip_ai:
             print("\n🛑 AI Processing Skipped (--skip-ai flag active).")
         else:
@@ -142,8 +147,8 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--title", required=True)
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
     parser.add_argument("-c", "--start-chapter", type=int, default=1, help="Starting narrative chapter number")
-    parser.add_argument("--skip-ai", action="store_true", help="Run ingest and OCR only, skipping Gemini AI requests") # <-- Added Flag
+    parser.add_argument("--skip-ai", action="store_true", help="Run ingest and OCR only, skipping Gemini AI requests")
     args = parser.parse_args()
 
     processor = BatchProcessor(args.title, start_chapter=args.start_chapter)
-    processor.run_full_pipeline(url=args.url, skip_ai=args.skip_ai) # <-- Pass flag to pipeline
+    processor.run_full_pipeline(url=args.url, skip_ai=args.skip_ai)
