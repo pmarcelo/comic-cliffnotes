@@ -43,3 +43,14 @@
 - [ ] **Pipeline Router:** Update `tier_3_ai` to dynamically switch between Gemini Cloud and the Local LLM.
 - [ ] **CLI Control:** Add a `--local-ai` flag to `processor.py` to force the pipeline off-grid.
 - [ ] **Infrastructure Setup:** Install the Ollama Windows app and pull the `llama3.2` model.
+🗄️ 9. Database Migration & Web Architecture Prep
+• [ ] PostgreSQL Setup: Install and configure a local PostgreSQL database to replace flat files.
+• [ ] Schema Design: Map out tables for Manga and Chapters using JSONB for narrative data.
+• [ ] ETL Refactor: Update the Python worker to INSERT records directly into the database.
+🚀 10. High-Efficiency AI Processing (The Batcher)
+• [ ] Batch Logic: Implement a ChapterGrouper to bundle 10 chapters of OCR text into a single API payload.
+• [ ] Token Guard: Add a calculation to ensure 10 chapters stay under the 8,192-token output limit.
+• [ ] Narrative Isolation: Update system prompts to ensure AI treats each chapter in the batch as a standalone event (preventing narrative bleed).
+• [ ] Quota Saver: Refactor ai_agent.py to use 1 API call per 10 chapters, stretching the Gemini free tier by 10x.
+
+
