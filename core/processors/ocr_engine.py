@@ -3,29 +3,29 @@ import re
 import numpy as np
 from PIL import Image
 from pathlib import Path
-from core.utils import file_io
-from core import config  # <-- Pulls our smart hardware settings
+from core import config 
 
 # Initialize EasyOCR using the toggle from config.py
-# This will automatically use your GPU at home and CPU in the cloud.
+# GPU at home, CPU in the cloud/Mac.
 print(f"🚀 OCR Engine Mode -> GPU: {config.USE_GPU}")
 reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
 
-def extract_text_from_chapter(metadata_path, chapter_id):
-    """Bridge to the main processor."""
-    manifest = file_io.load_json(metadata_path)
-    chapter_data = manifest.get("chapter_map", {}).get(str(chapter_id))
+def extract_text_from_chapter(image_dir_path, chapter_label):
+    """
+    Pure worker: Takes a path to images and returns the extracted text.
+    """
+    image_dir = Path(image_dir_path)
     
-    if not chapter_data:
+    if not image_dir.exists():
+        print(f"  ❌ Error: Directory not found -> {image_dir}")
         return None, None
 
-    image_dir = Path(chapter_data["local_dir"])
     image_files = _collect_image_files(image_dir)
     
     if not image_files:
         return "", {"page_count": 0}
 
-    raw_text = _process_images_to_text(image_files, chapter_id)
+    raw_text = _process_images_to_text(image_files, chapter_label)
     return raw_text, {"page_count": len(image_files)}
 
 def _collect_image_files(image_dir: Path):
@@ -35,35 +35,35 @@ def _collect_image_files(image_dir: Path):
         f for f in image_dir.iterdir() 
         if f.is_file() and (f.suffix.lower() in valid_exts or f.name.isdigit())
     ]
-    files.sort(key=lambda x: int(x.name) if x.name.isdigit() else x.name)
+    # Handle the numeric sorting so the story stays in order
+    files.sort(key=lambda x: int(x.stem) if x.stem.isdigit() else x.name)
     return files
 
-def _process_images_to_text(image_files, chapter_id):
+def _process_images_to_text(image_files, chapter_label):
     """
     Balanced Performance OCR:
-    - Downscales images by 50% for 3x faster processing on CPU.
-    - Uses Paragraph Grouping for better AI summarization.
-    - Cleans out scanlator noise via blacklist and regex.
+    - Downscales images by 50% (Speed hack for CPU).
+    - Paragraph Grouping (Better for AI summaries).
+    - Noise scrubbing for Scanlator credits.
     """
-    print(f"📖 Balanced OCR: Processing {len(image_files)} pages for Ch {chapter_id}...")
+    print(f"📖 OCR: Chapter {chapter_label} ({len(image_files)} pages)...")
     full_text = []
     
-    # Junk patterns to ignore (Scanlator credits)
+    # Junk patterns to ignore (Scanlator credits / Discord links)
     blacklist = [r"asurascans", r"asu[at]ascans", r"discord", r"gg/", r"killer", r"ace", r"qc"]
 
     for i, img_path in enumerate(image_files):
         try:
             with Image.open(img_path) as img:
-                # --- STEP 1: DOWNSIZING (The Speed Hack) ---
-                # Reducing pixels by 75% dramatically speeds up CPU OCR.
+                # --- STEP 1: DOWNSIZING ---
+                # This makes a massive difference on your Mac/CPU runs.
                 w, h = img.size
                 img = img.resize((w // 2, h // 2), Image.Resampling.LANCZOS)
                 
-                # Convert to RGB and then Numpy for EasyOCR
                 img_np = np.array(img.convert("RGB"))
                 
                 # --- STEP 2: GROUPED OCR ---
-                # paragraph=True merges nearby speech bubbles into narrative blocks
+                # merges speech bubbles into logical text blocks
                 results = reader.readtext(img_np, paragraph=True)
                 
                 page_blocks = []
@@ -71,11 +71,10 @@ def _process_images_to_text(image_files, chapter_id):
                     clean_line = text.strip()
                     
                     # --- STEP 3: NOISE SCRUBBING ---
-                    # Ignore scanlator credits
                     if any(re.search(p, clean_line, re.IGNORECASE) for p in blacklist):
                         continue
                     
-                    # Ignore the long coordinate/page number noise
+                    # Ignore coordinate noise / pure numbers
                     if len(clean_line) > 12 and re.match(r'^[\d\s\(\)\-\+]+$', clean_line):
                         continue
 
@@ -84,9 +83,9 @@ def _process_images_to_text(image_files, chapter_id):
                 if page_blocks:
                     full_text.append(" ".join(page_blocks))
             
-            # Progress feedback
+            # Progress feedback every 15 pages
             if (i + 1) % 15 == 0 or (i + 1) == len(image_files):
-                print(f"  ✅ Ch {chapter_id} | Page {i+1}/{len(image_files)} processed")
+                print(f"    └─ Page {i+1}/{len(image_files)} complete")
                 
         except Exception as e:
             print(f"  ❌ Error on Page {i} ({img_path.name}): {e}")

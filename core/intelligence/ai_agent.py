@@ -3,8 +3,14 @@ from google import genai
 from google.genai import types
 from core import config
 
+# --- CUSTOM EXCEPTIONS ---
+
+class RateLimitExhaustedError(Exception):
+    """Signals that we've hit the Gemini API spending cap or rate limit."""
+    pass
+
 # --- CONFIGURATION ---
-# Initialize the client with the new SDK structure
+# Initializing with the modern SDK client
 client = genai.Client(api_key=config.GEMINI_API_KEY)
 
 # --- PROMPT TEMPLATES ---
@@ -26,12 +32,13 @@ OCR DATA:
 
 def generate_summary(ocr_text):
     """
-    Sends OCR text to the Gemini model to identify chapter metadata and generate a summary.
+    Sends OCR text to Gemini. 
+    Triggers RateLimitExhaustedError on 429s to halt the pipeline.
     """
     prompt = SUMMARY_PROMPT_TEMPLATE.format(ocr_text=ocr_text)
 
     try:
-        # 🚀 THE NEW SDK METHOD: Force the API to return strictly valid JSON
+        # 🚀 Modern SDK Method with JSON mode enforced
         response = client.models.generate_content(
             model=config.TARGET_MODEL,
             contents=prompt,
@@ -40,20 +47,19 @@ def generate_summary(ocr_text):
             )
         )
         
-        # Because we enforced application/json, response.text is guaranteed to be clean JSON
+        # response.text is guaranteed valid JSON due to response_mime_type
         return json.loads(response.text)
         
-    except json.JSONDecodeError as je:
-        # This should theoretically never trigger now, but kept for absolute safety
-        print(f"❌ JSON Parsing Error: {je}")
-        if hasattr(response, 'text'):
-            print(f"Raw Output: {response.text[:200]}")
-        return None
     except Exception as e:
+        error_msg = str(e).upper()
+        
+        # 🛑 THE CIRCUIT BREAKER: Check for rate limits
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            print(f"\n🛑 API QUOTA EXCEEDED: {e}")
+            raise RateLimitExhaustedError("Gemini API: Resource Exhausted (429).") from e
+            
+        # Log other errors (network, 500s, etc.) but don't necessarily kill the daemon
         print(f"❌ Gemini AI Error: {e}")
-        # 🚀 NEW: If it's a quota/rate limit error, throw it back to the orchestrator!
-        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-            raise e
         return None
 
-# Keep any other helper functions (get_nearest_context, etc.) below this line
+# Helper functions for future context-awareness can be added here
