@@ -5,10 +5,16 @@ from PIL import Image
 from pathlib import Path
 from core import config 
 
-# Initialize EasyOCR using the toggle from config.py
-# GPU at home, CPU in the cloud/Mac.
-print(f"🚀 OCR Engine Mode -> GPU: {config.USE_GPU}")
-reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
+# 🚀 FIX: Set to None initially. No memory is claimed on import!
+_reader = None
+
+def get_reader():
+    """Lazy loader for EasyOCR to prevent VRAM hoarding."""
+    global _reader
+    if _reader is None:
+        print(f"\n🚀 Booting OCR Engine Mode -> GPU: {config.USE_GPU}")
+        _reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
+    return _reader
 
 def extract_text_from_chapter(image_dir_path, chapter_label):
     """
@@ -49,7 +55,10 @@ def _process_images_to_text(image_files, chapter_label):
     print(f"📖 OCR: Chapter {chapter_label} ({len(image_files)} pages)...")
     full_text = []
     
-    # Junk patterns to ignore (Scanlator credits / Discord links)
+    # 🚀 FIX: Wake up the OCR engine ONLY when we actually start processing images
+    reader = get_reader()
+    
+    # Junk patterns to ignore (Scanlator credits)
     blacklist = [r"asurascans", r"asu[at]ascans", r"discord", r"gg/", r"killer", r"ace", r"qc"]
 
     for i, img_path in enumerate(image_files):
