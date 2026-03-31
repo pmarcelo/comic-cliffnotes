@@ -5,3 +5,7 @@ python-dotenv
 opencv-python
 Pillow
 ollama
+sqlalchemy
+alembic
+pgcli
+psycopg2-binary

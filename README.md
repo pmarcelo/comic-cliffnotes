@@ -66,17 +66,44 @@ USE_GPU=True
 
 # Your Google AI Studio Key
 GEMINI_API_KEY=your_actual_key_goes_here
+
+# Local Database Connection
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/manga_tracker"
 ```
 
 ### 2. Install Base Dependencies
 Install the clean, cross-platform requirements:
 ```bash
 pip install -r requirements.txt
+pip install psycopg2-binary
 ```
 *Optional: If you have a local NVIDIA GPU, install the CUDA-enabled version of PyTorch to supercharge OCR speeds:*
 `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
 
-### 3. Install Local AI Infrastructure (Optional)
+### 3. Database Initialization (PostgreSQL)
+The pipeline uses a local PostgreSQL database and SQLAlchemy to track series metadata, chapters, and extraction progress.
+
+**1. Install PostgreSQL**
+Ensure you have the PostgreSQL engine installed on your machine.
+* **Windows:** `winget install EnterpriseDB.PostgreSQL.17`
+* **Mac:** `brew install postgresql`
+
+**2. Create the Database**
+Open your terminal and use `psql` or `pgcli` to create the empty database:
+```bash
+pgcli -U postgres
+# Inside the prompt run:
+CREATE DATABASE manga_tracker;
+\q
+```
+
+**3. Build the Schema**
+Run the Alembic migration command to generate all required tables (`series`, `chapters`, `chapter_processing`, etc.):
+```bash
+alembic upgrade head
+```
+
+### 4. Install Local AI Infrastructure (Optional)
 To run the AI pipeline completely offline and free:
 1. Install [Ollama](https://ollama.com/).
 2. Open a terminal and pull the narrative model: `ollama pull llama3.1`
