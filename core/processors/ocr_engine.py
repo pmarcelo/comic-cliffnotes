@@ -6,10 +6,16 @@ from pathlib import Path
 from core.utils import file_io
 from core import config  # <-- Pulls our smart hardware settings
 
-# Initialize EasyOCR using the toggle from config.py
-# This will automatically use your GPU at home and CPU in the cloud.
-print(f"🚀 OCR Engine Mode -> GPU: {config.USE_GPU}")
-reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
+# 🚀 FIX: Set to None initially. No memory is claimed on import!
+_reader = None
+
+def get_reader():
+    """Lazy loader for EasyOCR to prevent VRAM hoarding."""
+    global _reader
+    if _reader is None:
+        print(f"\n🚀 Booting OCR Engine Mode -> GPU: {config.USE_GPU}")
+        _reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
+    return _reader
 
 def extract_text_from_chapter(metadata_path, chapter_id):
     """Bridge to the main processor."""
@@ -47,6 +53,9 @@ def _process_images_to_text(image_files, chapter_id):
     """
     print(f"📖 Balanced OCR: Processing {len(image_files)} pages for Ch {chapter_id}...")
     full_text = []
+    
+    # 🚀 FIX: Wake up the OCR engine ONLY when we actually start processing images
+    reader = get_reader()
     
     # Junk patterns to ignore (Scanlator credits)
     blacklist = [r"asurascans", r"asu[at]ascans", r"discord", r"gg/", r"killer", r"ace", r"qc"]
