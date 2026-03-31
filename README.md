@@ -84,12 +84,10 @@ pip install psycopg2-binary
 The pipeline uses a local PostgreSQL database and SQLAlchemy to track series metadata, chapters, and extraction progress.
 
 **1. Install PostgreSQL**
-Ensure you have the PostgreSQL engine installed on your machine.
 * **Windows:** `winget install EnterpriseDB.PostgreSQL.17`
 * **Mac:** `brew install postgresql`
 
 **2. Create the Database**
-Open your terminal and use `psql` or `pgcli` to create the empty database:
 ```bash
 pgcli -U postgres
 # Inside the prompt run:
@@ -97,19 +95,31 @@ CREATE DATABASE manga_tracker;
 \q
 ```
 
-**3. Build the Schema**
-Run the Alembic migration command to generate all required tables (`series`, `chapters`, `chapter_processing`, etc.):
+**3. Link the Database (Environment Variables)**
+You must set the connection string in your current terminal session so the app can communicate with Postgres. Replace `password` with your actual database password.
+
+* **Windows (PowerShell):**
+    ```powershell
+    $env:DATABASE_URL="postgresql://postgres:password@localhost:5432/manga_tracker"
+    ```
+* **Mac/Linux:**
+    ```bash
+    export DATABASE_URL="postgresql://postgres:password@localhost:5432/manga_tracker"
+    ```
+
+**4. Build the Schema**
+Run the Alembic migration command to generate all required tables:
 ```bash
 alembic upgrade head
 ```
+```
 
-### 4. Install Local AI Infrastructure (Optional)
-To run the AI pipeline completely offline and free:
-1. Install [Ollama](https://ollama.com/).
-2. Open a terminal and pull the narrative model: `ollama pull llama3.1`
+### 💡 Pro-Tip for VS Code
+Since you're working in a `.env` file anyway, if you use a library like `python-dotenv` in your Python scripts, you won't have to manually type that `$env:DATABASE_URL` command every time you open a new terminal. The script will just "see" it in the file. 
 
-*(Note: For an AI coding assistant inside VS Code, install the `Continue.dev` extension and pull `ollama run qwen2.5-coder:7b`).*
+But for **Alembic** to work specifically, you usually need to run that terminal command at least once per session.
 
+Ready to start building that **Google Drive Image Scraper** now?
 ---
 
 ## 🛠️ Running the Pipeline
