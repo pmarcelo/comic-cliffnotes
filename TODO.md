@@ -38,15 +38,19 @@
 - [ ] Write `watcher.py` as a non-blocking loop that powers the GUI's "Auto-Scan" feature.
 - [ ] Implement the "Self-Healing" pattern (Global Try-Except) to prevent network glitches from killing the app.
 
-## 🧠 8. Dual-Engine AI Routing & Hardware Optimization (✅ COMPLETED)
-- [x] **Local Agent:** Created `local_agent.py` to interface natively with the Ollama JSON API.
-- [x] **Pipeline Router:** Updated `tier_3_ai` to dynamically switch between Gemini Cloud and the Local LLM.
-- [x] **CLI Control:** Added `--extract`, `--summarize`, and `--local-ai` flags for granular pipeline control.
-- [x] **VRAM Protection:** Wrapped EasyOCR in a lazy-loading function to prevent PyTorch from hoarding the 8GB GPU memory during AI summary shifts.
-- [x] **Infrastructure Setup:** Installed Ollama and selected `llama3.1` (8B) as the optimal narrative engine.
+## 🧠 8. Dual-Engine AI Routing (The Off-Grid Option)
+- [ ] **Local Agent:** Create `local_agent.py` in `core/intelligence` to interface with the Ollama API.
+- [ ] **Pipeline Router:** Update `tier_3_ai` to dynamically switch between Gemini Cloud and the Local LLM.
+- [ ] **CLI Control:** Add a `--local-ai` flag to `processor.py` to force the pipeline off-grid.
+- [ ] **Infrastructure Setup:** Install the Ollama Windows app and pull the `llama3.2` model.
+🗄️ 9. Database Migration & Web Architecture Prep
+• [ ] PostgreSQL Setup: Install and configure a local PostgreSQL database to replace flat files.
+• [ ] Schema Design: Map out tables for Manga and Chapters using JSONB for narrative data.
+• [ ] ETL Refactor: Update the Python worker to INSERT records directly into the database.
+🚀 10. High-Efficiency AI Processing (The Batcher)
+• [ ] Batch Logic: Implement a ChapterGrouper to bundle 10 chapters of OCR text into a single API payload.
+• [ ] Token Guard: Add a calculation to ensure 10 chapters stay under the 8,192-token output limit.
+• [ ] Narrative Isolation: Update system prompts to ensure AI treats each chapter in the batch as a standalone event (preventing narrative bleed).
+• [ ] Quota Saver: Refactor ai_agent.py to use 1 API call per 10 chapters, stretching the Gemini free tier by 10x.
 
-## 🗄️ 9. Database Migration & Web Architecture Prep (The Next Step)
-- [ ] **PostgreSQL Setup:** Install and configure a local PostgreSQL database to replace flat `.txt` and `.json` file storage.
-- [ ] **Schema Design:** Map out tables for `Manga`, `Chapters`, and utilize `JSONB` columns for the structured AI narrative data.
-- [ ] **ETL Refactor:** Update the Python worker pipeline to `INSERT` records directly into the database instead of saving files to the hard drive.
-- [ ] **Full-Stack Foundation:** Structure the database to smoothly plug into a Ruby on Rails backend API, preparing the data to be consumed and displayed by a React frontend.
+

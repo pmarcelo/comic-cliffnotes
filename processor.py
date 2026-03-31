@@ -14,16 +14,26 @@ class BatchProcessor:
     def __init__(self, title, start_chapter=1):
         self.title = title
         self.slug = file_io.get_safe_title(title)
+        
+        # 📂 Directory Setup (Categorized Artifacts)
         self.manga_dir = config.ARTIFACTS_DIR / self.slug
+        self.ocr_dir = self.manga_dir / "raw_ocr"
+        self.summary_dir = self.manga_dir / "summaries"
         self.metadata_path = self.manga_dir / "metadata.json"
         self.extract_dir = config.DATA_DIR / "extracted_images" / self.slug
+        
+        # Ensure directory hierarchy exists
+        for d in [self.manga_dir, self.ocr_dir, self.summary_dir]:
+            d.mkdir(parents=True, exist_ok=True)
+
         self.manifest = self._load_or_create_manifest()
         self.start_chapter = start_chapter 
 
     def _load_or_create_manifest(self):
+        """Loads the master ledger or initializes a new one."""
         if self.metadata_path.exists():
             return file_io.load_json(self.metadata_path)
-        return {"manga_title": self.title, "chapter_map": {}}
+        return {"manga_title": self.title, "slug": self.slug, "chapter_map": {}}
 
     def tier_1_ingest(self, url):
         if not url and self.metadata_path.exists():
@@ -52,8 +62,7 @@ class BatchProcessor:
             raw_text, metrics = ocr_engine.extract_text_from_chapter(str(self.metadata_path), ch_id)
             
             if raw_text:
-                paths = file_io.get_paths(self.title, ch_id)
-                with open(paths["raw_text"], "w", encoding="utf-8") as f:
+                with open(ocr_file_path, "w", encoding="utf-8") as f:
                     f.write(raw_text)
                 
                 self.manifest["chapter_map"][ch_id]["ocr_completed"] = True
@@ -106,6 +115,7 @@ class BatchProcessor:
         total = len(chapters)
         completed = sum(1 for data in chapters.values() if data.get("ai_completed"))
 
+        # Only delete images if the entire batch in the manifest is finished
         if total > 0 and completed == total:
             print(f"\n🧹 Tier 4: All {total} chapters processed. Cleaning up images...")
             if self.extract_dir.exists():
