@@ -95,6 +95,10 @@ class Chapter(Base, TimestampMixin):
         back_populates="chapter", uselist=False, cascade="all, delete-orphan"
     )
 
+    ocr_result: Mapped[Optional["OCRResult"]] = relationship(
+        back_populates="chapter", uselist=False, cascade="all, delete-orphan"
+    )
+
     __table_args__ = (
         UniqueConstraint("series_id", "chapter_number", name="uq_series_chapter"),
     )
@@ -108,9 +112,6 @@ class ChapterProcessing(Base, TimestampMixin):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False, unique=True)
-    
-    # The heavy data
-    raw_ocr_text: Mapped[Optional[str]] = mapped_column(Text)
     
     # Pipeline States
     ocr_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -137,3 +138,22 @@ class Summary(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<Summary(chapter_id={self.chapter_id})>"
+
+class OCRResult(Base, TimestampMixin):
+    __tablename__ = "ocr_results"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    chapter_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("chapters.id", ondelete="CASCADE"), 
+        nullable=False, 
+        unique=True
+    )
+    
+    # The 'Vault' for the raw text
+    raw_text: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Relationships
+    chapter: Mapped["Chapter"] = relationship(back_populates="ocr_result", uselist=False)
+
+    def __repr__(self) -> str:
+        return f"<OCRResult(chapter_id={self.chapter_id})>"

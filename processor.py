@@ -13,7 +13,7 @@ from core.processors import ocr_engine
 from core.intelligence import ai_agent, local_agent 
 
 from database.session import SessionLocal
-from database.models import Series, Chapter, ChapterProcessing, Summary
+from database.models import Series, Chapter, ChapterProcessing, Summary, OCRResult
 
 class BatchProcessor:
     def __init__(self, title, start_chapter=1):
@@ -163,13 +163,19 @@ class BatchProcessor:
             raw_text = ocr_engine.extract_text_from_images(image_path)
             
             if raw_text:
-                proc.raw_ocr_text = raw_text
+                # 1. Create the new Result record in the new table
+                new_result = OCRResult(
+                    chapter_id=chapter.id,
+                    raw_text=raw_text
+                )
+                self.db.add(new_result)
+
+                # 2. Update the Processing status (State only, no text)
                 proc.ocr_extracted = True
                 proc.has_error = False
-                # Use flush here if you want to commit all at the end, 
-                # or keep commit() to save progress as you go (safer for long runs)
+                
                 self.db.commit()
-                print(f"✅ OCR Saved to DB.")
+                print(f"✅ OCR Saved to Vault for Chapter {chapter.chapter_number}")
             else:
                 print(f"⚠️ OCR Failed: No text found in {image_path}")
                 proc.has_error = True
@@ -194,7 +200,10 @@ class BatchProcessor:
         print(f"🧠 Tier 3: Running AI Synthesis for {len(todo)} chapters...")
         for count, proc in enumerate(todo, 1):
             chapter = proc.chapter
-            ocr_text = proc.raw_ocr_text
+            
+            # Using the 1-to-1 relationship defined in models.py
+            ocr_record = chapter.ocr_result
+            ocr_text = ocr_record.raw_text if ocr_record else None
 
             # --- 1. Skip Empty OCR (Action-only chapters) ---
             if not ocr_text or len(ocr_text.strip()) < 10:
