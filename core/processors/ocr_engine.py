@@ -1,102 +1,77 @@
 import easyocr
 import re
 import numpy as np
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pathlib import Path
 from core import config 
 
-# 🚀 FIX: Set to None initially. No memory is claimed on import!
 _reader = None
 
 def get_reader():
-    """Lazy loader for EasyOCR to prevent VRAM hoarding."""
     global _reader
     if _reader is None:
-        print(f"\n🚀 Booting OCR Engine Mode -> GPU: {config.USE_GPU}")
         _reader = easyocr.Reader(['en'], gpu=config.USE_GPU)
     return _reader
 
-def extract_text_from_chapter(image_dir_path, chapter_label):
+def extract_text_from_images(image_dir: Path) -> str:
     """
-    Pure worker: Takes a path to images and returns the extracted text.
+    Takes a directory, filters out hidden files, and returns a single string of OCR text.
     """
-    image_dir = Path(image_dir_path)
-    
     if not image_dir.exists():
-        print(f"  ❌ Error: Directory not found -> {image_dir}")
-        return None, None
+        return ""
 
-    image_files = _collect_image_files(image_dir)
-    
-    if not image_files:
-        return "", {"page_count": 0}
-
-    raw_text = _process_images_to_text(image_files, chapter_label)
-    return raw_text, {"page_count": len(image_files)}
-
-def _collect_image_files(image_dir: Path):
-    """Sorts numeric files correctly (1, 2, 10 instead of 1, 10, 2)."""
-    valid_exts = {'.png', '.jpg', '.jpeg', '.webp'}
-    files = [
+    # 1. Grab everything that is a file AND NOT a hidden/system file
+    # This ignores .DS_Store, .nomedia, .thumbnails, etc.
+    all_files = [
         f for f in image_dir.iterdir() 
-        if f.is_file() and (f.suffix.lower() in valid_exts or f.name.isdigit())
+        if f.is_file() and not f.name.startswith('.')
     ]
-    # Handle the numeric sorting so the story stays in order
-    files.sort(key=lambda x: int(x.stem) if x.stem.isdigit() else x.name)
-    return files
-
-def _process_images_to_text(image_files, chapter_label):
-    """
-    Balanced Performance OCR:
-    - Downscales images by 50% (Speed hack for CPU).
-    - Paragraph Grouping (Better for AI summaries).
-    - Noise scrubbing for Scanlator credits.
-    """
-    print(f"📖 OCR: Chapter {chapter_label} ({len(image_files)} pages)...")
-    full_text = []
     
-    # 🚀 FIX: Wake up the OCR engine ONLY when we actually start processing images
+    # 2. Robust Sorting: Try to extract numbers for proper reading order
+    def get_sort_key(path):
+        nums = re.findall(r'\d+', path.stem)
+        return int(nums[0]) if nums else path.name
+
+    try:
+        image_files = sorted(all_files, key=get_sort_key)
+    except Exception:
+        image_files = sorted(all_files)
+
+    if not image_files:
+        print(f" ⚠️ No valid image files found in {image_dir}")
+        return ""
+
+    print(f" 🧪 Engine: Attempting OCR on {len(image_files)} files in {image_dir.name}...")
+
     reader = get_reader()
-    
-    # Junk patterns to ignore (Scanlator credits)
-    blacklist = [r"asurascans", r"asu[at]ascans", r"discord", r"gg/", r"killer", r"ace", r"qc"]
+    full_text = []
+    blacklist = [r"asurascans", r"discord", r"gg/", r"credits", r"scanlation"]
 
-    for i, img_path in enumerate(image_files):
+    for img_path in image_files:
         try:
+            # Pillow is smart enough to detect format even without extensions
             with Image.open(img_path) as img:
-                # --- STEP 1: DOWNSIZING ---
-                # This makes a massive difference on your Mac/CPU runs.
+                # Downsize for speed (Your LANCZOS logic)
                 w, h = img.size
                 img = img.resize((w // 2, h // 2), Image.Resampling.LANCZOS)
-                
                 img_np = np.array(img.convert("RGB"))
                 
-                # --- STEP 2: GROUPED OCR ---
-                # merges speech bubbles into logical text blocks
                 results = reader.readtext(img_np, paragraph=True)
                 
                 page_blocks = []
                 for (_, text) in results:
                     clean_line = text.strip()
-                    
-                    # --- STEP 3: NOISE SCRUBBING ---
                     if any(re.search(p, clean_line, re.IGNORECASE) for p in blacklist):
                         continue
-                    
-                    # Ignore coordinate noise / pure numbers
-                    if len(clean_line) > 12 and re.match(r'^[\d\s\(\)\-\+]+$', clean_line):
-                        continue
-
                     page_blocks.append(clean_line)
 
                 if page_blocks:
                     full_text.append(" ".join(page_blocks))
-            
-            # Progress feedback every 15 pages
-            if (i + 1) % 15 == 0 or (i + 1) == len(image_files):
-                print(f"    └─ Page {i+1}/{len(image_files)} complete")
-                
+                    
+        except (UnidentifiedImageError, PermissionError):
+            # Skip files that aren't actually images or are locked
+            continue
         except Exception as e:
-            print(f"  ❌ Error on Page {i} ({img_path.name}): {e}")
+            print(f"  ❌ Error on {img_path.name}: {e}")
             
     return "\n\n".join(full_text)

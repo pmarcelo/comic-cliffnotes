@@ -1,0 +1,6 @@
+-- Cleanup
+
+pgcli -U postgres -d manga_tracker
+
+-- Run this command inside pgcli:
+TRUNCATE series CASCADE;

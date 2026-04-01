@@ -4,62 +4,76 @@ from google.genai import types
 from core import config
 
 # --- CUSTOM EXCEPTIONS ---
-
 class RateLimitExhaustedError(Exception):
     """Signals that we've hit the Gemini API spending cap or rate limit."""
     pass
 
 # --- CONFIGURATION ---
-# Initializing with the modern SDK client
 client = genai.Client(api_key=config.GEMINI_API_KEY)
 
 # --- PROMPT TEMPLATES ---
+# I added 'key_insights' and 'tone' to make your summaries more robust for the DB
 SUMMARY_PROMPT_TEMPLATE = """
-You are an expert narrative analyst. Below is a raw English OCR transcript of a chapter. 
+You are an expert manga/manhwa narrative analyst. 
+Analyze the provided OCR text and generate a concise, spoiler-free chapter summary.
 
-Your goal is to provide a cohesive summary based on the dialogue and narrative.
-
-You MUST return a valid JSON object with the exact keys below:
+JSON STRUCTURE REQUIRED:
 {{
-    "summary": "A 3-5 sentence narrative of what happened.",
-    "key_moments": ["First event", "Second event", "Third event"],
-    "characters_present": ["Name 1", "Name 2"]
+    "summary": "A 3-5 sentence narrative of the main plot points.",
+    "key_moments": ["Event A", "Event B", "Event C"],
+    "characters_present": ["Character name or description"],
+    "tone": "e.g., Action-heavy, Comedic, Melancholic"
 }}
 
 OCR DATA:
 {ocr_text}
 """
 
-def generate_summary(ocr_text):
+def generate_summary(ocr_text: str):
     """
-    Sends OCR text to Gemini. 
-    Triggers RateLimitExhaustedError on 429s to halt the pipeline.
+    Pure AI Worker: 
+    Input: Raw OCR String 
+    Output: Dictionary (to be saved by the processor to Postgres)
     """
+    if not ocr_text or len(ocr_text.strip()) < 50:
+        return None
+
     prompt = SUMMARY_PROMPT_TEMPLATE.format(ocr_text=ocr_text)
 
     try:
-        # 🚀 Modern SDK Method with JSON mode enforced
         response = client.models.generate_content(
             model=config.TARGET_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
+                temperature=0.7,  # Added for better narrative flow
+                top_p=0.95,
             )
         )
         
-        # response.text is guaranteed valid JSON due to response_mime_type
-        return json.loads(response.text)
+        # 1. Check if the response actually contains text
+        if not response.text:
+            print("⚠️ Gemini returned an empty response (likely blocked by safety filters).")
+            return None
+
+        # 2. Parse the JSON string into a Python dict
+        ai_data = json.loads(response.text)
         
+        # 3. Basic Validation: Ensure the keys we expect actually exist
+        required_keys = ["summary", "key_moments", "characters_present"]
+        if not all(k in ai_data for k in required_keys):
+            print("⚠️ AI JSON missing required keys. Raw output:", response.text)
+            return None
+
+        return ai_data
+        
+    except json.JSONDecodeError as je:
+        print(f"❌ AI returned invalid JSON: {je}")
+        return None
     except Exception as e:
         error_msg = str(e).upper()
-        
-        # 🛑 THE CIRCUIT BREAKER: Check for rate limits
         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
-            print(f"\n🛑 API QUOTA EXCEEDED: {e}")
             raise RateLimitExhaustedError("Gemini API: Resource Exhausted (429).") from e
             
-        # Log other errors (network, 500s, etc.) but don't necessarily kill the daemon
         print(f"❌ Gemini AI Error: {e}")
         return None
-
-# Helper functions for future context-awareness can be added here
