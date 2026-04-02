@@ -9,3 +9,4 @@ tmp/*
 */__pycache__/*
 venv/
 .env
+.vscode/
