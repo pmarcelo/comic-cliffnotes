@@ -1,11 +1,16 @@
+# --- AI & OCR Engines ---
 google-genai
+ollama
 easyocr
-gdown
-python-dotenv
 opencv-python
 Pillow
-ollama
+
+# --- Database & ORM ---
 sqlalchemy
 alembic
-pgcli
 psycopg2-binary
+pgcli
+
+# --- Utilities & Networking ---
+python-dotenv
+requests
