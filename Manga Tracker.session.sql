@@ -1,4 +1,5 @@
 SELECT * FROM series where title = 'Test 1';
+SELECT * from series;
 -- eaf13163-0625-4292-b8dd-e0f9ade59c71
 SELECT * FROM chapters where series_id = 'eaf13163-0625-4292-b8dd-e0f9ade59c71';
 

@@ -32,8 +32,9 @@ The pipeline doesn't just generate text; it builds a relational database of stor
 ├── .env                 # 🛑 Hardware Toggles, API Keys, & DB URL (Git Ignored)
 ├── alembic/             # 🗄️ Database migration scripts and environment
 ├── core/                # The "Brains" (Logic)
+│   ├── pipeline/        # ⚙️ Domain Managers (Ingest, OCR, Summary, Arcs)
 │   ├── database.py      # 🔗 SQLAlchemy engine and Session logic
-│   ├── models.py        # 🏛️ DB Schema (Series, Chapter, Summary tables)
+│   ├── models.py        # 🏛️ DB Schema (Series, Chapter, Summary, StoryArcs)
 │   ├── config.py        # 🎯 Smart Config (Loads .env)
 │   ├── extractors/      # Google Drive ingestion & Folder Scanning
 │   ├── processors/      # EasyOCR extraction & Image Pre-processing
@@ -42,7 +43,7 @@ The pipeline doesn't just generate text; it builds a relational database of stor
 │   ├── extracted_images/# Temporary workspace for Tier 1
 │   └── raw_archives/    # Downloaded ZIP files
 ├── alembic.ini          # Database migration configuration
-├── processor.py         # The Main Orchestrator
+├── processor.py         # The Main CLI Orchestrator
 └── requirements.txt     # Clean, OS-Agnostic Dependencies
 ```
 
@@ -58,15 +59,18 @@ source venv/bin/activate  # Mac/Linux
 # .\venv\Scripts\activate # Windows
 ```
 
-Create a `.env` file in the root directory:
-```bash
-# Hardware Toggle
+Create a `.env` file in the root directory. You can copy and paste this example, replacing the dummy values with your local credentials:
+```env
+# --- HARDWARE TOGGLE ---
+# Set to True if you have an NVIDIA GPU (CUDA), False for CPU only
 USE_GPU=True
 
-# API Keys
-GEMINI_API_KEY=your_key_here
+# --- API KEYS ---
+# Required for Tier 3 and Tier 5 Cloud synthesis
+GEMINI_API_KEY="your_actual_api_key_here"
 
-# Database Connection (PostgreSQL)
+# --- DATABASE CONNECTION ---
+# Format: postgresql://username:password@host:port/database_name
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/manga_tracker"
 ```
 
@@ -102,6 +106,11 @@ python processor.py -t "Series Title" -u "GDrive_URL" --extract
 python processor.py -t "Series Title" --summarize
 ```
 
+**Arc Synthesis (Tier 5 - Stateful Narrative Grouping):**
+```bash
+python processor.py -t "Series Title" --build-arcs
+```
+
 **Targeted AI Reruns (Reset specific chapters using ranges/mixes):**
 ```bash
 python processor.py -t "Series Title" --redo-summaries 1-5 8 12
@@ -124,7 +133,7 @@ The project utilizes a relational schema to support a future web interface and a
 
 - [x] **Database Migration:** Replaced `manifest.json` with PostgreSQL and SQLAlchemy.
 - [x] **Schema Versioning:** Implemented Alembic for robust database migrations.
-- [ ] **Arc Synthesizer (Tier 2 AI):** Implement a secondary AI pass that reads chapter metadata to automatically identify and summarize narrative arcs (e.g., "The Training Arc").
+- [x] **Arc Synthesizer (Tier 5 AI):** Implemented a secondary AI pass utilizing Stateful Handoff to automatically identify and summarize narrative arcs without hitting token limits.
 - [ ] **API Layer:** Build Ruby on Rails controllers to serve chapter and arc data as JSON.
 - [ ] **Web UI:** Develop React frontend for browsing "CliffNotes" by series, arc, and chapter.
 - [ ] **Service Account Auth:** Update `cloud_drive.py` for non-public GDrive folder access.

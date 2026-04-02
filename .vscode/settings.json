@@ -11,5 +11,13 @@
             "database": "manga_tracker",
             "username": "postgres"
         }
-    ]
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        }
+    }
 }
