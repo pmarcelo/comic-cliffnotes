@@ -247,6 +247,70 @@ class BatchProcessor:
                 print("⏳ Pacing Cloud API (10s)...")
                 time.sleep(10)
 
+    def reset_summaries(self, target_inputs):
+        """
+        Deletes existing summaries and resets the processing flag so Tier 3 will run again.
+        Accepts 'all', individual numbers ('1', '2'), or ranges ('1-5', '10-15').
+        """
+        parsed_targets = set()
+        run_all = False
+
+        # --- 1. The Parser ---
+        for t in target_inputs:
+            t_str = str(t).lower()
+            if t_str == 'all':
+                run_all = True
+                break
+            
+            if '-' in t_str:
+                # Handle ranges like '1-5'
+                try:
+                    start, end = map(int, t_str.split('-'))
+                    if start <= end:
+                        parsed_targets.update(range(start, end + 1))
+                except ValueError:
+                    print(f"⚠️ Warning: Ignored invalid range format '{t}'")
+            elif t_str.isdigit():
+                # Handle single numbers
+                parsed_targets.add(int(t_str))
+
+        # --- 2. Database Query ---
+        if run_all:
+            chapters_to_reset = self.db.query(Chapter).filter(Chapter.series_id == self.series.id).all()
+            print(f"🔄 Preparing to reset ALL summaries for {self.title}...")
+        else:
+            targets_list = list(parsed_targets)
+            if not targets_list:
+                print("⚠️ No valid chapter targets provided for reset.")
+                return
+
+            chapters_to_reset = self.db.query(Chapter).filter(
+                Chapter.series_id == self.series.id,
+                Chapter.chapter_number.in_(targets_list)
+            ).all()
+            
+            targets_list.sort()
+            print(f"🔄 Preparing to reset summaries for Chapters: {targets_list}...")
+
+        if not chapters_to_reset:
+            print("⚠️ No matching chapters found in the DB to reset.")
+            return
+
+        # --- 3. The Reset Execution ---
+        reset_count = 0
+        for ch in chapters_to_reset:
+            existing_summary = self.db.query(Summary).filter(Summary.chapter_id == ch.id).first()
+            if existing_summary:
+                self.db.delete(existing_summary)
+            
+            proc = self.db.query(ChapterProcessing).filter(ChapterProcessing.chapter_id == ch.id).first()
+            if proc:
+                proc.summary_complete = False
+                reset_count += 1
+
+        self.db.commit()
+        print(f"✅ Reset AI status for {reset_count} chapter(s). They are queued for Tier 3.")
+
     def tier_4_cleanup(self):
         """Cleanup image workspace if all DB processing flags are set."""
         total_ch = self.db.query(Chapter).filter(Chapter.series_id == self.series.id).count()
@@ -266,14 +330,18 @@ class BatchProcessor:
         else:
             print(f"\n⏳ Tier 4: Cleanup deferred ({completed_ch}/{total_ch} complete).")
 
-    def run_full_pipeline(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False):
+    def run_full_pipeline(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False, redo_targets=None):
         print(f"\n🚀 PROCESSING: {self.title}")
         print("-" * 40)
         
-        # Determine which phases to run based on flags. If neither is set, run all.
-        run_all = not run_extract and not run_summarize
-
         try:
+            if redo_targets:
+                self.reset_summaries(redo_targets)
+                run_summarize = True 
+
+            # Determine which phases to run
+            run_all = not run_extract and not run_summarize
+
             if run_extract or run_all:
                 print("\n--- PHASE 1: EXTRACTION & OCR ---")
                 if not self.tier_1_ingest(url): return
@@ -297,7 +365,12 @@ if __name__ == "__main__":
     parser.add_argument("--extract", action="store_true", help="Run Tiers 1 & 2 (Download and OCR) only.")
     parser.add_argument("--summarize", action="store_true", help="Run Tiers 3 & 4 (AI and Cleanup) only.")
     parser.add_argument("--local-ai", action="store_true", help="Route summaries to local Ollama instead of Gemini.")
-    
+    parser.add_argument(
+        "--redo-summaries", 
+        nargs='+', 
+        help="Reset summaries. Accepts numbers (1 2), ranges (1-5), mixes (1 3-5), or 'all'"
+    )
+
     args = parser.parse_args()
 
     processor = BatchProcessor(args.title, start_chapter=args.start_chapter)
@@ -305,5 +378,6 @@ if __name__ == "__main__":
         url=args.url, 
         run_extract=args.extract, 
         run_summarize=args.summarize, 
-        use_local_ai=args.local_ai
+        use_local_ai=args.local_ai,
+        redo_targets=args.redo_summaries 
     )
