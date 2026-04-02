@@ -14,3 +14,4 @@ pgcli
 # --- Utilities & Networking ---
 python-dotenv
 requests
+gdown
