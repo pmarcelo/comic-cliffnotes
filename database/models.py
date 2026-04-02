@@ -51,9 +51,12 @@ class Series(Base, TimestampMixin):
     chapters: Mapped[List["Chapter"]] = relationship(
         back_populates="series", cascade="all, delete-orphan", order_by="Chapter.chapter_number"
     )
-    # UPDATE: Renamed from 'metadata' to 'series_metadata' to avoid SQLAlchemy reserved keyword
     series_metadata: Mapped[Optional["SeriesMetadata"]] = relationship(
         back_populates="series", uselist=False, cascade="all, delete-orphan"
+    )
+    # ➕ NEW: Relationship to the Story Arcs
+    arcs: Mapped[List["StoryArc"]] = relationship(
+        back_populates="series", cascade="all, delete-orphan", order_by="StoryArc.start_chapter"
     )
 
     def __repr__(self) -> str:
@@ -66,11 +69,10 @@ class SeriesMetadata(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False, unique=True)
     
-    # Track overall series pipeline status (e.g., initial bulk scrape finished)
+    # Track overall series pipeline status
     is_backlog_processed: Mapped[bool] = mapped_column(Boolean, default=False)
     
     # Relationships
-    # UPDATE: Matches the newly renamed relationship in Series
     series: Mapped["Series"] = relationship(back_populates="series_metadata")
 
     def __repr__(self) -> str:
@@ -116,7 +118,7 @@ class ChapterProcessing(Base, TimestampMixin):
     # Pipeline States
     ocr_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
     summary_complete: Mapped[bool] = mapped_column(Boolean, default=False)
-    has_error: Mapped[bool] = mapped_column(Boolean, default=False) # Useful if a worker fails
+    has_error: Mapped[bool] = mapped_column(Boolean, default=False) 
 
     # Relationships
     chapter: Mapped["Chapter"] = relationship(back_populates="processing")
@@ -139,6 +141,7 @@ class Summary(Base, TimestampMixin):
     def __repr__(self) -> str:
         return f"<Summary(chapter_id={self.chapter_id})>"
 
+
 class OCRResult(Base, TimestampMixin):
     __tablename__ = "ocr_results"
 
@@ -149,7 +152,6 @@ class OCRResult(Base, TimestampMixin):
         unique=True
     )
     
-    # The 'Vault' for the raw text
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Relationships
@@ -157,3 +159,21 @@ class OCRResult(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<OCRResult(chapter_id={self.chapter_id})>"
+
+
+class StoryArc(Base, TimestampMixin):
+    __tablename__ = "story_arcs"
+    
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
+    
+    arc_title: Mapped[str] = mapped_column(String(255), nullable=False)
+    start_chapter: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_chapter: Mapped[int] = mapped_column(Integer, nullable=False)
+    arc_summary: Mapped[str] = mapped_column(Text, nullable=False) 
+    
+    # Relationships
+    series: Mapped["Series"] = relationship(back_populates="arcs")
+
+    def __repr__(self) -> str:
+        return f"<StoryArc(title={self.arc_title}, chapters={self.start_chapter}-{self.end_chapter})>"
