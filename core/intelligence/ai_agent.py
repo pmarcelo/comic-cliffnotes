@@ -15,14 +15,21 @@ client = genai.Client(api_key=config.GEMINI_API_KEY)
 # I added 'key_insights' and 'tone' to make your summaries more robust for the DB
 SUMMARY_PROMPT_TEMPLATE = """
 You are an expert manga/manhwa narrative analyst. 
-Analyze the provided OCR text and generate a concise, spoiler-free chapter summary.
+Analyze the provided OCR text and generate a structured, spoiler-free chapter summary. 
 
-JSON STRUCTURE REQUIRED:
+CRITICAL: This data will be used to automatically detect multi-chapter story arcs later. You must be highly precise about location changes, newly introduced characters, and shifting character motivations.
+
+You MUST return a valid JSON object with these exact keys:
 {{
-    "summary": "A 3-5 sentence narrative of the main plot points.",
-    "key_moments": ["Event A", "Event B", "Event C"],
-    "characters_present": ["Character name or description"],
-    "tone": "e.g., Action-heavy, Comedic, Melancholic"
+    "chapter_summary": "A 3-5 sentence narrative of the main plot points.",
+    "settings": ["List of distinct locations where the chapter takes place"],
+    "characters": {{
+        "active": ["List of established characters who play a role"],
+        "introduced": ["Any characters appearing or named for the VERY FIRST time"]
+    }},
+    "key_events": ["Event A", "Event B", "Event C"],
+    "current_objective": "What is the primary goal or immediate conflict driving the protagonist right now?",
+    "unresolved_threads": ["Any cliffhangers, ongoing battles, or mysteries carrying over to the next chapter"]
 }}
 
 OCR DATA:
@@ -60,7 +67,14 @@ def generate_summary(ocr_text: str):
         ai_data = json.loads(response.text)
         
         # 3. Basic Validation: Ensure the keys we expect actually exist
-        required_keys = ["summary", "key_moments", "characters_present"]
+        required_keys = [
+            "chapter_summary", 
+            "settings", 
+            "characters", 
+            "key_events", 
+            "current_objective", 
+            "unresolved_threads"
+        ]
         if not all(k in ai_data for k in required_keys):
             print("⚠️ AI JSON missing required keys. Raw output:", response.text)
             return None

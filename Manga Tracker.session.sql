@@ -6,6 +6,7 @@ SELECT * FROM chapter_processing where chapter_id IN (SELECT id FROM chapters WH
 
 SELECT * FROM summaries where chapter_id IN (SELECT id FROM chapters WHERE series_id = 'eaf13163-0625-4292-b8dd-e0f9ade59c71');
 SELECT * FROM ocr_results where chapter_id IN (SELECT id FROM chapters WHERE series_id = 'eaf13163-0625-4292-b8dd-e0f9ade59c71');
+select * from story_arcs where series_id = 'eaf13163-0625-4292-b8dd-e0f9ade59c71';
 
 -- DELETE Sequence
 -- 1. Wipe the summaries for these chapters

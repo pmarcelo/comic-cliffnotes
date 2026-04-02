@@ -10,10 +10,10 @@ from core import config
 from core.utils import file_io
 from core.extractors import cloud_drive
 from core.processors import ocr_engine
-from core.intelligence import ai_agent, local_agent 
+from core.intelligence import ai_agent, local_agent, arc_agent
 
 from database.session import SessionLocal
-from database.models import Series, Chapter, ChapterProcessing, Summary, OCRResult
+from database.models import Series, Chapter, ChapterProcessing, Summary, OCRResult, StoryArc
 
 class BatchProcessor:
     def __init__(self, title, start_chapter=1):
@@ -247,6 +247,70 @@ class BatchProcessor:
                 print("⏳ Pacing Cloud API (10s)...")
                 time.sleep(10)
 
+    def reset_summaries(self, target_inputs):
+        """
+        Deletes existing summaries and resets the processing flag so Tier 3 will run again.
+        Accepts 'all', individual numbers ('1', '2'), or ranges ('1-5', '10-15').
+        """
+        parsed_targets = set()
+        run_all = False
+
+        # --- 1. The Parser ---
+        for t in target_inputs:
+            t_str = str(t).lower()
+            if t_str == 'all':
+                run_all = True
+                break
+            
+            if '-' in t_str:
+                # Handle ranges like '1-5'
+                try:
+                    start, end = map(int, t_str.split('-'))
+                    if start <= end:
+                        parsed_targets.update(range(start, end + 1))
+                except ValueError:
+                    print(f"⚠️ Warning: Ignored invalid range format '{t}'")
+            elif t_str.isdigit():
+                # Handle single numbers
+                parsed_targets.add(int(t_str))
+
+        # --- 2. Database Query ---
+        if run_all:
+            chapters_to_reset = self.db.query(Chapter).filter(Chapter.series_id == self.series.id).all()
+            print(f"🔄 Preparing to reset ALL summaries for {self.title}...")
+        else:
+            targets_list = list(parsed_targets)
+            if not targets_list:
+                print("⚠️ No valid chapter targets provided for reset.")
+                return
+
+            chapters_to_reset = self.db.query(Chapter).filter(
+                Chapter.series_id == self.series.id,
+                Chapter.chapter_number.in_(targets_list)
+            ).all()
+            
+            targets_list.sort()
+            print(f"🔄 Preparing to reset summaries for Chapters: {targets_list}...")
+
+        if not chapters_to_reset:
+            print("⚠️ No matching chapters found in the DB to reset.")
+            return
+
+        # --- 3. The Reset Execution ---
+        reset_count = 0
+        for ch in chapters_to_reset:
+            existing_summary = self.db.query(Summary).filter(Summary.chapter_id == ch.id).first()
+            if existing_summary:
+                self.db.delete(existing_summary)
+            
+            proc = self.db.query(ChapterProcessing).filter(ChapterProcessing.chapter_id == ch.id).first()
+            if proc:
+                proc.summary_complete = False
+                reset_count += 1
+
+        self.db.commit()
+        print(f"✅ Reset AI status for {reset_count} chapter(s). They are queued for Tier 3.")
+
     def tier_4_cleanup(self):
         """Cleanup image workspace if all DB processing flags are set."""
         total_ch = self.db.query(Chapter).filter(Chapter.series_id == self.series.id).count()
@@ -266,23 +330,124 @@ class BatchProcessor:
         else:
             print(f"\n⏳ Tier 4: Cleanup deferred ({completed_ch}/{total_ch} complete).")
 
-    def run_full_pipeline(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False):
+
+    def tier_5_arc_synthesis(self):
+        """
+        Stateful Arc Synthesizer: Batches chapters into chunks to protect API limits,
+        passing unresolved narrative arcs to the next batch.
+        """
+        print(f"\n🗺️ Tier 5: Starting Stateful Arc Synthesis for {self.title}...")
+
+        completed_chapters = (
+            self.db.query(Chapter)
+            .join(Summary)
+            .filter(Chapter.series_id == self.series.id)
+            .order_by(Chapter.chapter_number)
+            .all()
+        )
+
+        if not completed_chapters:
+            print("⚠️ No completed chapter summaries found to synthesize.")
+            return
+
+        # 1. Prepare all metadata
+        all_metadata = []
+        for ch in completed_chapters:
+            try:
+                all_metadata.append({
+                    "chapter_number": ch.chapter_number,
+                    "metadata": json.loads(ch.summary.content)
+                })
+            except Exception as e:
+                print(f"⚠️ Skipping Ch {ch.chapter_number} due to invalid JSON: {e}")
+
+        # 2. Stateful Batching Logic
+        BATCH_SIZE = 100
+        all_final_arcs = []
+        ongoing_arc_state = None  # The "Baton" we pass between batches
+
+        # Slice the list into chunks of 100
+        chunks = [all_metadata[i:i + BATCH_SIZE] for i in range(0, len(all_metadata), BATCH_SIZE)]
+        
+        print(f"📦 Grouped {len(all_metadata)} chapters into {len(chunks)} batch(es).")
+
+        for index, chunk in enumerate(chunks, 1):
+            print(f"🧠 Routing Batch {index}/{len(chunks)} to Arc Agent...")
+            
+            # Pass the chunk AND the baton
+            arc_results = arc_agent.generate_arc_summaries(chunk, previous_ongoing_arc=ongoing_arc_state)
+
+            if not arc_results:
+                print(f"❌ Arc Synthesis failed on Batch {index}. Halting.")
+                return
+
+            # Add the completed arcs from this batch to our master list
+            if arc_results.get("completed_arcs"):
+                all_final_arcs.extend(arc_results["completed_arcs"])
+            
+            # Grab the baton (ongoing arc) for the next loop
+            ongoing_arc_state = arc_results.get("ongoing_arc")
+
+        # 3. Cleanup: If the very last batch ends with an ongoing arc, we force it to close
+        if ongoing_arc_state:
+            print("📝 Finalizing the last ongoing arc...")
+            ongoing_arc_state["end_chapter"] = all_metadata[-1]["chapter_number"]
+            ongoing_arc_state["status_quo_shift"] = "Series is currently ongoing or arc boundary not yet reached."
+            all_final_arcs.append(ongoing_arc_state)
+
+        # 4. Save to Database
+        self.db.query(StoryArc).filter(StoryArc.series_id == self.series.id).delete()
+        
+        new_arcs_count = 0
+        for arc_data in all_final_arcs:
+            try:
+                new_arc = StoryArc(
+                    series_id=self.series.id,
+                    arc_title=arc_data.get("arc_title", "Unknown Arc"),
+                    start_chapter=arc_data.get("start_chapter"),
+                    end_chapter=arc_data.get("end_chapter"),
+                    arc_summary=json.dumps({
+                        "summary": arc_data.get("arc_summary", ""),
+                        "core_cast": arc_data.get("core_cast", []),
+                        "status_quo_shift": arc_data.get("status_quo_shift", "")
+                    }, ensure_ascii=False)
+                )
+                self.db.add(new_arc)
+                new_arcs_count += 1
+            except Exception as e:
+                print(f"⚠️ Failed to save an arc: {e}")
+
+        self.db.commit()
+        print(f"✅ Successfully synthesized and saved {new_arcs_count} Story Arcs.")
+
+    def run_full_pipeline(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False, redo_targets=None, run_arcs=False):
         print(f"\n🚀 PROCESSING: {self.title}")
         print("-" * 40)
         
-        # Determine which phases to run based on flags. If neither is set, run all.
-        run_all = not run_extract and not run_summarize
-
         try:
-            if run_extract or run_all:
-                print("\n--- PHASE 1: EXTRACTION & OCR ---")
-                if not self.tier_1_ingest(url): return
-                self.tier_2_ocr()
+            if redo_targets:
+                self.reset_summaries(redo_targets)
+                run_summarize = True 
+
+            # Only run the base pipeline if run_arcs is NOT the only flag
+            if not run_arcs or run_extract or run_summarize:
+                run_all = not run_extract and not run_summarize and not run_arcs
+
+                if run_extract or run_all:
+                    print("\n--- PHASE 1: EXTRACTION & OCR ---")
+                    if not self.tier_1_ingest(url): return
+                    self.tier_2_ocr()
+                    
+                if run_summarize or run_all:
+                    print("\n--- PHASE 2: AI SUMMARY ---")
+                    self.tier_3_ai(use_local_ai)
+                    self.tier_4_cleanup()
+            
+            # --- NEW: Phase 3 ---
+            if run_arcs:
+                print("\n--- PHASE 3: ARC SYNTHESIS ---")
+                self.tier_5_arc_synthesis()
                 
-            if run_summarize or run_all:
-                print("\n--- PHASE 2: AI SUMMARY ---")
-                self.tier_3_ai(use_local_ai)
-                self.tier_4_cleanup()
         finally:
             self.db.close()
         
@@ -296,8 +461,15 @@ if __name__ == "__main__":
     
     parser.add_argument("--extract", action="store_true", help="Run Tiers 1 & 2 (Download and OCR) only.")
     parser.add_argument("--summarize", action="store_true", help="Run Tiers 3 & 4 (AI and Cleanup) only.")
+    parser.add_argument("--build-arcs", action="store_true", help="Run Tier 5 (Arc Synthesis) to group completed chapters.")
+
     parser.add_argument("--local-ai", action="store_true", help="Route summaries to local Ollama instead of Gemini.")
-    
+    parser.add_argument(
+        "--redo-summaries", 
+        nargs='+', 
+        help="Reset summaries. Accepts numbers (1 2), ranges (1-5), mixes (1 3-5), or 'all'"
+    )
+
     args = parser.parse_args()
 
     processor = BatchProcessor(args.title, start_chapter=args.start_chapter)
@@ -305,5 +477,7 @@ if __name__ == "__main__":
         url=args.url, 
         run_extract=args.extract, 
         run_summarize=args.summarize, 
-        use_local_ai=args.local_ai
+        use_local_ai=args.local_ai,
+        redo_targets=args.redo_summaries,
+        run_arcs=args.build_arcs # Pass it here
     )
