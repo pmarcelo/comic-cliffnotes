@@ -1,4 +1,0 @@
-{
-  "image": "mcr.microsoft.com/devcontainers/python:3.10",
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-por tesseract-ocr-eng tesseract-ocr-spa tesseract-ocr-fra && pip install -r requirements.txt"
-}

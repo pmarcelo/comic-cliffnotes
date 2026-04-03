@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv  # <-- ADDED
+from dotenv import load_dotenv
 
 # --- INITIALIZE ENVIRONMENT ---
 # This loads variables from a file named '.env' in your root directory
@@ -29,10 +29,15 @@ LANGUAGE_PRIORITY = ["en", "ko", "ja", "es", "es-la", "fr", "pt-br"]
 CONTENT_RATING = ["safe", "suggestive", "erotica"]
 
 # --- AI & HARDWARE SETTINGS ---
-# Use .env for sensitive keys or hardware-specific toggles
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-USE_GPU = os.getenv("USE_GPU", "False").lower() == "true"  # <-- ADDED
+# We map the .env names to these config variables
+GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY", "") 
+USE_GPU = os.getenv("USE_GPU", "False").lower() == "true"
 
+# --- DATABASE SETTINGS ---
+# Crucial: This maps the string from your .env so session.py can see it
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# --- MODEL SETTINGS ---
 # TARGET_MODEL = "gemini-2.5-flash"
 TARGET_MODEL = "gemini-3.1-flash-lite-preview"
 SCHEMA_VERSION = "2.1"
@@ -42,5 +47,6 @@ DAILY_TOKEN_LIMIT = 500000
 MAX_RETRIES = 3
 
 # --- AUTO-INITIALIZE ---
+# Ensures the folder structure exists before the pipeline starts
 for folder in [TEMP_DIR, ARTIFACTS_DIR, SUMMARIES_DIR, RAW_ARCHIVES_DIR]:
     folder.mkdir(parents=True, exist_ok=True)

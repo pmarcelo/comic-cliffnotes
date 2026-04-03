@@ -1,18 +1,11 @@
-import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from core import config
 
-# 1. Grab the exact same URL you used for Alembic
-DATABASE_URL = os.getenv("DATABASE_URL")
+if not config.DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set in the .env file!")
 
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set!")
-
-# 2. Create the Engine (The core connection to Postgres)
-# Set echo=True if you ever want to see the raw SQL queries printing in your terminal
-engine = create_engine(DATABASE_URL, echo=False)
-
-# 3. Create the Session Factory
+engine = create_engine(config.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # 4. The Dependency Generator

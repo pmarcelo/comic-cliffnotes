@@ -1,12 +1,19 @@
-data/usage_log.json
-data/temp/*
-data/extracted_images/
-tmp/*
+# Application Data
+data/
+tmp/
+
 # Byte-compiled / optimized / DLL files
 *.py[cod]
 *$py.class
 
-*/__pycache__/*
+# Python caching
+**/__pycache__/
+
+# Environments and IDE
 venv/
 .env
 .vscode/
+.devcontainer/
+
+# Database exports
+*.sql
