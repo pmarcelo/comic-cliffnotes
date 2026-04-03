@@ -41,7 +41,6 @@ def extract_text_from_images(image_dir: Path) -> str:
         print(f" ⚠️ No valid image files found in {image_dir}")
         return ""
 
-    print(f" 🧪 Engine: Attempting OCR on {len(image_files)} files in {image_dir.name}...")
 
     reader = get_reader()
     full_text = []

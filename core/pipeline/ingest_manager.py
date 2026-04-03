@@ -79,9 +79,6 @@ class IngestManager:
 
                 proc = ChapterProcessing(chapter_id=new_ch.id)
                 self.db.add(proc)
-                print(f"  ✅ DB Registered: Ch {next_num}")
-            else:
-                print(f"  ℹ️  Ch {next_num} already exists in DB. Checking files...")
 
             target_base = config.DATA_DIR / "extracted_images" / self.slug
             target_path = target_base / str(next_num)
@@ -91,7 +88,6 @@ class IngestManager:
                 for file in folder_path.iterdir():
                     if file.is_file():
                         shutil.move(str(file), str(target_path / file.name))
-                print(f"  📂 Files Organized: {target_path}")
 
             next_num += 1
 

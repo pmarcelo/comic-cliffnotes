@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint
+from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint, Float
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -54,13 +54,39 @@ class Series(Base, TimestampMixin):
     series_metadata: Mapped[Optional["SeriesMetadata"]] = relationship(
         back_populates="series", uselist=False, cascade="all, delete-orphan"
     )
-    # ➕ NEW: Relationship to the Story Arcs
     arcs: Mapped[List["StoryArc"]] = relationship(
         back_populates="series", cascade="all, delete-orphan", order_by="StoryArc.start_chapter"
+    )
+    # ➕ NEW: Relationship to the multiple web sources
+    sources: Mapped[List["SeriesSource"]] = relationship(
+        back_populates="series", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
         return f"<Series(title={self.title})>"
+
+
+class SeriesSource(Base, TimestampMixin):
+    """➕ NEW: Tracks where the manga is being pulled from and any numbering offsets."""
+    __tablename__ = "series_sources"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
+    
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    # Canonical_Chapter = Source_Chapter + chapter_offset
+    chapter_offset: Mapped[float] = mapped_column(Float, default=0.0)
+    
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    priority: Mapped[int] = mapped_column(Integer, default=1) # 1 is primary
+    
+    last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    series: Mapped["Series"] = relationship(back_populates="sources")
+
+    def __repr__(self) -> str:
+        return f"<SeriesSource(series_id={self.series_id}, url={self.url[:30]}...)>"
 
 
 class SeriesMetadata(Base, TimestampMixin):
@@ -69,10 +95,8 @@ class SeriesMetadata(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False, unique=True)
     
-    # Track overall series pipeline status
     is_backlog_processed: Mapped[bool] = mapped_column(Boolean, default=False)
     
-    # Relationships
     series: Mapped["Series"] = relationship(back_populates="series_metadata")
 
     def __repr__(self) -> str:
@@ -84,7 +108,9 @@ class Chapter(Base, TimestampMixin):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
-    chapter_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    
+    # 🔄 UPDATED: Changed from Integer to Float to support .5 chapters
+    chapter_number: Mapped[float] = mapped_column(Float, nullable=False)
 
     # Relationships
     series: Mapped["Series"] = relationship(back_populates="chapters")
@@ -92,11 +118,9 @@ class Chapter(Base, TimestampMixin):
     summary: Mapped[Optional["Summary"]] = relationship(
         back_populates="chapter", uselist=False, cascade="all, delete-orphan"
     )
-    # 1-to-1 relationship to the processing pipeline tracker
     processing: Mapped[Optional["ChapterProcessing"]] = relationship(
         back_populates="chapter", uselist=False, cascade="all, delete-orphan"
     )
-
     ocr_result: Mapped[Optional["OCRResult"]] = relationship(
         back_populates="chapter", uselist=False, cascade="all, delete-orphan"
     )
@@ -115,12 +139,10 @@ class ChapterProcessing(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False, unique=True)
     
-    # Pipeline States
     ocr_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
     summary_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     has_error: Mapped[bool] = mapped_column(Boolean, default=False) 
 
-    # Relationships
     chapter: Mapped["Chapter"] = relationship(back_populates="processing")
 
     def __repr__(self) -> str:
@@ -135,7 +157,6 @@ class Summary(Base, TimestampMixin):
     
     content: Mapped[str] = mapped_column(Text, nullable=False) 
     
-    # Relationships
     chapter: Mapped["Chapter"] = relationship(back_populates="summary")
 
     def __repr__(self) -> str:
@@ -146,15 +167,10 @@ class OCRResult(Base, TimestampMixin):
     __tablename__ = "ocr_results"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    chapter_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("chapters.id", ondelete="CASCADE"), 
-        nullable=False, 
-        unique=True
-    )
+    chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False, unique=True)
     
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
 
-    # Relationships
     chapter: Mapped["Chapter"] = relationship(back_populates="ocr_result", uselist=False)
 
     def __repr__(self) -> str:
@@ -168,11 +184,13 @@ class StoryArc(Base, TimestampMixin):
     series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
     
     arc_title: Mapped[str] = mapped_column(String(255), nullable=False)
-    start_chapter: Mapped[int] = mapped_column(Integer, nullable=False)
-    end_chapter: Mapped[int] = mapped_column(Integer, nullable=False)
+    
+    # 🔄 UPDATED: Float support for arc boundaries
+    start_chapter: Mapped[float] = mapped_column(Float, nullable=False)
+    end_chapter: Mapped[float] = mapped_column(Float, nullable=False)
+    
     arc_summary: Mapped[str] = mapped_column(Text, nullable=False) 
     
-    # Relationships
     series: Mapped["Series"] = relationship(back_populates="arcs")
 
     def __repr__(self) -> str:

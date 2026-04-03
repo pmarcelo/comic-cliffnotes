@@ -1,32 +1,35 @@
 import os
 import sys
+from pathlib import Path
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
+from sqlalchemy import engine_from_config, pool
 from alembic import context
+from dotenv import load_dotenv
 
-# UPDATE: Ensures Alembic can find the 'database' package in your project root
-sys.path.append(os.getcwd())
+# 1. Ensure project root is in path for imports
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
 
-# UPDATE: Points to your actual models
-from database.models import Base
-target_metadata = Base.metadata
+# 2. Import your models
+from database.models import Base 
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+load_dotenv()
+
 config = context.config
 
-# Interpret the config file for Python logging.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# 3. Override URL from .env
+db_url = os.getenv("DATABASE_URL")
+if db_url:
+    config.set_main_option("sqlalchemy.url", db_url)
+
+target_metadata = Base.metadata
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    # UPDATE: Pulls URL from environment variable for security
-    url = os.getenv("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
-    
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -39,15 +42,9 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # UPDATE: Prioritizes DATABASE_URL from your environment
-    db_url = os.getenv("DATABASE_URL")
-    
-    section = config.get_section(config.config_ini_section, {})
-    if db_url:
-        section["sqlalchemy.url"] = db_url
-
+    # FIX: Removed 'is_settings=True' argument here
     connectable = engine_from_config(
-        section,
+        config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -56,7 +53,6 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
-            # UPDATE: Detects changes to column types (e.g., Integer to BigInteger)
             compare_type=True 
         )
 
