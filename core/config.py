@@ -39,7 +39,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # --- MODEL SETTINGS ---
 # TARGET_MODEL = "gemini-2.5-flash"
-TARGET_MODEL = "gemini-3.1-flash-lite-preview"
+DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
+SUPPORTED_MODELS = [
+    "gemini-3.1-flash-lite-preview",
+    "gemini-2.5-flash"
+]
+
+
 SCHEMA_VERSION = "2.1"
 
 # --- SYSTEM SETTINGS ---

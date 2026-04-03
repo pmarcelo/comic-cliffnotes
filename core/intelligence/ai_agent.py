@@ -12,10 +12,11 @@ class RateLimitExhaustedError(Exception):
 client = genai.Client(api_key=config.GEMINI_API_KEY)
 
 # --- PROMPT TEMPLATES ---
-# I added 'key_insights' and 'tone' to make your summaries more robust for the DB
 SUMMARY_PROMPT_TEMPLATE = """
 You are an expert manga/manhwa narrative analyst. 
 Analyze the provided OCR text and generate a structured, spoiler-free chapter summary. 
+
+The OCR data may contain fragments, vertical text artifacts, or page numbers. Ignore these and focus only on dialogue and narrative descriptions.
 
 CRITICAL: This data will be used to automatically detect multi-chapter story arcs later. You must be highly precise about location changes, newly introduced characters, and shifting character motivations.
 
@@ -36,7 +37,29 @@ OCR DATA:
 {ocr_text}
 """
 
-def generate_summary(ocr_text: str):
+# --- HELPER METHODS ---
+def _extract_usage_stats(response) -> dict:
+    """
+    Safely extracts token usage metadata from the Gemini response object.
+    Returns a dictionary of token counts, or zeroes if unavailable.
+    """
+    try:
+        usage = response.usage_metadata
+        if usage:
+            return {
+                "prompt_tokens": getattr(usage, 'prompt_token_count', 0),
+                "candidates_tokens": getattr(usage, 'candidates_token_count', 0),
+                "total_tokens": getattr(usage, 'total_token_count', 0)
+            }
+    except AttributeError:
+        # Failsafe in case the response object is malformed
+        pass 
+    
+    return {"prompt_tokens": 0, "candidates_tokens": 0, "total_tokens": 0}
+
+# --- MAIN WORKER ---
+# ---> NEW: Added model_name parameter with fallback <---
+def generate_summary(ocr_text: str, model_name: str = getattr(config, 'DEFAULT_MODEL', 'gemini-3.1-flash-lite-preview')):
     """
     Pure AI Worker: 
     Input: Raw OCR String 
@@ -48,25 +71,30 @@ def generate_summary(ocr_text: str):
     prompt = SUMMARY_PROMPT_TEMPLATE.format(ocr_text=ocr_text)
 
     try:
+        # ---> NEW: Use the dynamically passed model parameter <---
         response = client.models.generate_content(
-            model=config.TARGET_MODEL,
+            model=model_name,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                temperature=0.7,  # Added for better narrative flow
+                temperature=0.7,  
                 top_p=0.95,
             )
         )
         
-        # 1. Check if the response actually contains text
+        # 1. Extract Token Usage using the helper method
+        token_info = _extract_usage_stats(response)
+        print(f"📊 Tokens used for this chapter: {token_info.get('total_tokens', 0)}")
+
+        # 2. Check if the response actually contains text
         if not response.text:
             print("⚠️ Gemini returned an empty response (likely blocked by safety filters).")
             return None
 
-        # 2. Parse the JSON string into a Python dict
+        # 3. Parse the JSON string into a Python dict
         ai_data = json.loads(response.text)
         
-        # 3. Basic Validation: Ensure the keys we expect actually exist
+        # 4. Basic Validation: Ensure the keys we expect actually exist
         required_keys = [
             "chapter_summary", 
             "settings", 
@@ -78,6 +106,9 @@ def generate_summary(ocr_text: str):
         if not all(k in ai_data for k in required_keys):
             print("⚠️ AI JSON missing required keys. Raw output:", response.text)
             return None
+
+        # 5. Attach usage stats to the final payload for Streamlit/DB tracking
+        ai_data["_usage_stats"] = token_info
 
         return ai_data
         

@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from core.pipeline.arc_manager import ArcManager
 from core.pipeline.ingest_manager import IngestManager
@@ -6,6 +7,7 @@ from core.pipeline.ocr_manager import OCRManager
 from core.pipeline.summary_manager import SummaryManager
 from database.models import Series
 from database.session import SessionLocal
+from core.utils import usage_tracker
 
 
 class PipelineOrchestrator:
@@ -33,7 +35,8 @@ class PipelineOrchestrator:
             self.db.refresh(series)
         return series
 
-    def run(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False, redo_targets=None, run_arcs=False):
+    # ---> NEW: Added model_name parameter <---
+    def run(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False, redo_targets=None, run_arcs=False, model_name=None):
         print(f"\n🚀 PROCESSING: {self.title}")
         print("-" * 40)
 
@@ -54,11 +57,25 @@ class PipelineOrchestrator:
 
                 if run_summarize or run_all:
                     print("\n--- PHASE 2: AI SUMMARY ---")
-                    self.summary_manager.generate_chapter_summaries(use_local_ai)
+                    
+                    # --- NEW GATEKEEPER CHECK ---
+                    # We only check quota if we are using the paid Gemini API
+                    if not use_local_ai and not usage_tracker.check_usage(model_name):
+                        print("🛑 Aborting: Daily chapter or token limit reached.")
+                        return
+                        
+                    # ---> NEW: Pass model_name down to the manager <---
+                    self.summary_manager.generate_chapter_summaries(use_local_ai, model_name=model_name)
                     self.ingest_manager.cleanup()
 
             if run_arcs:
                 print("\n--- PHASE 3: ARC SYNTHESIS ---")
+                
+                # --- NEW GATEKEEPER CHECK ---
+                if not use_local_ai and not usage_tracker.check_usage(model_name):
+                    print("🛑 Aborting: Daily chapter or token limit reached.")
+                    return
+                    
                 self.arc_manager.generate_arc_summaries()
 
         finally:
@@ -72,6 +89,9 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--title", required=True)
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
     parser.add_argument("-c", "--start-chapter", type=int, default=1)
+
+    # ---> NEW: Model Selection Argument <---
+    parser.add_argument("-m", "--model", default="gemini-3.1-flash-lite-preview", help="The Gemini model to use for summaries")
 
     parser.add_argument("--extract", action="store_true", help="Run Tiers 1 & 2 (Download and OCR) only.")
     parser.add_argument("--summarize", action="store_true", help="Run Tiers 3 & 4 (AI and Cleanup) only.")
@@ -90,4 +110,5 @@ if __name__ == "__main__":
         use_local_ai=args.local_ai,
         redo_targets=args.redo_summaries,
         run_arcs=args.build_arcs,
+        model_name=args.model # ---> NEW: Pass argument into the runner <---
     )
