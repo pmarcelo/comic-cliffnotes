@@ -3,6 +3,7 @@ import time
 
 from core.intelligence import ai_agent, local_agent
 from database.models import Chapter, ChapterProcessing, Summary
+from core.utils import usage_tracker
 
 
 class SummaryManager:
@@ -89,7 +90,8 @@ class SummaryManager:
             f"✅ Reset AI status for {reset_count} chapter(s). They are queued for Tier 3."
         )
 
-    def generate_chapter_summaries(self, use_local_ai=False):
+    # ---> NEW: Added model_name parameter <---
+    def generate_chapter_summaries(self, use_local_ai=False, model_name=None):
         """Generates summaries for OCR-ready chapters."""
         todo = (
             self.db.query(ChapterProcessing)
@@ -104,6 +106,11 @@ class SummaryManager:
         if not todo:
             print("⏩ Tier 3: AI summaries complete. Skipping.")
             return
+            
+        # Fallback to default if not provided
+        if not model_name:
+            from core import config
+            model_name = getattr(config, 'DEFAULT_MODEL', 'gemini-3.1-flash-lite-preview')
 
         print(f"🧠 Tier 3: Running AI Synthesis for {len(todo)} chapters...")
         for count, proc in enumerate(todo, 1):
@@ -129,14 +136,24 @@ class SummaryManager:
                     )
                     ai_results = local_agent.generate_summary(ocr_text)
                 else:
+                    # ---> NEW: Print the specific model being used and pass it to the agent <---
                     print(
-                        f"☁️ Routing Ch {chapter.chapter_number} to Cloud API (Gemini)..."
+                        f"☁️ Routing Ch {chapter.chapter_number} to Cloud API ({model_name})..."
                     )
-                    ai_results = ai_agent.generate_summary(ocr_text)
+                    ai_results = ai_agent.generate_summary(ocr_text, model_name=model_name)
 
                 if ai_results:
+                    # Safely extract tokens (defaults to 0 if local_ai or missing)
+                    tokens_used = ai_results.get("_usage_stats", {}).get("total_tokens", 0)
+                    
+                    # Log the run to our shared JSON file for the dashboard
+                    usage_tracker.log_success(tokens_used=tokens_used, model_name=model_name)
+
+                    # Strip the usage stats so they don't get saved to Postgres
+                    clean_ai_results = {k: v for k, v in ai_results.items() if k != "_usage_stats"}
+
                     # --- 2. JSON Integrity Check ---
-                    content_json_str = json.dumps(ai_results, ensure_ascii=False)
+                    content_json_str = json.dumps(clean_ai_results, ensure_ascii=False)
 
                     new_summary = Summary(
                         chapter_id=chapter.id, content=content_json_str
