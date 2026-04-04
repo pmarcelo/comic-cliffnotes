@@ -84,7 +84,6 @@ def generate_summary(ocr_text: str, model_name: str = getattr(config, 'DEFAULT_M
         
         # 1. Extract Token Usage using the helper method
         token_info = _extract_usage_stats(response)
-        print(f"📊 Tokens used for this chapter: {token_info.get('total_tokens', 0)}")
 
         # 2. Check if the response actually contains text
         if not response.text:

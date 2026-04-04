@@ -4,6 +4,7 @@ ollama
 easyocr
 opencv-python
 Pillow
+gallery-dl
 
 # --- Database & ORM ---
 sqlalchemy
@@ -16,5 +17,7 @@ python-dotenv
 requests
 gdown
 
+
 # -- Dashboard
 streamlit
+psutil

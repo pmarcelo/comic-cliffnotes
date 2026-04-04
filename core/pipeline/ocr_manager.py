@@ -35,11 +35,12 @@ class OCRManager:
 
         for count, proc in enumerate(todo, 1):
             chapter = proc.chapter
+            chapter_number_string = file_io.get_chapter_folder_name(chapter.chapter_number)
 
             # Absolute path: .../extracted_images/test_/1
-            image_path = base_dir / series_slug / str(chapter.chapter_number)
+            image_path = base_dir / series_slug / chapter_number_string
 
-            print(f"[{count}/{len(todo)}] OCRing Chapter {chapter.chapter_number}")
+            print(f"[{count}/{len(todo)}] OCRing Chapter {chapter_number_string} at {image_path}...")
 
             if not image_path.exists():
                 # We can keep a fallback, but Tier 1 should have prevented this

@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 
 from core.pipeline.arc_manager import ArcManager
 from core.pipeline.ingest_manager import IngestManager
@@ -35,9 +36,18 @@ class PipelineOrchestrator:
             self.db.refresh(series)
         return series
 
-    # ---> NEW: Added model_name parameter <---
-    def run(self, url=None, run_extract=False, run_summarize=False, use_local_ai=False, redo_targets=None, run_arcs=False, model_name=None):
+    def run(self, 
+            url=None, 
+            run_extract=False, 
+            run_summarize=False, 
+            use_local_ai=False, 
+            redo_targets=None, 
+            run_arcs=False, 
+            model_name=None,
+            ingest_method="auto"): # 🎯 Default to smart auto-routing
+        
         print(f"\n🚀 PROCESSING: {self.title}")
+        print(f"🛠️  Method: {ingest_method} | Model: {model_name}")
         print("-" * 40)
 
         try:
@@ -45,35 +55,45 @@ class PipelineOrchestrator:
                 self.summary_manager.reset_summaries(redo_targets)
                 run_summarize = True
 
-            # Only run the base pipeline if run_arcs is NOT the only flag
-            if not run_arcs or run_extract or run_summarize:
-                run_all = not run_extract and not run_summarize and not run_arcs
+            # Logic gate: if no specific flags are passed, we assume a full run
+            run_all = not run_extract and not run_summarize and not run_arcs
 
-                if run_extract or run_all:
-                    print("\n--- PHASE 1: EXTRACTION & OCR ---")
-                    if not self.ingest_manager.ingest(url):
-                        return
-                    self.ocr_manager.process_chapters()
+            # --- PHASE 1: EXTRACTION & OCR ---
+            if run_extract or run_all:
+                print("\n--- PHASE 1: EXTRACTION & OCR ---")
+                
+                # 🎯 Smart Ingestion: Let the manager decide the best path
+                success = self.ingest_manager.ingest(
+                    gdrive_url=url, 
+                    manual_method=ingest_method
+                )
 
-                if run_summarize or run_all:
-                    print("\n--- PHASE 2: AI SUMMARY ---")
+                if not success:
+                    print("❌ Ingestion failed. Aborting pipeline.")
+                    return
+
+                self.ocr_manager.process_chapters()
+
+            # --- PHASE 2: AI SUMMARY ---
+            if run_summarize or run_all:
+                print("\n--- PHASE 2: AI SUMMARY ---")
+                
+                # Check daily request quota before calling LLM
+                if not use_local_ai and not usage_tracker.check_usage(model_name):
+                    print("🛑 Aborting: Daily API limit reached.")
+                    return
                     
-                    # --- NEW GATEKEEPER CHECK ---
-                    # We only check quota if we are using the paid Gemini API
-                    if not use_local_ai and not usage_tracker.check_usage(model_name):
-                        print("🛑 Aborting: Daily chapter or token limit reached.")
-                        return
-                        
-                    # ---> NEW: Pass model_name down to the manager <---
-                    self.summary_manager.generate_chapter_summaries(use_local_ai, model_name=model_name)
-                    self.ingest_manager.cleanup()
+                self.summary_manager.generate_chapter_summaries(use_local_ai, model_name=model_name)
+                
+                # Clean up local image files only if summaries are fully finished
+                self.ingest_manager.cleanup()
 
-            if run_arcs:
+            # --- PHASE 3: ARC SYNTHESIS ---
+            if run_arcs or run_all:
                 print("\n--- PHASE 3: ARC SYNTHESIS ---")
                 
-                # --- NEW GATEKEEPER CHECK ---
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
-                    print("🛑 Aborting: Daily chapter or token limit reached.")
+                    print("🛑 Aborting: Daily API limit reached.")
                     return
                     
                 self.arc_manager.generate_arc_summaries()
@@ -89,16 +109,22 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--title", required=True)
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
     parser.add_argument("-c", "--start-chapter", type=int, default=1)
-
-    # ---> NEW: Model Selection Argument <---
-    parser.add_argument("-m", "--model", default="gemini-3.1-flash-lite-preview", help="The Gemini model to use for summaries")
-
-    parser.add_argument("--extract", action="store_true", help="Run Tiers 1 & 2 (Download and OCR) only.")
-    parser.add_argument("--summarize", action="store_true", help="Run Tiers 3 & 4 (AI and Cleanup) only.")
-    parser.add_argument("--build-arcs", action="store_true", help="Run Tier 5 (Arc Synthesis) to group completed chapters.")
+    parser.add_argument("-m", "--model", default="gemini-3.1-flash-lite-preview", help="Gemini model name")
     
-    parser.add_argument("--local-ai", action="store_true", help="Route summaries to local Ollama instead of Gemini.")
-    parser.add_argument("--redo-summaries", nargs="+", help="Reset summaries. Accepts numbers (1 2), ranges (1-5), mixes (1 3-5), or 'all'")
+    # 🎯 Updated Ingest Method: Added "auto" as the default choice
+    parser.add_argument(
+        "--ingest-method", 
+        default="auto", 
+        choices=["auto", "google_drive", "web_gallery-dl"], 
+        help="Method to acquire images. 'auto' checks DB for web source first."
+    )
+
+    parser.add_argument("--extract", action="store_true", help="Run Download and OCR only.")
+    parser.add_argument("--summarize", action="store_true", help="Run AI and Cleanup only.")
+    parser.add_argument("--build-arcs", action="store_true", help="Run Arc Synthesis only.")
+    
+    parser.add_argument("--local-ai", action="store_true", help="Use Ollama instead of Gemini.")
+    parser.add_argument("--redo-summaries", nargs="+", help="Reset specific summaries.")
 
     args = parser.parse_args()
 
@@ -110,5 +136,6 @@ if __name__ == "__main__":
         use_local_ai=args.local_ai,
         redo_targets=args.redo_summaries,
         run_arcs=args.build_arcs,
-        model_name=args.model # ---> NEW: Pass argument into the runner <---
+        model_name=args.model,
+        ingest_method=args.ingest_method
     )

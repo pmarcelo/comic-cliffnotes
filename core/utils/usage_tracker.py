@@ -2,19 +2,19 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+# Path setup relative to this file
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 LOG_FILE = ROOT_DIR / "data" / "usage_log.json"
 
 # --- TIER-SPECIFIC LIMITS ---
-# Google AI Studio Free Tier limits vary drastically by model size.
 LIMITS = {
     "flash": {
         "tokens": 1_000_000, 
-        "chapters": 200
+        "chapters": 2000 # Increased for lite-preview tiers
     },
     "pro": {
-        "tokens": 100_000,  # Pro uses tokens much faster; limit acts as a cost/quota safeguard
-        "chapters": 45      # Free tier limit is 50 requests/day
+        "tokens": 100_000,
+        "chapters": 50
     }
 }
 
@@ -29,34 +29,47 @@ def _ensure_log_exists():
         with open(LOG_FILE, "w") as f:
             json.dump({}, f)
 
-def check_usage(model_name: str) -> bool:
-    """Returns True if safe to run based on the specific model's tier."""
+def get_today_stats(model_name: str) -> dict:
+    """
+    Dashboard Helper: Returns formatted stats from the JSON log.
+    Maps 'chapters' to 'requests' for the UI.
+    """
     _ensure_log_exists()
     tier = _get_tier(model_name)
-    limits = LIMITS[tier]
-        
     today = datetime.now().strftime("%Y-%m-%d")
-    with open(LOG_FILE, "r") as f:
-        try:
-            data = json.load(f)
-        except json.JSONDecodeError:
-            data = {}
-            
-    # Look for today's stats under the specific tier
-    today_stats = data.get(today, {}).get(tier, {"chapters": 0, "tokens": 0})
     
-    if today_stats["chapters"] >= limits["chapters"]:
-        print(f"🛑 {tier.upper()} LIMIT: Reached {today_stats['chapters']} chapters today.")
+    try:
+        with open(LOG_FILE, "r") as f:
+            data = json.load(f)
+            # Drill down: Date -> Tier -> Stats
+            stats = data.get(today, {}).get(tier, {"chapters": 0, "tokens": 0})
+            
+            return {
+                "requests": stats["chapters"],  # Dashboard calls them 'requests'
+                "tokens": stats["tokens"],
+                "token_limit": LIMITS[tier]["tokens"]
+            }
+    except (json.JSONDecodeError, Exception):
+        return {"requests": 0, "tokens": 0, "token_limit": LIMITS[tier]["tokens"]}
+
+def check_usage(model_name: str) -> bool:
+    """Logic gate for processor.py."""
+    stats = get_today_stats(model_name)
+    tier = _get_tier(model_name)
+    limits = LIMITS[tier]
+    
+    if stats["requests"] >= limits["chapters"]:
+        print(f"🛑 {tier.upper()} LIMIT: Reached {stats['requests']} requests today.")
         return False
         
-    if today_stats["tokens"] >= limits["tokens"]:
-        print(f"🛑 {tier.upper()} QUOTA: Reached {today_stats['tokens']:,} tokens today.")
+    if stats["tokens"] >= limits["tokens"]:
+        print(f"🛑 {tier.upper()} QUOTA: Reached {stats['tokens']:,} tokens today.")
         return False
         
     return True
 
 def log_success(tokens_used: int = 0, model_name: str = "default"):
-    """Logs usage under the correct model tier."""
+    """Increments the count in your JSON file."""
     _ensure_log_exists()
     tier = _get_tier(model_name)
     today = datetime.now().strftime("%Y-%m-%d")
@@ -78,19 +91,7 @@ def log_success(tokens_used: int = 0, model_name: str = "default"):
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
+# Keep this for backward compatibility if any old code uses it
 def get_today_tokens(model_name: str) -> dict:
-    """Returns the tokens used and the max limit for the given model."""
-    tier = _get_tier(model_name)
-    max_limit = LIMITS[tier]["tokens"]
-    
-    if not LOG_FILE.exists():
-        return {"used": 0, "limit": max_limit}
-        
-    today = datetime.now().strftime("%Y-%m-%d")
-    try:
-        with open(LOG_FILE, "r") as f:
-            data = json.load(f)
-            used = data.get(today, {}).get(tier, {}).get("tokens", 0)
-            return {"used": used, "limit": max_limit}
-    except Exception:
-        return {"used": 0, "limit": max_limit}
+    stats = get_today_stats(model_name)
+    return {"used": stats["tokens"], "limit": stats["token_limit"]}
