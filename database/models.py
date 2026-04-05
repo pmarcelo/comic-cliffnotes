@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint, Float
+from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint, Float, Index
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -57,7 +57,6 @@ class Series(Base, TimestampMixin):
     arcs: Mapped[List["StoryArc"]] = relationship(
         back_populates="series", cascade="all, delete-orphan", order_by="StoryArc.start_chapter"
     )
-    # ➕ NEW: Relationship to the multiple web sources
     sources: Mapped[List["SeriesSource"]] = relationship(
         back_populates="series", cascade="all, delete-orphan"
     )
@@ -67,7 +66,7 @@ class Series(Base, TimestampMixin):
 
 
 class SeriesSource(Base, TimestampMixin):
-    """➕ NEW: Tracks where the manga is being pulled from and any numbering offsets."""
+    """Tracks where the manga is being pulled from and any numbering offsets."""
     __tablename__ = "series_sources"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -84,6 +83,11 @@ class SeriesSource(Base, TimestampMixin):
 
     # Relationships
     series: Mapped["Series"] = relationship(back_populates="sources")
+
+    # Composite Index for optimized source discovery
+    __table_args__ = (
+        Index("idx_source_lookup", "series_id", "is_active", "priority"),
+    )
 
     def __repr__(self) -> str:
         return f"<SeriesSource(series_id={self.series_id}, url={self.url[:30]}...)>"
@@ -109,8 +113,10 @@ class Chapter(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
     
-    # 🔄 UPDATED: Changed from Integer to Float to support .5 chapters
     chapter_number: Mapped[float] = mapped_column(Float, nullable=False)
+
+    # Stores the direct link to the specific chapter reader page
+    url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relationships
     series: Mapped["Series"] = relationship(back_populates="chapters")
@@ -127,6 +133,7 @@ class Chapter(Base, TimestampMixin):
 
     __table_args__ = (
         UniqueConstraint("series_id", "chapter_number", name="uq_series_chapter"),
+        Index("idx_chapter_url", "url"),
     )
 
     def __repr__(self) -> str:
@@ -144,6 +151,11 @@ class ChapterProcessing(Base, TimestampMixin):
     has_error: Mapped[bool] = mapped_column(Boolean, default=False) 
 
     chapter: Mapped["Chapter"] = relationship(back_populates="processing")
+
+    # Composite Index to optimize worker queues finding pending tasks
+    __table_args__ = (
+        Index("idx_processing_status", "ocr_extracted", "summary_complete", "has_error"),
+    )
 
     def __repr__(self) -> str:
         return f"<ChapterProcessing(chapter_id={self.chapter_id}, ocr={self.ocr_extracted}, summary={self.summary_complete})>"
@@ -185,7 +197,6 @@ class StoryArc(Base, TimestampMixin):
     
     arc_title: Mapped[str] = mapped_column(String(255), nullable=False)
     
-    # 🔄 UPDATED: Float support for arc boundaries
     start_chapter: Mapped[float] = mapped_column(Float, nullable=False)
     end_chapter: Mapped[float] = mapped_column(Float, nullable=False)
     
