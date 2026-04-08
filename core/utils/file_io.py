@@ -80,12 +80,12 @@ def load_json(path):
 def extract_archive(zip_path, extract_dir):
     """Unzips an archive to a target directory."""
     try:
-        print(f"📦 Extracting {zip_path} to {extract_dir}...")
+        print(f"Extracting {zip_path} to {extract_dir}...")
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
         return True
     except Exception as e:
-        print(f"❌ Extraction error: {e}")
+        print(f"Extraction error: {e}")
         return False
 
 def update_chapter_metadata(metadata_path, original_id, ai_data):

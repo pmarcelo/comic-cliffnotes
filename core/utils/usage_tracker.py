@@ -69,11 +69,11 @@ def check_usage(model_name: str) -> bool:
     limits = LIMITS[tier]
     
     if stats["requests"] >= limits["chapters"]:
-        print(f"🛑 [{PROJECT_NAME.upper()}] {tier.upper()} LIMIT: Reached {stats['requests']} requests.")
+        print(f"[{PROJECT_NAME.upper()}] {tier.upper()} LIMIT: Reached {stats['requests']} requests.")
         return False
         
     if stats["tokens"] >= limits["tokens"]:
-        print(f"🛑 [{PROJECT_NAME.upper()}] {tier.upper()} QUOTA: Reached {stats['tokens']:,} tokens.")
+        print(f"[{PROJECT_NAME.upper()}] {tier.upper()} QUOTA: Reached {stats['tokens']:,} tokens.")
         return False
         
     return True

@@ -29,7 +29,7 @@ class PipelineOrchestrator:
         """Ensures the series exists in Postgres."""
         series = self.db.query(Series).filter(Series.title == self.title).first()
         if not series:
-            print(f"🆕 Initializing Series in Database: {self.title}")
+            print(f"Initializing Series in Database: {self.title}")
             series = Series(title=self.title)
             self.db.add(series)
             self.db.commit()
@@ -48,10 +48,10 @@ class PipelineOrchestrator:
             ingest_method="auto",
             skip_input=""):
         
-        print(f"\n🚀 PROCESSING: {self.title}")
-        print(f"🛠️  Method: {ingest_method} | Model: {model_name}")
+        print(f"\nPROCESSING: {self.title}")
+        print(f"Method: {ingest_method} | Model: {model_name}")
         if skip_input:
-            print(f"⏭️  Skipping Chapters: {skip_input}")
+            print(f"Skipping Chapters: {skip_input}")
         print("-" * 40)
 
         try:
@@ -75,7 +75,7 @@ class PipelineOrchestrator:
                 )
 
                 if not success:
-                    print("❌ Ingestion failed. Aborting pipeline.")
+                    print("Ingestion failed. Aborting pipeline.")
                     return
 
             # --- PHASE 2: OCR ---
@@ -88,7 +88,7 @@ class PipelineOrchestrator:
                 print("\n--- PHASE 3: AI SUMMARY ---")
                 
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
-                    print("🛑 Aborting: Daily API limit reached.")
+                    print("Aborting: Daily API limit reached.")
                     return
                 
                 # The SummaryManager now handles context-fetching and state-saving automatically
@@ -102,7 +102,7 @@ class PipelineOrchestrator:
                 print("\n--- PHASE 4: ARC SYNTHESIS ---")
                 
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
-                    print("🛑 Aborting: Daily API limit reached.")
+                    print("Aborting: Daily API limit reached.")
                     return
                     
                 self.arc_manager.generate_arc_summaries()
@@ -110,7 +110,7 @@ class PipelineOrchestrator:
         finally:
             self.db.close()
 
-        print("\n✨ PIPELINE COMPLETE ✨")
+        print(f"\n PIPELINE COMPLETE  for {self.title}")
 
 
 if __name__ == "__main__":
@@ -140,7 +140,6 @@ if __name__ == "__main__":
     
     parser.add_argument("--local-ai", action="store_true", help="Use Ollama instead of Cloud Gemini.")
     
-    # 🎯 Reset Summaries (Matches the UI button call)
     parser.add_argument("--reset-summaries", nargs="+", help="Resets summaries for target chapters (e.g., 'all', '1-10').")
 
     args = parser.parse_args()
