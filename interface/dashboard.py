@@ -8,13 +8,12 @@ root_path = Path(__file__).resolve().parent.parent
 if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
-
 from core import config  # noqa: E402
 from ui.sidebar import render_pipeline_control, render_active_tasks, render_api_usage # noqa: E402
 from ui.index_tab import render_index # noqa: E402
 from ui.deep_dive_tab import render_deep_dive # noqa: E402
 from ui.discovery_tab import render_discovery # noqa: E402
-
+from ui.queue_tab import render_queue_tab # noqa: E402
 
 def inject_mobile_ui():
     st.markdown("""
@@ -55,15 +54,18 @@ inject_mobile_ui()
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Manga OS", layout="wide", initial_sidebar_state="expanded")
 
-# --- 🎯 THE FIX: INITIALIZE SESSION STATE ---
-# This must happen before the tabs or fragments are rendered
+# --- 🎯 INITIALIZE SESSION STATE ---
 if 'selected_series_id' not in st.session_state:
     st.session_state.selected_series_id = None
 if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
 
 # --- DATABASE CONNECTION ---
-engine = create_engine(config.DATABASE_URL)
+@st.cache_resource
+def get_db_engine():
+    return create_engine(config.DATABASE_URL)
+
+engine = get_db_engine()
 
 # --- RENDER SIDEBAR ---
 with st.sidebar:
@@ -73,13 +75,25 @@ with st.sidebar:
 
 # --- MAIN CONTENT ---
 st.title("📖 Manga Processing Dashboard")
-tab_index, tab_details, tab_discover = st.tabs(["📚 Series Index", "🔍 Series Deep Dive", "🌐 Global Discovery"])
+
+# Added the 4th tab for the Pipeline Queue
+tab_index, tab_details, tab_discover, tab_queue = st.tabs([
+    "📚 Series Index", 
+    "🔍 Series Deep Dive", 
+    "🌐 Global Discovery",
+    "📋 Pipeline Queue"
+])
 
 with tab_index:
     render_index(engine, root_path)
 
 with tab_details:
+    # This acts as your 'Reader/Summary' view
     render_deep_dive(engine)
 
 with tab_discover:
     render_discovery(engine)
+
+with tab_queue:
+    # 🎯 NEW: Mission Control for background workers
+    render_queue_tab(engine)

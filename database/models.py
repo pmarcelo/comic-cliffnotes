@@ -1,8 +1,9 @@
 import uuid
+import enum
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint, Float, Index
+from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint, Float, Index, Enum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
@@ -25,6 +26,17 @@ class TimestampMixin:
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+
+# -------------------------------------------------------------------------
+# Enums
+# -------------------------------------------------------------------------
+
+class QueueStatus(enum.Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    PARTIAL = "partial" # Used when some chapters pass but others fail (e.g., OCR)
 
 # -------------------------------------------------------------------------
 # Models
@@ -58,6 +70,9 @@ class Series(Base, TimestampMixin):
         back_populates="series", cascade="all, delete-orphan", order_by="StoryArc.start_chapter"
     )
     sources: Mapped[List["SeriesSource"]] = relationship(
+        back_populates="series", cascade="all, delete-orphan"
+    )
+    queue_tasks: Mapped[List["ProcessingQueue"]] = relationship(
         back_populates="series", cascade="all, delete-orphan"
     )
 
@@ -215,3 +230,34 @@ class StoryArc(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<StoryArc(title={self.arc_title}, chapters={self.start_chapter}-{self.end_chapter})>"
+
+
+class ProcessingQueue(Base, TimestampMixin):
+    """A database-backed queue for background pipeline tasks."""
+    __tablename__ = "processing_queue"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
+    
+    # Action type: 'ocr', 'summary', 'extract', 'full'
+    action: Mapped[str] = mapped_column(String(50), nullable=False)
+    
+    status: Mapped[QueueStatus] = mapped_column(
+        Enum(QueueStatus), 
+        default=QueueStatus.PENDING,
+        nullable=False
+    )
+    
+    # Lower number = higher priority
+    priority: Mapped[int] = mapped_column(Integer, default=10)
+    
+    # Flexible params like model_name, temperature, or retry count
+    context: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    
+    error_log: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Relationships
+    series: Mapped["Series"] = relationship(back_populates="queue_tasks")
+
+    def __repr__(self) -> str:
+        return f"<QueueTask(action={self.action}, status={self.status.value}, series_id={self.series_id})>"

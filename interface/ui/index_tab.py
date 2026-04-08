@@ -3,6 +3,7 @@ import pandas as pd
 import sys
 import os
 import uuid
+import json  # 🎯 Required for JSONB context
 import subprocess
 from sqlalchemy import text
 from core.extractors.discovery import sync_series_by_id
@@ -13,7 +14,6 @@ from ui.sidebar import AVAILABLE_MODELS
 @st.cache_data(ttl=60) # Cache for 1 minute to prevent flicker
 def fetch_series_index(_engine):
     """Cached database query for the main index with granular progress tracking."""
-    # 🎯 FIX: Added COALESCE to the SUMs to ensure NULL results from LEFT JOINs show as 0
     query = text("""
         SELECT 
             s.id, s.title, s.created_at, ss.url as primary_source,
@@ -73,11 +73,9 @@ def render_index(engine, root_path):
 
     df['id'] = df['id'].astype(str)
 
-    # 🎯 Series-Level Metrics (Showing "Finished Series" vs "Raw Chapters")
+    # 🎯 Series-Level Metrics
     m_col1, m_col2, m_col3 = st.columns(3)
     total_series = len(df)
-    
-    # Check for full completion based on total chapters vs stage completion
     series_extracted = len(df[(df['extracted_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
     series_summarized = len(df[(df['summaries_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
 
@@ -143,6 +141,27 @@ def render_index(engine, root_path):
             st.caption("Trigger Pipeline Actions")
             q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
             
+            def queue_task(action, context=None):
+                try:
+                    with engine.begin() as conn:
+                        # 🎯 FIX: Added 'priority' to the column list and VALUES
+                        conn.execute(text("""
+                            INSERT INTO processing_queue (
+                                id, series_id, action, status, priority, context, created_at, updated_at
+                            )
+                            VALUES (
+                                :uuid, :s_id, :action, 'PENDING'::queuestatus, 10, :context, now(), now()
+                            )
+                        """), {
+                            "uuid": str(uuid.uuid4()),
+                            "s_id": selected_row['id'],
+                            "action": action,
+                            "context": json.dumps(context) if context else None
+                        })
+                    st.toast(f"✅ Queued {action.upper()} for {selected_row['title']}")
+                except Exception as e:
+                    st.error(f"Failed to queue task: {e}")
+
             b1, b2, b3, b4, b5 = st.columns(5)
             
             if b1.button("🔍 Scan", use_container_width=True, disabled=not selected_row['primary_source']):
@@ -152,30 +171,21 @@ def render_index(engine, root_path):
                 st.rerun(scope="fragment")
 
             if b2.button("📥 Extract", use_container_width=True):
-                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--extract", "--model", q_model, "--ingest-method", "auto"]
-                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("Extraction Started")
+                queue_task("extract")
 
             if b3.button("📷 OCR", use_container_width=True):
-                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--ocr", "--model", q_model]
-                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("OCR Started")
+                queue_task("ocr")
 
             if b4.button("📝 Summary", use_container_width=True):
-                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--summarize", "--model", q_model]
-                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("Summary Started")
+                queue_task("summary", context={"model": q_model})
 
             if b5.button("🔄 Full", use_container_width=True):
-                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--extract", "--ocr", "--summarize", "--model", q_model, "--ingest-method", "auto"]
-                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("Full Pipeline Started")
+                queue_task("full", context={"model": q_model})
 
             # 🛠️ Maintenance / Danger Zone
             with st.expander("🛠️ Advanced / Maintenance"):
                 st.warning("Destructive Actions: Resetting data will delete existing records.")
                 reset_col1, reset_col2 = st.columns([3, 1])
-                # Default to 'all' for simplicity
                 reset_input = reset_col1.text_input("Chapter Targets (e.g., 'all', '1-10', '25')", value="all", key=f"reset_field_{selected_row['id']}")
                 
                 if reset_col2.button("🗑️ Reset Summaries", use_container_width=True, type="secondary"):
@@ -184,7 +194,6 @@ def render_index(engine, root_path):
                         "-t", selected_row['title'], 
                         "--reset-summaries", reset_input
                     ]
-                    # Running this synchronously via subprocess.run so we can refresh after it finishes
                     subprocess.run(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
                     st.cache_data.clear()
                     st.success(f"Successfully reset summaries for: {reset_input}")

@@ -33,7 +33,7 @@ def extract_text_from_images(image_dir: Path) -> str:
     ]
     
     if not image_files:
-        print(f" ⚠️ No valid (finished) image files found in {image_dir}")
+        print(f"No valid (finished) image files found in {image_dir}")
         return ""
 
     # 2. Robust Sorting
@@ -76,9 +76,9 @@ def extract_text_from_images(image_dir: Path) -> str:
                     
         except (UnidentifiedImageError, PermissionError) as e:
             # Skip corrupted or locked files
-            print(f"  ⏭️  Skipping unreadable file {img_path.name}")
+            print(f" Skipping unreadable file {img_path.name}")
             continue
         except Exception as e:
-            print(f"  ❌ Critical Error on {img_path.name}: {e}")
+            print(f" Critical Error on {img_path.name}: {e}")
             
     return "\n\n".join(full_text)

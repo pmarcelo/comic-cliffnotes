@@ -15,7 +15,7 @@ class ArcManager:
         Stateful Arc Synthesizer: Batches chapters into chunks to protect API limits,
         passing unresolved narrative arcs to the next batch.
         """
-        print(f"\n🗺️ Tier 5: Starting Stateful Arc Synthesis for {self.title}...")
+        print(f"\nTier 5: Starting Stateful Arc Synthesis for {self.title}...")
 
         completed_chapters = (
             self.db.query(Chapter)
@@ -26,7 +26,7 @@ class ArcManager:
         )
 
         if not completed_chapters:
-            print("⚠️ No completed chapter summaries found to synthesize.")
+            print("No completed chapter summaries found to synthesize.")
             return
 
         # 1. Prepare all metadata
@@ -40,7 +40,7 @@ class ArcManager:
                     }
                 )
             except Exception as e:
-                print(f"⚠️ Skipping Ch {ch.chapter_number} due to invalid JSON: {e}")
+                print(f"Skipping Ch {ch.chapter_number} due to invalid JSON: {e}")
 
         # 2. Stateful Batching Logic
         BATCH_SIZE = 100
@@ -53,10 +53,10 @@ class ArcManager:
             for i in range(0, len(all_metadata), BATCH_SIZE)
         ]
 
-        print(f"📦 Grouped {len(all_metadata)} chapters into {len(chunks)} batch(es).")
+        print(f"Grouped {len(all_metadata)} chapters into {len(chunks)} batch(es).")
 
         for index, chunk in enumerate(chunks, 1):
-            print(f"🧠 Routing Batch {index}/{len(chunks)} to Arc Agent...")
+            print(f"Routing Batch {index}/{len(chunks)} to Arc Agent...")
 
             # Pass the chunk AND the baton
             arc_results = arc_agent.generate_arc_summaries(
@@ -64,7 +64,7 @@ class ArcManager:
             )
 
             if not arc_results:
-                print(f"❌ Arc Synthesis failed on Batch {index}. Halting.")
+                print(f"Arc Synthesis failed on Batch {index}. Halting.")
                 return
 
             # Add the completed arcs from this batch to our master list
@@ -76,7 +76,7 @@ class ArcManager:
 
         # 3. Cleanup: If the very last batch ends with an ongoing arc, we force it to close
         if ongoing_arc_state:
-            print("📝 Finalizing the last ongoing arc...")
+            print("Finalizing the last ongoing arc...")
             ongoing_arc_state["end_chapter"] = all_metadata[-1]["chapter_number"]
             ongoing_arc_state["status_quo_shift"] = (
                 "Series is currently ongoing or arc boundary not yet reached."
@@ -106,7 +106,7 @@ class ArcManager:
                 self.db.add(new_arc)
                 new_arcs_count += 1
             except Exception as e:
-                print(f"⚠️ Failed to save an arc: {e}")
+                print(f"Failed to save an arc: {e}")
 
         self.db.commit()
-        print(f"✅ Successfully synthesized and saved {new_arcs_count} Story Arcs.")
+        print(f"Successfully synthesized and saved {new_arcs_count} Story Arcs.")
