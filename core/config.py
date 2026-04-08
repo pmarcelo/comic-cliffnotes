@@ -12,9 +12,6 @@ DATA_DIR = BASE_DIR / "data"
 
 # --- SUB-DIRECTORIES ---
 TEMP_DIR = DATA_DIR / "temp"
-ARTIFACTS_DIR = DATA_DIR / "artifacts"
-SUMMARIES_DIR = DATA_DIR / "summaries"
-RAW_ARCHIVES_DIR = DATA_DIR / "raw_archives"
 
 # --- MANIFEST & LOGS ---
 MANIFEST_PATH = DATA_DIR / "manifest.json"
@@ -30,8 +27,10 @@ CONTENT_RATING = ["safe", "suggestive", "erotica"]
 
 # --- AI & HARDWARE SETTINGS ---
 # We map the .env names to these config variables
+GEMINI_PROJECT = os.getenv("GEMINI_PROJECT", "")
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY", "") 
 USE_GPU = os.getenv("USE_GPU", "False").lower() == "true"
+GEMINI_MAX_RPM = int(os.getenv("GEMINI_MAX_RPM", 15))
 
 # --- DATABASE SETTINGS ---
 # Crucial: This maps the string from your .env so session.py can see it
@@ -54,5 +53,5 @@ MAX_RETRIES = 3
 
 # --- AUTO-INITIALIZE ---
 # Ensures the folder structure exists before the pipeline starts
-for folder in [TEMP_DIR, ARTIFACTS_DIR, SUMMARIES_DIR, RAW_ARCHIVES_DIR]:
+for folder in [TEMP_DIR]:
     folder.mkdir(parents=True, exist_ok=True)

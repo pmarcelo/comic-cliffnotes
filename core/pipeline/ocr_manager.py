@@ -11,7 +11,7 @@ class OCRManager:
         self.title = title
 
     def process_chapters(self):
-        """Finds chapters in DB missing OCR and processes them."""
+        """Finds chapters in DB missing OCR and processes them, skipping incomplete downloads."""
         todo = (
             self.db.query(ChapterProcessing)
             .join(Chapter)
@@ -26,7 +26,6 @@ class OCRManager:
             return
 
         series_slug = file_io.get_safe_title(self.title)
-        # Use the base extracted_images directory as the anchor
         base_dir = config.DATA_DIR / "extracted_images"
 
         print(
@@ -35,27 +34,45 @@ class OCRManager:
 
         for count, proc in enumerate(todo, 1):
             chapter = proc.chapter
+            chapter_number_string = file_io.get_chapter_folder_name(chapter.chapter_number)
+            image_path = base_dir / series_slug / chapter_number_string
 
-            # Absolute path: .../extracted_images/test_/1
-            image_path = base_dir / series_slug / str(chapter.chapter_number)
+            print(f"[{count}/{len(todo)}] OCRing Chapter {chapter_number_string}...")
 
-            print(f"[{count}/{len(todo)}] OCRing Chapter {chapter.chapter_number}")
+            # 1. 🛡️ THE PENDING RECORD SAFETY CHECK
+            # If the folder doesn't exist or is completely empty, it is a Pending chapter.
+            if not image_path.exists() or not any(image_path.iterdir()):
+                print(f"⚠️ No images found for Ch {chapter.chapter_number}. Leaving in Pending state.")
+                continue # Jumps to the next chapter safely without flagging an error
 
-            if not image_path.exists():
-                # We can keep a fallback, but Tier 1 should have prevented this
-                print(f"⚠️ Path not found: {image_path}")
+            # 2. 🛡️ .part File Sanity Check
+            # If gallery-dl left .part files, the download is incomplete.
+            incomplete_files = list(image_path.glob("*.part"))
+            if incomplete_files:
+                print(f"❌ Incomplete Download: Found {len(incomplete_files)} '.part' files in {chapter_number_string}. Skipping.")
+                proc.has_error = True
+                # We don't mark ocr_extracted = True here so it can be retried later
+                self.db.commit()
+                continue
+
+            # 3. 🛡️ Image Validation Check
+            # Ensure there are actually JPEGs/PNGs to read
+            images = list(image_path.glob("*.jpg")) + list(image_path.glob("*.png"))
+            if not images:
+                print(f"⚠️ No valid images found in {image_path}. Skipping.")
                 proc.has_error = True
                 self.db.commit()
                 continue
 
+            # 4. Perform OCR
             raw_text = ocr_engine.extract_text_from_images(image_path)
 
             if raw_text:
-                # 1. Create the new Result record in the new table
+                # Create the new Result record
                 new_result = OCRResult(chapter_id=chapter.id, raw_text=raw_text)
                 self.db.add(new_result)
 
-                # 2. Update the Processing status (State only, no text)
+                # Update the Processing status
                 proc.ocr_extracted = True
                 proc.has_error = False
 

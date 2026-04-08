@@ -17,3 +17,6 @@ venv/
 
 # Database exports
 *.sql
+
+*cookies.txt
+*.log

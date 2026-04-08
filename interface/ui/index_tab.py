@@ -1,0 +1,191 @@
+import streamlit as st
+import pandas as pd
+import sys
+import os
+import uuid
+import subprocess
+from sqlalchemy import text
+from core.extractors.discovery import sync_series_by_id
+
+# We import the model list to keep the selection in sync with the sidebar
+from ui.sidebar import AVAILABLE_MODELS
+
+@st.cache_data(ttl=60) # Cache for 1 minute to prevent flicker
+def fetch_series_index(_engine):
+    """Cached database query for the main index with granular progress tracking."""
+    # 🎯 FIX: Added COALESCE to the SUMs to ensure NULL results from LEFT JOINs show as 0
+    query = text("""
+        SELECT 
+            s.id, s.title, s.created_at, ss.url as primary_source,
+            COUNT(c.id) as total_chapters,
+            COALESCE(SUM(CASE WHEN cp.is_extracted THEN 1 ELSE 0 END), 0) as extracted_done,
+            COALESCE(SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END), 0) as ocr_done,
+            COALESCE(SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END), 0) as summaries_done,
+            COALESCE(SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END), 0) as errors
+        FROM series s
+        LEFT JOIN series_sources ss ON s.id = ss.series_id AND ss.priority = 1
+        LEFT JOIN chapters c ON s.id = c.series_id
+        LEFT JOIN chapter_processing cp ON c.id = cp.chapter_id
+        GROUP BY s.id, s.title, s.created_at, ss.url
+        ORDER BY s.created_at DESC
+    """)
+    return pd.read_sql(query, _engine)
+
+def highlight_discrepancies(row):
+    """Styles the dataframe to show progress gaps based on pipeline order."""
+    styles = [''] * len(row)
+    if row['total_chapters'] == 0:
+        return styles
+
+    # 1. Highlight missing local images (Red)
+    if row['extracted_done'] < row['total_chapters']:
+        idx = row.index.get_loc('extracted_done')
+        styles[idx] = 'background-color: rgba(231, 76, 60, 0.2);' 
+    # 2. Highlight missing OCR (Yellow)
+    elif row['ocr_done'] < row['total_chapters']:
+        idx = row.index.get_loc('ocr_done')
+        styles[idx] = 'background-color: rgba(241, 196, 15, 0.2);' 
+    # 3. Highlight missing Summaries (Blue)
+    elif row['summaries_done'] < row['total_chapters']:
+        idx = row.index.get_loc('summaries_done')
+        styles[idx] = 'background-color: rgba(52, 152, 219, 0.2);'
+    return styles
+
+@st.fragment
+def render_index(engine, root_path):
+    """
+    The main fragment for Tab 1. 
+    Selection and Actions here will NOT flicker the sidebar.
+    """
+    col_header, col_ref = st.columns([5, 1])
+    with col_header:
+        st.subheader("Library Status")
+    with col_ref:
+        if st.button("🔄 Refresh Data", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun(scope="fragment")
+
+    df = fetch_series_index(engine)
+    
+    if df.empty:
+        st.info("No series found in database yet.")
+        return
+
+    df['id'] = df['id'].astype(str)
+
+    # 🎯 Series-Level Metrics (Showing "Finished Series" vs "Raw Chapters")
+    m_col1, m_col2, m_col3 = st.columns(3)
+    total_series = len(df)
+    
+    # Check for full completion based on total chapters vs stage completion
+    series_extracted = len(df[(df['extracted_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
+    series_summarized = len(df[(df['summaries_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
+
+    m_col1.metric("Library Size", f"{total_series} Series")
+    m_col2.metric("Fully Extracted", f"{series_extracted} Series")
+    m_col3.metric("Summaries Done", f"{series_summarized} Series")
+
+    # 2. The Interactive Table
+    event = st.dataframe(
+        df.style.apply(highlight_discrepancies, axis=1),
+        column_config={
+            "id": None,
+            "title": "Series Title",
+            "created_at": st.column_config.DatetimeColumn("Added On", format="D MMM YYYY, h:mm a"),
+            "primary_source": st.column_config.LinkColumn("Source URL"),
+            "total_chapters": "Total",
+            "extracted_done": "Images 📥",
+            "ocr_done": "OCR ✅",
+            "summaries_done": "Summaries 📝",
+            "errors": st.column_config.NumberColumn("Errors ⚠️", format="%d")
+        },
+        width="stretch",
+        height=450,
+        hide_index=True,
+        on_select="rerun",
+        selection_mode="single-row",
+        key="index_table_widget" 
+    )
+
+    # 3. Row Selection & Management
+    if len(event.selection.rows) > 0:
+        selected_row = df.iloc[event.selection.rows[0]]
+        
+        st.session_state.selected_series_id = selected_row['id']
+        st.session_state.selected_series_title = selected_row['title']
+
+        st.divider()
+        with st.container(border=True):
+            st.subheader(f"⚡ Manage: {selected_row['title']}")
+            
+            # Edit Metadata
+            edit_col1, edit_col2 = st.columns(2)
+            new_title = edit_col1.text_input("Edit Title", value=selected_row['title'])
+            new_url = edit_col2.text_input("Edit Source URL", value=selected_row['primary_source'] or "")
+
+            if st.button("💾 Save Metadata Changes", type="primary"):
+                try:
+                    with engine.begin() as conn:
+                        conn.execute(text("UPDATE series SET title = :t, updated_at = now() WHERE id = :id"), {"t": new_title, "id": selected_row['id']})
+                        exists = conn.execute(text("SELECT id FROM series_sources WHERE series_id = :id AND priority = 1"), {"id": selected_row['id']}).fetchone()
+                        if exists:
+                            conn.execute(text("UPDATE series_sources SET url = :url, updated_at = now() WHERE id = :s_id"), {"url": new_url, "s_id": exists[0]})
+                    
+                    st.cache_data.clear()
+                    st.success("Saved!")
+                    st.rerun(scope="fragment")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+            st.divider()
+            
+            # Action Buttons
+            st.caption("Trigger Pipeline Actions")
+            q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
+            
+            b1, b2, b3, b4, b5 = st.columns(5)
+            
+            if b1.button("🔍 Scan", use_container_width=True, disabled=not selected_row['primary_source']):
+                with st.spinner("Scouting..."):
+                    sync_series_by_id(selected_row['id'])
+                st.cache_data.clear()
+                st.rerun(scope="fragment")
+
+            if b2.button("📥 Extract", use_container_width=True):
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--extract", "--model", q_model, "--ingest-method", "auto"]
+                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                st.toast("Extraction Started")
+
+            if b3.button("📷 OCR", use_container_width=True):
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--ocr", "--model", q_model]
+                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                st.toast("OCR Started")
+
+            if b4.button("📝 Summary", use_container_width=True):
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--summarize", "--model", q_model]
+                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                st.toast("Summary Started")
+
+            if b5.button("🔄 Full", use_container_width=True):
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--extract", "--ocr", "--summarize", "--model", q_model, "--ingest-method", "auto"]
+                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                st.toast("Full Pipeline Started")
+
+            # 🛠️ Maintenance / Danger Zone
+            with st.expander("🛠️ Advanced / Maintenance"):
+                st.warning("Destructive Actions: Resetting data will delete existing records.")
+                reset_col1, reset_col2 = st.columns([3, 1])
+                # Default to 'all' for simplicity
+                reset_input = reset_col1.text_input("Chapter Targets (e.g., 'all', '1-10', '25')", value="all", key=f"reset_field_{selected_row['id']}")
+                
+                if reset_col2.button("🗑️ Reset Summaries", use_container_width=True, type="secondary"):
+                    cmd = [
+                        sys.executable, "processor.py", 
+                        "-t", selected_row['title'], 
+                        "--reset-summaries", reset_input
+                    ]
+                    # Running this synchronously via subprocess.run so we can refresh after it finishes
+                    subprocess.run(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                    st.cache_data.clear()
+                    st.success(f"Successfully reset summaries for: {reset_input}")
+                    st.rerun(scope="fragment")
