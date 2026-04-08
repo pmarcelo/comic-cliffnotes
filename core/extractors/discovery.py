@@ -44,6 +44,11 @@ def get_web_chapters(source_url: str, offset: float) -> List[Dict[str, Any]]:
                     try:
                         raw_num = float(metadata['chapter'])
                         
+                        # 🎯 NEW FILTER: Skip Chapter 0 (Prologues, covers, announcements)
+                        if raw_num == 0:
+                            logger.info("⏭️ Skipping Chapter 0 (Prologue/Cover)")
+                            continue
+                        
                         # 🎯 THE FILTER: Only whole numbers (skips 23.1, etc.)
                         if raw_num.is_integer():
                             final_num = raw_num + offset

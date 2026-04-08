@@ -114,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
     
     # 🎯 FIX: Updated start-chapter default to 0 for Auto-Append logic
-    parser.add_argument("-c", "--start-chapter", type=int, default=0, help="0 to auto-append, or specify a number to override.")
+    parser.add_argument("-c", "--start-chapter", type=int, default=1, help="1 to auto-append, or specify a number to override.")
     
     parser.add_argument("-m", "--model", default="gemini-3.1-flash-lite-preview", help="Gemini model name")
     

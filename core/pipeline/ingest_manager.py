@@ -265,7 +265,7 @@ class IngestManager:
         # 🎯 FIX: Determine starting chapter number (Auto-Append vs Override logic)
         existing_nums = [n[0] for n in self.db.query(Chapter.chapter_number).filter(Chapter.series_id == self.series.id).all()]
         
-        if self.start_chapter > 0:
+        if self.start_chapter != -1:
             next_num = self.start_chapter
             logger.info(f"🎯 Override Active: Forcing sequence to start at Ch. {next_num}")
         else:

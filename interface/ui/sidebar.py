@@ -49,12 +49,18 @@ def render_pipeline_control(root_path):
         url_label = "GDrive URL" if ingest_method == "Google Drive" else "GDrive URL (Optional)"
         input_url = st.text_input(url_label)
         
-        # 🎯 NEW: 0 tells the backend to auto-detect. Any other number forces an override.
+        # 🎯 THE NEW UX FIX: Checkbox instead of a magic number
+        auto_append = st.checkbox(
+            "Auto-Append (Continue from latest)", 
+            value=True,
+            help="Automatically finds the highest chapter in the database and continues from there."
+        )
+        
         starting_chapter = st.number_input(
-            "Starting Chapter (0 = Auto-Append)", 
-            min_value=0, 
-            value=0,
-            help="Leave at 0 to automatically append to the end of the series. Enter a number to force the pipeline to overwrite or fill a specific chapter."
+            "Override Starting Chapter", 
+            min_value=1, 
+            value=1,
+            help="Only applies if 'Auto-Append' is unchecked. Forces the pipeline to start downloading/overwriting at this specific chapter."
         )
         
         # 🎯 NEW: Added the Skip Chapters input field
@@ -87,11 +93,14 @@ def render_pipeline_control(root_path):
                 "Web (gallery-dl)": "web_gallery-dl"
             }
             method_flag = mapping[ingest_method]
+            
+            # 🎯 Resolving the final chapter to send to the CLI
+            actual_start_chapter = -1 if auto_append else starting_chapter
 
             cmd = [
                 sys.executable, "processor.py", 
                 "-t", input_title, 
-                "-c", str(starting_chapter), 
+                "-c", str(actual_start_chapter), 
                 "--model", selected_model,
                 "--ingest-method", method_flag
             ]
