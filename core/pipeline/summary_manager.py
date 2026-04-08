@@ -1,6 +1,8 @@
 import json
 import time
+import os
 
+from core import config
 from core.intelligence import ai_agent, local_agent
 from database.models import Chapter, ChapterProcessing, Summary
 from core.utils import usage_tracker
@@ -90,7 +92,6 @@ class SummaryManager:
             f"✅ Reset AI status for {reset_count} chapter(s). They are queued for Tier 3."
         )
 
-    # ---> NEW: Added model_name parameter <---
     def generate_chapter_summaries(self, use_local_ai=False, model_name=None):
         """Generates summaries for OCR-ready chapters."""
         todo = (
@@ -109,10 +110,10 @@ class SummaryManager:
             
         # Fallback to default if not provided
         if not model_name:
-            from core import config
             model_name = getattr(config, 'DEFAULT_MODEL', 'gemini-3.1-flash-lite-preview')
 
         print(f"🧠 Tier 3: Running AI Synthesis for {len(todo)} chapters...")
+        
         for count, proc in enumerate(todo, 1):
             chapter = proc.chapter
 
@@ -136,7 +137,6 @@ class SummaryManager:
                     )
                     ai_results = local_agent.generate_summary(ocr_text)
                 else:
-                    # ---> NEW: Print the specific model being used and pass it to the agent <---
                     print(
                         f"☁️ Routing Ch {chapter.chapter_number} to Cloud API ({model_name})..."
                     )
@@ -166,13 +166,34 @@ class SummaryManager:
                     print(f"✅ Saved Summary for Chapter {chapter.chapter_number}")
 
             except Exception as e:
-                # Break here because if the AI service is down/rate-limited, no point looping
-                print(
-                    f"\n🛑 FATAL: AI Service Failed on Ch {chapter.chapter_number}: {e}"
-                )
-                break
+                error_msg = str(e).lower()
+                
+                # 🛡️ 429 Hard Catch: Safely aborts the entire loop on rate limits
+                if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg:
+                    print(f"\n🚨 API QUOTA REACHED (HTTP 429) on Ch {chapter.chapter_number}!")
+                    print("🛑 Halting gracefully. Your progress up to now is saved.")
+                    break
+                else:
+                    # Soft Catch: Skips a single chapter on random JSON/API glitches
+                    print(f"\n⚠️ Error summarizing Ch {chapter.chapter_number}: {e}")
+                    continue
 
-            # Rate limiting for Cloud APIs (skip on last item)
+            # --- 4. Dynamic Env-Based API Pacing ---
             if not use_local_ai and count < len(todo):
-                print("⏳ Pacing Cloud API (10s)...")
-                time.sleep(10)
+                try:
+                    # Fetch max RPM from config, fallback to environment variable, then to 15
+                    max_rpm = int(getattr(config, 'GEMINI_MAX_RPM', os.getenv("GEMINI_MAX_RPM", 15)))
+                except ValueError:
+                    max_rpm = 15
+                    
+                # Create a 20% safety buffer (e.g., 5 Max -> 4 Target, 15 Max -> 12 Target)
+                # Ensure it never drops below 1 RPM to avoid divide-by-zero errors
+                target_rpm = max(1, int(max_rpm * 0.8))
+                
+                # 60 seconds divided by target requests per minute = sleep time
+                sleep_time = round(60.0 / target_rpm, 2)
+                
+                print(f"⏳ Pacing {model_name} (Targeting {target_rpm} RPM | {sleep_time}s pause)...")
+                time.sleep(sleep_time)
+
+        return True

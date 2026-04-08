@@ -41,17 +41,22 @@ def render_pipeline_control(root_path):
         st.write("Launch New Process")
         input_title = st.text_input("Series Title")
         
-        # 🎯 Updated to include Auto-Detect
         ingest_method = st.selectbox(
             "Ingest Method", 
             ["Auto-Detect", "Google Drive", "Web (gallery-dl)"]
         )
         
-        # Logic: GDrive needs a URL, Web uses the DB source, Auto uses DB then GDrive fallback
         url_label = "GDrive URL" if ingest_method == "Google Drive" else "GDrive URL (Optional)"
         input_url = st.text_input(url_label)
         
         starting_chapter = st.number_input("Starting Chapter", min_value=1, value=1)
+        
+        # 🎯 NEW: Added the Skip Chapters input field
+        skip_chapters_input = st.text_input(
+            "Chapters to Skip (Optional)",
+            placeholder="e.g., 20, 25-30",
+            help="Comma-separated list of chapters or ranges to completely ignore during GDrive ingestion."
+        )
         
         selected_model = st.selectbox(
             "AI Model", 
@@ -70,7 +75,6 @@ def render_pipeline_control(root_path):
         elif ingest_method == "Google Drive" and not input_url:
             st.error("GDrive URL required for Google Drive ingestion.")
         else:
-            # 🎯 Map UI selection to CLI flag
             mapping = {
                 "Auto-Detect": "auto",
                 "Google Drive": "google_drive",
@@ -87,6 +91,10 @@ def render_pipeline_control(root_path):
             ]
             
             if input_url: cmd.extend(["-u", input_url])
+            
+            # 🎯 NEW: Pass the skip argument to the subprocess
+            if skip_chapters_input: cmd.extend(["--skip", skip_chapters_input])
+                
             if do_extract: cmd.append("--extract")
             if do_summarize: cmd.append("--summarize")
             
@@ -115,13 +123,20 @@ def render_active_tasks():
 
 @st.fragment
 def render_api_usage():
-    """Isolated fragment for request tracking."""
+    """Isolated fragment for request tracking, project-aware (Requests only)."""
     st.divider()
     st.header("📊 API Usage")
     
+    # Identify Active Project from Env
+    active_project = os.getenv("GEMINI_PROJECT", "default")
+    
+    # Get current model for tier logic (Flash vs Pro)
     current_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
     stats = usage_tracker.get_today_stats(current_model)
     
+    # Clean Display: Project name and simple request metric
+    st.subheader(f"Project: {active_project.upper()}")
     st.metric("Requests Today", f"{stats.get('requests', 0):,}")
+
     if st.button("🔄 Refresh Stats", use_container_width=True):
         st.rerun(scope="fragment")

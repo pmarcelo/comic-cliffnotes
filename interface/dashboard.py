@@ -13,6 +13,42 @@ from ui.index_tab import render_index
 from ui.deep_dive_tab import render_deep_dive
 from ui.discovery_tab import render_discovery
 
+def inject_mobile_ui():
+    st.markdown("""
+    <style>
+        /* 1. Kill the massive top padding */
+        .block-container {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Mobile-Specific Tweaks (triggers on screens smaller than 768px) */
+        @media (max-width: 768px) {
+            /* 2. Make buttons massive for thumbs */
+            .stButton > button {
+                width: 100% !important;
+                min-height: 50px !important;
+                font-weight: bold !important;
+            }
+            
+            /* 3. Shrink text slightly so metrics and tables fit */
+            html, body, [class*="css"] {
+                font-size: 14px;
+            }
+            
+            /* 4. Fix selectbox and text input tap targets */
+            .stTextInput>div>div>input, .stSelectbox>div>div>div {
+                min-height: 45px !important;
+            }
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Call it immediately
+inject_mobile_ui()
+
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Manga OS", layout="wide", initial_sidebar_state="expanded")
 

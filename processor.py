@@ -44,10 +44,13 @@ class PipelineOrchestrator:
             redo_targets=None, 
             run_arcs=False, 
             model_name=None,
-            ingest_method="auto"): # 🎯 Default to smart auto-routing
+            ingest_method="auto",
+            skip_input=""): # 🎯 NEW: Added skip_input parameter
         
         print(f"\n🚀 PROCESSING: {self.title}")
         print(f"🛠️  Method: {ingest_method} | Model: {model_name}")
+        if skip_input:
+            print(f"⏭️  Skipping Chapters: {skip_input}")
         print("-" * 40)
 
         try:
@@ -62,10 +65,11 @@ class PipelineOrchestrator:
             if run_extract or run_all:
                 print("\n--- PHASE 1: EXTRACTION & OCR ---")
                 
-                # 🎯 Smart Ingestion: Let the manager decide the best path
+                # 🎯 Smart Ingestion: Pass the skip argument
                 success = self.ingest_manager.ingest(
                     gdrive_url=url, 
-                    manual_method=ingest_method
+                    manual_method=ingest_method,
+                    skip_input=skip_input
                 )
 
                 if not success:
@@ -111,7 +115,10 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--start-chapter", type=int, default=1)
     parser.add_argument("-m", "--model", default="gemini-3.1-flash-lite-preview", help="Gemini model name")
     
-    # 🎯 Updated Ingest Method: Added "auto" as the default choice
+    # 🎯 NEW: Add the skip argument to the parser
+    parser.add_argument("--skip", type=str, default="", help="Comma-separated chapters to skip (for GDrive ingestion)")
+    
+    # Updated Ingest Method: Added "auto" as the default choice
     parser.add_argument(
         "--ingest-method", 
         default="auto", 
@@ -137,5 +144,6 @@ if __name__ == "__main__":
         redo_targets=args.redo_summaries,
         run_arcs=args.build_arcs,
         model_name=args.model,
-        ingest_method=args.ingest_method
+        ingest_method=args.ingest_method,
+        skip_input=args.skip # 🎯 Pass it to the orchestrator here
     )
