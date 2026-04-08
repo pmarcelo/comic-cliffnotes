@@ -39,12 +39,11 @@ class OCRManager:
 
             print(f"[{count}/{len(todo)}] OCRing Chapter {chapter_number_string}...")
 
-            # 1. Path Existence Check
-            if not image_path.exists():
-                print(f"⚠️ Path not found: {image_path}")
-                proc.has_error = True
-                self.db.commit()
-                continue
+            # 1. 🛡️ THE PENDING RECORD SAFETY CHECK
+            # If the folder doesn't exist or is completely empty, it is a Pending chapter.
+            if not image_path.exists() or not any(image_path.iterdir()):
+                print(f"⚠️ No images found for Ch {chapter.chapter_number}. Leaving in Pending state.")
+                continue # Jumps to the next chapter safely without flagging an error
 
             # 2. 🛡️ .part File Sanity Check
             # If gallery-dl left .part files, the download is incomplete.
@@ -56,8 +55,8 @@ class OCRManager:
                 self.db.commit()
                 continue
 
-            # 3. 🛡️ Empty Folder Check
-            # Ensure there are actually JPEGs to read
+            # 3. 🛡️ Image Validation Check
+            # Ensure there are actually JPEGs/PNGs to read
             images = list(image_path.glob("*.jpg")) + list(image_path.glob("*.png"))
             if not images:
                 print(f"⚠️ No valid images found in {image_path}. Skipping.")

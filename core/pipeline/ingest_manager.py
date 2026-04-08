@@ -186,16 +186,19 @@ class IngestManager:
         root_dir = Path(__file__).resolve().parent.parent.parent
         config_path = root_dir / "config" / "gallery-dl.conf"
 
+        # 🎯 FIX: Safely handle the 0 default for web scraping override logic
+        actual_start = self.start_chapter if self.start_chapter > 0 else 1
+
         targets = self.db.query(Chapter).filter(
             Chapter.series_id == self.series.id,
-            Chapter.chapter_number >= self.start_chapter
+            Chapter.chapter_number >= actual_start
         ).order_by(Chapter.chapter_number.asc()).all()
 
         if not targets:
             logger.warning("ℹ️ No chapters found in database. Run a 'Scan' first.")
             return False
 
-        logger.info(f"📑 Processing {len(targets)} chapters starting from Ch. {self.start_chapter}")
+        logger.info(f"📑 Processing {len(targets)} chapters starting from Ch. {actual_start}")
 
         source = self.db.execute(
             select(SeriesSource).where(
@@ -259,9 +262,15 @@ class IngestManager:
             logger.error(f"❌ GDrive Ingest Failed: {e}")
             return False
 
-        # Determine starting chapter number purely by database state + start parameter
+        # 🎯 FIX: Determine starting chapter number (Auto-Append vs Override logic)
         existing_nums = [n[0] for n in self.db.query(Chapter.chapter_number).filter(Chapter.series_id == self.series.id).all()]
-        next_num = max(existing_nums) + 1 if existing_nums else self.start_chapter
+        
+        if self.start_chapter > 0:
+            next_num = self.start_chapter
+            logger.info(f"🎯 Override Active: Forcing sequence to start at Ch. {next_num}")
+        else:
+            next_num = max(existing_nums) + 1 if existing_nums else 1
+            logger.info(f"🔄 Auto-Append: Starting at Ch. {next_num}")
 
         # ⚠️ CRITICAL WARNING: If folders are named gibberish, the OS reads them in random/alphanumeric order.
         # We sort them here to at least guarantee a consistent order, but ensure your source packs them sequentially!
@@ -270,9 +279,24 @@ class IngestManager:
         for folder_path in chapter_folders:
             chapter_num = float(next_num)
 
-            # 🎯 STRICT SKIP LOGIC (Only trusts the internal counter)
+            # 🎯 STRICT SKIP LOGIC (Creates "Pending" DB Stubs)
             if chapter_num in skip_set:
-                logger.info(f"⏭️ Skipping Ch. {chapter_num} (Matches user skip list)")
+                logger.info(f"⏭️ Skipping Ch. {chapter_num} (Creating pending database stub, bypassing files)")
+                
+                exists = self.db.query(Chapter).filter(Chapter.series_id == self.series.id, Chapter.chapter_number == chapter_num).first()
+                
+                if not exists:
+                    new_ch = Chapter(series_id=self.series.id, chapter_number=chapter_num)
+                    self.db.add(new_ch)
+                    self.db.flush()
+                    
+                    # 🎯 Leave processing flags as False! It is now a "Pending" chapter.
+                    self.db.add(ChapterProcessing(
+                        chapter_id=new_ch.id, 
+                        ocr_extracted=False, 
+                        summary_complete=False
+                    ))
+                
                 next_num += 1
                 continue
 

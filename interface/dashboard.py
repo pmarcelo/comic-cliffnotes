@@ -1,17 +1,20 @@
 import sys
 from pathlib import Path
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine  
+import streamlit as st  
 
-# --- PATH FIX ---
+# This forces Python to look at the root 'comic-cliffnotes' folder before doing anything else.
 root_path = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_path))
+if str(root_path) not in sys.path:
+    sys.path.insert(0, str(root_path))
 
-import streamlit as st
-from core import config
-from ui.sidebar import render_pipeline_control, render_active_tasks, render_api_usage
-from ui.index_tab import render_index
-from ui.deep_dive_tab import render_deep_dive
-from ui.discovery_tab import render_discovery
+
+from core import config  # noqa: E402
+from ui.sidebar import render_pipeline_control, render_active_tasks, render_api_usage # noqa: E402
+from ui.index_tab import render_index # noqa: E402
+from ui.deep_dive_tab import render_deep_dive # noqa: E402
+from ui.discovery_tab import render_discovery # noqa: E402
+
 
 def inject_mobile_ui():
     st.markdown("""

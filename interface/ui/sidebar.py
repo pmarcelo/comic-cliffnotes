@@ -49,7 +49,13 @@ def render_pipeline_control(root_path):
         url_label = "GDrive URL" if ingest_method == "Google Drive" else "GDrive URL (Optional)"
         input_url = st.text_input(url_label)
         
-        starting_chapter = st.number_input("Starting Chapter", min_value=1, value=1)
+        # 🎯 NEW: 0 tells the backend to auto-detect. Any other number forces an override.
+        starting_chapter = st.number_input(
+            "Starting Chapter (0 = Auto-Append)", 
+            min_value=0, 
+            value=0,
+            help="Leave at 0 to automatically append to the end of the series. Enter a number to force the pipeline to overwrite or fill a specific chapter."
+        )
         
         # 🎯 NEW: Added the Skip Chapters input field
         skip_chapters_input = st.text_input(
