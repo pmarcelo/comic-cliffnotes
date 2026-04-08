@@ -72,11 +72,21 @@ def render_index(engine, root_path):
 
     df['id'] = df['id'].astype(str)
 
-    # 1. Metric Overview
+    # 🎯 NEW: Metric Overview (Series-Level Progress)
     m_col1, m_col2, m_col3 = st.columns(3)
-    m_col1.metric("Total Library", f"{len(df)} Series")
-    m_col2.metric("Images Local", f"{df['extracted_done'].sum():,}")
-    m_col3.metric("Summaries Complete", f"{df['summaries_done'].sum():,}")
+    
+    # Calculate completions at the series level
+    total_series = len(df)
+    
+    # A series is "Fully Extracted" if extracted chapters match total chapters (and total > 0)
+    series_extracted = len(df[(df['extracted_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
+    
+    # A series is "Fully Summarized" if summaries match total chapters (and total > 0)
+    series_summarized = len(df[(df['summaries_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
+
+    m_col1.metric("Library Size", f"{total_series} Series")
+    m_col2.metric("Fully Extracted", f"{series_extracted} Series")
+    m_col3.metric("Summaries Done", f"{series_summarized} Series")
 
     # 2. The Interactive Table
     event = st.dataframe(
