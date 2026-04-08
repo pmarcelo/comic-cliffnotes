@@ -146,6 +146,9 @@ class ChapterProcessing(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False, unique=True)
     
+    # 🎯 NEW: Tracks if images are present on disk
+    is_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
+    
     ocr_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
     summary_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     has_error: Mapped[bool] = mapped_column(Boolean, default=False) 
@@ -154,11 +157,11 @@ class ChapterProcessing(Base, TimestampMixin):
 
     # Composite Index to optimize worker queues finding pending tasks
     __table_args__ = (
-        Index("idx_processing_status", "ocr_extracted", "summary_complete", "has_error"),
+        Index("idx_processing_status", "is_extracted", "ocr_extracted", "summary_complete", "has_error"),
     )
 
     def __repr__(self) -> str:
-        return f"<ChapterProcessing(chapter_id={self.chapter_id}, ocr={self.ocr_extracted}, summary={self.summary_complete})>"
+        return f"<ChapterProcessing(chapter_id={self.chapter_id}, ext={self.is_extracted}, ocr={self.ocr_extracted}, summary={self.summary_complete})>"
 
 
 class Summary(Base, TimestampMixin):

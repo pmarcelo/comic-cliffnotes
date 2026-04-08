@@ -76,8 +76,11 @@ def render_pipeline_control(root_path):
             key="sidebar_model_select"
         )
         
-        do_extract = st.checkbox("Extract & OCR", value=True)
-        do_summarize = st.checkbox("Summarize", value=False)
+        # 🎯 NEW: Split the checkboxes into three distinct pipeline stages
+        st.write("Pipeline Stages:")
+        do_extract = st.checkbox("Extract Images", value=True, help="Download and extract images from the source.")
+        do_ocr = st.checkbox("Run OCR", value=True, help="Extract text from the downloaded images.")
+        do_summarize = st.checkbox("Summarize (AI)", value=False, help="Generate chapter summaries using the selected AI model.")
         
         submit_btn = st.form_submit_button("🚀 Start Processor")
 
@@ -110,7 +113,9 @@ def render_pipeline_control(root_path):
             # 🎯 NEW: Pass the skip argument to the subprocess
             if skip_chapters_input: cmd.extend(["--skip", skip_chapters_input])
                 
+            # 🎯 NEW: Pass the split flags to the backend
             if do_extract: cmd.append("--extract")
+            if do_ocr: cmd.append("--ocr")
             if do_summarize: cmd.append("--summarize")
             
             subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})

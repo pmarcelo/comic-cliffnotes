@@ -12,11 +12,12 @@ from ui.sidebar import AVAILABLE_MODELS
 
 @st.cache_data(ttl=60) # Cache for 1 minute to prevent flicker
 def fetch_series_index(_engine):
-    """Cached database query for the main index."""
+    """Cached database query for the main index with granular progress tracking."""
     query = text("""
         SELECT 
             s.id, s.title, s.created_at, ss.url as primary_source,
             COUNT(c.id) as total_chapters,
+            SUM(CASE WHEN cp.is_extracted THEN 1 ELSE 0 END) as extracted_done,
             SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END) as ocr_done,
             SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END) as summaries_done,
             SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END) as errors
@@ -30,11 +31,20 @@ def fetch_series_index(_engine):
     return pd.read_sql(query, _engine)
 
 def highlight_discrepancies(row):
-    """Styles the dataframe to show progress gaps."""
+    """Styles the dataframe to show progress gaps based on pipeline order."""
     styles = [''] * len(row)
-    if row['ocr_done'] < row['total_chapters']:
+    if row['total_chapters'] == 0:
+        return styles
+
+    # 1. Highlight missing local images (Red)
+    if row['extracted_done'] < row['total_chapters']:
+        idx = row.index.get_loc('extracted_done')
+        styles[idx] = 'background-color: rgba(231, 76, 60, 0.2);' 
+    # 2. Highlight missing OCR (Yellow)
+    elif row['ocr_done'] < row['total_chapters']:
         idx = row.index.get_loc('ocr_done')
-        styles[idx] = 'background-color: rgba(241, 196, 15, 0.2);'
+        styles[idx] = 'background-color: rgba(241, 196, 15, 0.2);' 
+    # 3. Highlight missing Summaries (Blue)
     elif row['summaries_done'] < row['total_chapters']:
         idx = row.index.get_loc('summaries_done')
         styles[idx] = 'background-color: rgba(52, 152, 219, 0.2);'
@@ -65,11 +75,10 @@ def render_index(engine, root_path):
     # 1. Metric Overview
     m_col1, m_col2, m_col3 = st.columns(3)
     m_col1.metric("Total Library", f"{len(df)} Series")
-    m_col2.metric("Fully OCR'd", f"{len(df[df['ocr_done'] >= df['total_chapters']])}")
-    m_col3.metric("Fully Summarized", f"{len(df[df['summaries_done'] >= df['total_chapters']])}")
+    m_col2.metric("Images Local", f"{df['extracted_done'].sum():,}")
+    m_col3.metric("Summaries Complete", f"{df['summaries_done'].sum():,}")
 
     # 2. The Interactive Table
-    # The 'key' ensures Streamlit remembers which row is selected during reruns
     event = st.dataframe(
         df.style.apply(highlight_discrepancies, axis=1),
         column_config={
@@ -78,6 +87,7 @@ def render_index(engine, root_path):
             "created_at": st.column_config.DatetimeColumn("Added On", format="D MMM YYYY, h:mm a"),
             "primary_source": st.column_config.LinkColumn("Source URL"),
             "total_chapters": "Total",
+            "extracted_done": "Images 📥",
             "ocr_done": "OCR ✅",
             "summaries_done": "Summaries 📝",
             "errors": st.column_config.NumberColumn("Errors ⚠️", format="%d")
@@ -94,7 +104,6 @@ def render_index(engine, root_path):
     if len(event.selection.rows) > 0:
         selected_row = df.iloc[event.selection.rows[0]]
         
-        # Sync the selection to the global session state for Tab 2
         st.session_state.selected_series_id = selected_row['id']
         st.session_state.selected_series_title = selected_row['title']
 
@@ -111,14 +120,13 @@ def render_index(engine, root_path):
                 try:
                     with engine.begin() as conn:
                         conn.execute(text("UPDATE series SET title = :t, updated_at = now() WHERE id = :id"), {"t": new_title, "id": selected_row['id']})
-                        # Check/Update Source
                         exists = conn.execute(text("SELECT id FROM series_sources WHERE series_id = :id AND priority = 1"), {"id": selected_row['id']}).fetchone()
                         if exists:
                             conn.execute(text("UPDATE series_sources SET url = :url, updated_at = now() WHERE id = :s_id"), {"url": new_url, "s_id": exists[0]})
                         else:
                             conn.execute(text("INSERT INTO series_sources (id, series_id, url, priority, created_at, updated_at) VALUES (:uuid, :id, :url, 1, now(), now())"), {"uuid": str(uuid.uuid4()), "id": selected_row['id'], "url": new_url})
                     
-                    st.cache_data.clear() # Clear cache so table updates
+                    st.cache_data.clear()
                     st.success("Saved!")
                     st.rerun(scope="fragment")
                 except Exception as e:
@@ -128,10 +136,9 @@ def render_index(engine, root_path):
             
             # Action Buttons
             st.caption("Trigger Pipeline Actions")
-            # Pull the model from the sidebar's state so they match
             q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
             
-            b1, b2, b3, b4 = st.columns(4)
+            b1, b2, b3, b4, b5 = st.columns(5)
             
             if b1.button("🔍 Scan", use_container_width=True, disabled=not selected_row['primary_source']):
                 with st.spinner("Scouting..."):
@@ -139,8 +146,7 @@ def render_index(engine, root_path):
                 st.cache_data.clear()
                 st.rerun(scope="fragment")
 
-            if b2.button("📷 OCR", use_container_width=True):
-                # 🎯 Updated to use smart auto-routing
+            if b2.button("📥 Extract", use_container_width=True):
                 cmd = [
                     sys.executable, "processor.py", 
                     "-t", selected_row['title'], 
@@ -149,19 +155,33 @@ def render_index(engine, root_path):
                     "--ingest-method", "auto"
                 ]
                 subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("OCR Started (Auto-detecting source)")
+                st.toast("Extraction Started (Auto-detecting source)")
 
-            if b3.button("📝 Summary", use_container_width=True):
-                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--summarize", "--model", q_model]
-                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("Summary Started")
-
-            if b4.button("🔄 Full", use_container_width=True):
-                # 🎯 Updated to use smart auto-routing
+            if b3.button("📷 OCR", use_container_width=True):
                 cmd = [
                     sys.executable, "processor.py", 
                     "-t", selected_row['title'], 
-                    "--extract", "--summarize", 
+                    "--ocr", 
+                    "--model", q_model
+                ]
+                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                st.toast("OCR Started")
+
+            if b4.button("📝 Summary", use_container_width=True):
+                cmd = [
+                    sys.executable, "processor.py", 
+                    "-t", selected_row['title'], 
+                    "--summarize", 
+                    "--model", q_model
+                ]
+                subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                st.toast("Summary Started")
+
+            if b5.button("🔄 Full", use_container_width=True):
+                cmd = [
+                    sys.executable, "processor.py", 
+                    "-t", selected_row['title'], 
+                    "--extract", "--ocr", "--summarize", 
                     "--model", q_model, 
                     "--ingest-method", "auto"
                 ]

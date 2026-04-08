@@ -12,7 +12,7 @@ from core.utils import usage_tracker
 
 
 class PipelineOrchestrator:
-    def __init__(self, title, start_chapter=1):
+    def __init__(self, title, start_chapter=-1): # 🎯 Default now -1 for auto-append
         self.title = title
         
         # Initialize DB Session
@@ -39,13 +39,14 @@ class PipelineOrchestrator:
     def run(self, 
             url=None, 
             run_extract=False, 
+            run_ocr=False,        # 🎯 NEW: Granular OCR flag
             run_summarize=False, 
             use_local_ai=False, 
             redo_targets=None, 
             run_arcs=False, 
             model_name=None,
             ingest_method="auto",
-            skip_input=""): # 🎯 NEW: Added skip_input parameter
+            skip_input=""):
         
         print(f"\n🚀 PROCESSING: {self.title}")
         print(f"🛠️  Method: {ingest_method} | Model: {model_name}")
@@ -59,13 +60,11 @@ class PipelineOrchestrator:
                 run_summarize = True
 
             # Logic gate: if no specific flags are passed, we assume a full run
-            run_all = not run_extract and not run_summarize and not run_arcs
+            run_all = not run_extract and not run_ocr and not run_summarize and not run_arcs
 
-            # --- PHASE 1: EXTRACTION & OCR ---
+            # --- PHASE 1: EXTRACTION ---
             if run_extract or run_all:
-                print("\n--- PHASE 1: EXTRACTION & OCR ---")
-                
-                # 🎯 Smart Ingestion: Pass the skip argument
+                print("\n--- PHASE 1: EXTRACTION ---")
                 success = self.ingest_manager.ingest(
                     gdrive_url=url, 
                     manual_method=ingest_method,
@@ -76,13 +75,15 @@ class PipelineOrchestrator:
                     print("❌ Ingestion failed. Aborting pipeline.")
                     return
 
+            # --- PHASE 2: OCR ---
+            if run_ocr or run_all:
+                print("\n--- PHASE 2: OCR ---")
                 self.ocr_manager.process_chapters()
 
-            # --- PHASE 2: AI SUMMARY ---
+            # --- PHASE 3: AI SUMMARY ---
             if run_summarize or run_all:
-                print("\n--- PHASE 2: AI SUMMARY ---")
+                print("\n--- PHASE 3: AI SUMMARY ---")
                 
-                # Check daily request quota before calling LLM
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
                     print("🛑 Aborting: Daily API limit reached.")
                     return
@@ -92,9 +93,9 @@ class PipelineOrchestrator:
                 # Clean up local image files only if summaries are fully finished
                 self.ingest_manager.cleanup()
 
-            # --- PHASE 3: ARC SYNTHESIS ---
+            # --- PHASE 4: ARC SYNTHESIS ---
             if run_arcs or run_all:
-                print("\n--- PHASE 3: ARC SYNTHESIS ---")
+                print("\n--- PHASE 4: ARC SYNTHESIS ---")
                 
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
                     print("🛑 Aborting: Daily API limit reached.")
@@ -113,15 +114,13 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--title", required=True)
     parser.add_argument("-u", "--url", help="GDrive URL for Ingest")
     
-    # 🎯 FIX: Updated start-chapter default to 0 for Auto-Append logic
-    parser.add_argument("-c", "--start-chapter", type=int, default=1, help="1 to auto-append, or specify a number to override.")
+    # 🎯 FIX: Changed default to -1 for Auto-Append logic
+    parser.add_argument("-c", "--start-chapter", type=int, default=-1, help="-1 to auto-append, or specify a number to override.")
     
     parser.add_argument("-m", "--model", default="gemini-3.1-flash-lite-preview", help="Gemini model name")
     
-    # 🎯 NEW: Add the skip argument to the parser
     parser.add_argument("--skip", type=str, default="", help="Comma-separated chapters to skip (for GDrive ingestion)")
     
-    # Updated Ingest Method: Added "auto" as the default choice
     parser.add_argument(
         "--ingest-method", 
         default="auto", 
@@ -129,8 +128,10 @@ if __name__ == "__main__":
         help="Method to acquire images. 'auto' checks DB for web source first."
     )
 
-    parser.add_argument("--extract", action="store_true", help="Run Download and OCR only.")
-    parser.add_argument("--summarize", action="store_true", help="Run AI and Cleanup only.")
+    # 🎯 SPLIT FLAGS
+    parser.add_argument("-e", "--extract", action="store_true", help="Run image extraction phase only.")
+    parser.add_argument("-o", "--ocr", action="store_true", help="Run OCR text extraction phase only.")
+    parser.add_argument("-s", "--summarize", action="store_true", help="Run AI and Cleanup only.")
     parser.add_argument("--build-arcs", action="store_true", help="Run Arc Synthesis only.")
     
     parser.add_argument("--local-ai", action="store_true", help="Use Ollama instead of Gemini.")
@@ -142,11 +143,12 @@ if __name__ == "__main__":
     orchestrator.run(
         url=args.url,
         run_extract=args.extract,
+        run_ocr=args.ocr, # 🎯 Passed new OCR flag
         run_summarize=args.summarize,
         use_local_ai=args.local_ai,
         redo_targets=args.redo_summaries,
         run_arcs=args.build_arcs,
         model_name=args.model,
         ingest_method=args.ingest_method,
-        skip_input=args.skip # 🎯 Pass it to the orchestrator here
+        skip_input=args.skip
     )
