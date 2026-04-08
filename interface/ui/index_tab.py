@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd
+import pd
 import sys
 import os
 import uuid
@@ -13,14 +13,15 @@ from ui.sidebar import AVAILABLE_MODELS
 @st.cache_data(ttl=60) # Cache for 1 minute to prevent flicker
 def fetch_series_index(_engine):
     """Cached database query for the main index with granular progress tracking."""
+    # 🎯 FIX: Added COALESCE to the SUMs to ensure NULL results from LEFT JOINs show as 0
     query = text("""
         SELECT 
             s.id, s.title, s.created_at, ss.url as primary_source,
             COUNT(c.id) as total_chapters,
-            SUM(CASE WHEN cp.is_extracted THEN 1 ELSE 0 END) as extracted_done,
-            SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END) as ocr_done,
-            SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END) as summaries_done,
-            SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END) as errors
+            COALESCE(SUM(CASE WHEN cp.is_extracted THEN 1 ELSE 0 END), 0) as extracted_done,
+            COALESCE(SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END), 0) as ocr_done,
+            COALESCE(SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END), 0) as summaries_done,
+            COALESCE(SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END), 0) as errors
         FROM series s
         LEFT JOIN series_sources ss ON s.id = ss.series_id AND ss.priority = 1
         LEFT JOIN chapters c ON s.id = c.series_id
@@ -72,16 +73,12 @@ def render_index(engine, root_path):
 
     df['id'] = df['id'].astype(str)
 
-    # 🎯 NEW: Metric Overview (Series-Level Progress)
+    # 🎯 Series-Level Metrics (Showing "Finished Series" vs "Raw Chapters")
     m_col1, m_col2, m_col3 = st.columns(3)
-    
-    # Calculate completions at the series level
     total_series = len(df)
     
-    # A series is "Fully Extracted" if extracted chapters match total chapters (and total > 0)
+    # Check for full completion based on total chapters vs stage completion
     series_extracted = len(df[(df['extracted_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
-    
-    # A series is "Fully Summarized" if summaries match total chapters (and total > 0)
     series_summarized = len(df[(df['summaries_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
 
     m_col1.metric("Library Size", f"{total_series} Series")
@@ -133,8 +130,6 @@ def render_index(engine, root_path):
                         exists = conn.execute(text("SELECT id FROM series_sources WHERE series_id = :id AND priority = 1"), {"id": selected_row['id']}).fetchone()
                         if exists:
                             conn.execute(text("UPDATE series_sources SET url = :url, updated_at = now() WHERE id = :s_id"), {"url": new_url, "s_id": exists[0]})
-                        else:
-                            conn.execute(text("INSERT INTO series_sources (id, series_id, url, priority, created_at, updated_at) VALUES (:uuid, :id, :url, 1, now(), now())"), {"uuid": str(uuid.uuid4()), "id": selected_row['id'], "url": new_url})
                     
                     st.cache_data.clear()
                     st.success("Saved!")
@@ -157,43 +152,40 @@ def render_index(engine, root_path):
                 st.rerun(scope="fragment")
 
             if b2.button("📥 Extract", use_container_width=True):
-                cmd = [
-                    sys.executable, "processor.py", 
-                    "-t", selected_row['title'], 
-                    "--extract", 
-                    "--model", q_model, 
-                    "--ingest-method", "auto"
-                ]
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--extract", "--model", q_model, "--ingest-method", "auto"]
                 subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("Extraction Started (Auto-detecting source)")
+                st.toast("Extraction Started")
 
             if b3.button("📷 OCR", use_container_width=True):
-                cmd = [
-                    sys.executable, "processor.py", 
-                    "-t", selected_row['title'], 
-                    "--ocr", 
-                    "--model", q_model
-                ]
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--ocr", "--model", q_model]
                 subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
                 st.toast("OCR Started")
 
             if b4.button("📝 Summary", use_container_width=True):
-                cmd = [
-                    sys.executable, "processor.py", 
-                    "-t", selected_row['title'], 
-                    "--summarize", 
-                    "--model", q_model
-                ]
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--summarize", "--model", q_model]
                 subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
                 st.toast("Summary Started")
 
             if b5.button("🔄 Full", use_container_width=True):
-                cmd = [
-                    sys.executable, "processor.py", 
-                    "-t", selected_row['title'], 
-                    "--extract", "--ocr", "--summarize", 
-                    "--model", q_model, 
-                    "--ingest-method", "auto"
-                ]
+                cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--extract", "--ocr", "--summarize", "--model", q_model, "--ingest-method", "auto"]
                 subprocess.Popen(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
-                st.toast("Full Pipeline Started (Auto-detecting source)")
+                st.toast("Full Pipeline Started")
+
+            # 🛠️ Maintenance / Danger Zone
+            with st.expander("🛠️ Advanced / Maintenance"):
+                st.warning("Destructive Actions: Resetting data will delete existing records.")
+                reset_col1, reset_col2 = st.columns([3, 1])
+                # Default to 'all' for simplicity
+                reset_input = reset_col1.text_input("Chapter Targets (e.g., 'all', '1-10', '25')", value="all", key=f"reset_field_{selected_row['id']}")
+                
+                if reset_col2.button("🗑️ Reset Summaries", use_container_width=True, type="secondary"):
+                    cmd = [
+                        sys.executable, "processor.py", 
+                        "-t", selected_row['title'], 
+                        "--reset-summaries", reset_input
+                    ]
+                    # Running this synchronously via subprocess.run so we can refresh after it finishes
+                    subprocess.run(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
+                    st.cache_data.clear()
+                    st.success(f"Successfully reset summaries for: {reset_input}")
+                    st.rerun(scope="fragment")

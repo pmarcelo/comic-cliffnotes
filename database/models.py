@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, DateTime, UniqueConstraint, Float, Index
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 # -------------------------------------------------------------------------
 # Base & Mixins
@@ -100,6 +100,9 @@ class SeriesMetadata(Base, TimestampMixin):
     series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False, unique=True)
     
     is_backlog_processed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # The Hybrid Living Summary (Stores Meta, Prose, and Character Bank)
+    living_summary: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     series: Mapped["Series"] = relationship(back_populates="series_metadata")
 
@@ -146,7 +149,7 @@ class ChapterProcessing(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False, unique=True)
     
-    # 🎯 NEW: Tracks if images are present on disk
+    # Tracks if images are present on disk
     is_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
     
     ocr_extracted: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -171,6 +174,9 @@ class Summary(Base, TimestampMixin):
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False, unique=True)
     
     content: Mapped[str] = mapped_column(Text, nullable=False) 
+    
+    # Snapshot of the World State after this chapter is processed
+    state_snapshot: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     chapter: Mapped["Chapter"] = relationship(back_populates="summary")
 
