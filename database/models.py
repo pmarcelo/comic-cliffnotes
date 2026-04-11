@@ -75,6 +75,10 @@ class Series(Base, TimestampMixin):
     queue_tasks: Mapped[List["ProcessingQueue"]] = relationship(
         back_populates="series", cascade="all, delete-orphan"
     )
+    # 🎯 NEW: Relationship for Bridge Caching
+    bridge_caches: Mapped[List["BridgeCache"]] = relationship(
+        back_populates="series", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Series(title={self.title})>"
@@ -261,3 +265,28 @@ class ProcessingQueue(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<QueueTask(action={self.action}, status={self.status.value}, series_id={self.series_id})>"
+
+# -------------------------------------------------------------------------
+# 🎯 NEW: Bridge Cache Model
+# -------------------------------------------------------------------------
+class BridgeCache(Base, TimestampMixin):
+    """Caches AI-generated 'Previously On...' summaries to save API costs."""
+    __tablename__ = "bridge_cache"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    series_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
+    
+    start_chapter: Mapped[float] = mapped_column(Float, nullable=False)
+    end_chapter: Mapped[float] = mapped_column(Float, nullable=False)
+    
+    # The generated AI text summarizing the gap
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+
+    series: Mapped["Series"] = relationship(back_populates="bridge_caches")
+
+    __table_args__ = (
+        UniqueConstraint("series_id", "start_chapter", "end_chapter", name="uq_bridge_cache"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<BridgeCache(series_id={self.series_id}, range={self.start_chapter}-{self.end_chapter})>"

@@ -29,7 +29,7 @@ class PipelineOrchestrator:
         """Ensures the series exists in Postgres."""
         series = self.db.query(Series).filter(Series.title == self.title).first()
         if not series:
-            print(f"Initializing Series in Database: {self.title}")
+            print(f"Initializing Series in Database: {self.title}", flush=True)
             series = Series(title=self.title)
             self.db.add(series)
             self.db.commit()
@@ -48,18 +48,18 @@ class PipelineOrchestrator:
             ingest_method="auto",
             skip_input=""):
         
-        print(f"\nPROCESSING: {self.title}")
-        print(f"Method: {ingest_method} | Model: {model_name}")
+        print(f"\nPROCESSING: {self.title}", flush=True)
+        print(f"Method: {ingest_method} | Model: {model_name}", flush=True)
         if skip_input:
-            print(f"Skipping Chapters: {skip_input}")
-        print("-" * 40)
+            print(f"Skipping Chapters: {skip_input}", flush=True)
+        print("-" * 40, flush=True)
 
         try:
             # --- MAINTENANCE: RESET SUMMARIES ---
             if reset_targets:
-                # If the UI sends 'all' or a range, we clear the DB before running
-                self.summary_manager.reset_summaries(reset_targets)
-                # If we reset, we usually want to re-summarize immediately
+                # If UI sends a list of strings, join them for the manager
+                target_str = " ".join(reset_targets) if isinstance(reset_targets, list) else reset_targets
+                self.summary_manager.reset_summaries(target_str)
                 run_summarize = True
 
             # Logic gate: if no specific flags are passed, we assume a full run
@@ -67,7 +67,7 @@ class PipelineOrchestrator:
 
             # --- PHASE 1: EXTRACTION (Ingest) ---
             if run_extract or run_all:
-                print("\n--- PHASE 1: EXTRACTION ---")
+                print("\n--- PHASE 1: EXTRACTION ---", flush=True)
                 success = self.ingest_manager.ingest(
                     gdrive_url=url, 
                     manual_method=ingest_method,
@@ -75,34 +75,31 @@ class PipelineOrchestrator:
                 )
 
                 if not success:
-                    print("Ingestion failed. Aborting pipeline.")
+                    print("Ingestion failed. Aborting pipeline.", flush=True)
                     return
 
             # --- PHASE 2: OCR ---
             if run_ocr or run_all:
-                print("\n--- PHASE 2: OCR ---")
+                print("\n--- PHASE 2: OCR ---", flush=True)
                 self.ocr_manager.process_chapters()
 
             # --- PHASE 3: AI SUMMARY (Stateful) ---
             if run_summarize or run_all:
-                print("\n--- PHASE 3: AI SUMMARY ---")
+                print("\n--- PHASE 3: AI SUMMARY ---", flush=True)
                 
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
-                    print("Aborting: Daily API limit reached.")
+                    print("Aborting: Daily API limit reached.", flush=True)
                     return
                 
-                # The SummaryManager now handles context-fetching and state-saving automatically
                 self.summary_manager.generate_chapter_summaries(use_local_ai, model_name=model_name)
-                
-                # Cleanup: Deletes images once summaries are 100% finished
                 self.ingest_manager.cleanup()
 
             # --- PHASE 4: ARC SYNTHESIS ---
             if run_arcs or run_all:
-                print("\n--- PHASE 4: ARC SYNTHESIS ---")
+                print("\n--- PHASE 4: ARC SYNTHESIS ---", flush=True)
                 
                 if not use_local_ai and not usage_tracker.check_usage(model_name):
-                    print("Aborting: Daily API limit reached.")
+                    print("Aborting: Daily API limit reached.", flush=True)
                     return
                     
                 self.arc_manager.generate_arc_summaries()
@@ -110,7 +107,7 @@ class PipelineOrchestrator:
         finally:
             self.db.close()
 
-        print(f"\n PIPELINE COMPLETE  for {self.title}")
+        print(f"\nPIPELINE COMPLETE for {self.title}", flush=True)
 
 
 if __name__ == "__main__":
@@ -118,7 +115,6 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--title", required=True, help="Title of the series (Must match DB)")
     parser.add_argument("-u", "--url", help="Google Drive URL for ingestion")
     
-    # Auto-Append logic: default to -1
     parser.add_argument("-c", "--start-chapter", type=int, default=-1, 
                         help="-1 to auto-append based on last DB entry, or specify a number to override.")
     
@@ -132,7 +128,6 @@ if __name__ == "__main__":
         help="Method to acquire images. 'auto' checks DB for web source first."
     )
 
-    # Granular Phase Flags
     parser.add_argument("-e", "--extract", action="store_true", help="Run Phase 1: Image Extraction only.")
     parser.add_argument("-o", "--ocr", action="store_true", help="Run Phase 2: OCR extraction only.")
     parser.add_argument("-s", "--summarize", action="store_true", help="Run Phase 3: AI Synthesis only.")

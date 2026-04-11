@@ -11,6 +11,34 @@ from core.extractors.discovery import sync_series_by_id
 # We import the model list to keep the selection in sync with the sidebar
 from ui.sidebar import AVAILABLE_MODELS
 
+def run_synchronously(cmd_list, cwd):
+    """
+    Runs a shell command and yields output line-by-line for Streamlit to render.
+    Enforces utf-8 encoding and fail-safe character replacement.
+    """
+    env = {**os.environ, "PYTHONUTF8": "1", "PYTHONPATH": str(cwd)}
+    
+    process = subprocess.Popen(
+        cmd_list,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        bufsize=1,
+        universal_newlines=True
+    )
+
+    for line in process.stdout:
+        yield line.strip()
+        
+    process.wait()
+    
+    if process.returncode != 0:
+        raise Exception(f"Process failed with exit code {process.returncode}")
+
 @st.cache_data(ttl=60) # Cache for 1 minute to prevent flicker
 def fetch_series_index(_engine):
     """Cached database query for the main index with granular progress tracking."""
@@ -137,14 +165,10 @@ def render_index(engine, root_path):
 
             st.divider()
             
-            # Action Buttons
-            st.caption("Trigger Pipeline Actions")
-            q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
-            
+            # Helper Functions for Actions
             def queue_task(action, context=None):
                 try:
                     with engine.begin() as conn:
-                        # 🎯 FIX: Added 'priority' to the column list and VALUES
                         conn.execute(text("""
                             INSERT INTO processing_queue (
                                 id, series_id, action, status, priority, context, created_at, updated_at
@@ -162,25 +186,95 @@ def render_index(engine, root_path):
                 except Exception as e:
                     st.error(f"Failed to queue task: {e}")
 
-            b1, b2, b3, b4, b5 = st.columns(5)
+            def run_now_task(action, series_id, series_title, cwd_path, context=None):
+                task_id = str(uuid.uuid4())
+                try:
+                    # 1. Insert RUNNING "Ghost Task"
+                    with engine.begin() as conn:
+                        conn.execute(text("""
+                            INSERT INTO processing_queue (
+                                id, series_id, action, status, priority, context, created_at, updated_at
+                            )
+                            VALUES (
+                                :uuid, :s_id, :action, 'RUNNING'::queuestatus, 10, :context, now(), now()
+                            )
+                        """), {
+                            "uuid": task_id,
+                            "s_id": series_id,
+                            "action": action,
+                            "context": json.dumps(context) if context else None
+                        })
+
+                    # 2. Prepare Command
+                    cmd = [sys.executable, "processor.py", "-t", series_title]
+                    if action == "extract": cmd.append("--extract")
+                    elif action == "ocr": cmd.append("--ocr")
+                    elif action == "summary": cmd.append("--summarize")
+                    elif action == "full": cmd.extend(["--extract", "--ocr", "--summarize"])
+                    
+                    if context and "model" in context and action in ["summary", "full"]:
+                        cmd.extend(["--model", context["model"]])
+
+                    # 3. UI Streaming
+                    st.write(f"### Live Execution Logs: {action.upper()}")
+                    log_container = st.empty()
+                    log_lines = []
+
+                    with st.spinner("Processing in real-time..."):
+                        for line in run_synchronously(cmd, cwd_path):
+                            if line:
+                                log_lines.append(f"> {line}")
+                                log_container.code("\n".join(log_lines[-15:]), language="shell")
+
+                    # 4. Mark Completed
+                    with engine.begin() as conn:
+                        conn.execute(text("UPDATE processing_queue SET status = 'COMPLETED'::queuestatus, updated_at = now() WHERE id = :id"), {"id": task_id})
+                    
+                    st.cache_data.clear()
+                    st.success(f"Successfully completed {action.upper()}!")
+                    
+                except Exception as e:
+                    # Mark Failed
+                    with engine.begin() as conn:
+                        conn.execute(text("UPDATE processing_queue SET status = 'FAILED'::queuestatus, updated_at = now() WHERE id = :id"), {"id": task_id})
+                    st.error(f"Execution Failed: {e}")
+
+
+            # --- Action Panel ---
+            st.caption("Trigger Pipeline Actions")
+            q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
             
-            if b1.button("🔍 Scan", use_container_width=True, disabled=not selected_row['primary_source']):
+            # Top-level scan (Synchronous only, no queue needed)
+            if st.button("🔍 Scan for New Chapters", use_container_width=True, disabled=not selected_row['primary_source']):
                 with st.spinner("Scouting..."):
                     sync_series_by_id(selected_row['id'])
                 st.cache_data.clear()
                 st.rerun(scope="fragment")
 
-            if b2.button("📥 Extract", use_container_width=True):
-                queue_task("extract")
+            st.write("") # Spacer
 
-            if b3.button("📷 OCR", use_container_width=True):
-                queue_task("ocr")
+            # Action Grid Configuration
+            pipeline_actions = [
+                ("extract", "📥 Extract Images", None),
+                ("ocr", "📷 OCR Panels", None),
+                ("summary", "📝 Generate Summaries", {"model": q_model}),
+                ("full", "🔄 Full Pipeline", {"model": q_model})
+            ]
 
-            if b4.button("📝 Summary", use_container_width=True):
-                queue_task("summary", context={"model": q_model})
+            # Render structured rows for each pipeline action
+            for act_key, act_label, act_ctx in pipeline_actions:
+                col_label, col_q, col_run = st.columns([2, 1, 1])
+                
+                # Align text vertically with the buttons
+                with col_label:
+                    st.write(f"**{act_label}**")
+                
+                if col_q.button("Add to Queue", key=f"q_{act_key}_{selected_row['id']}", use_container_width=True):
+                    queue_task(act_key, context=act_ctx)
+                
+                if col_run.button("Run Now", type="primary", key=f"run_{act_key}_{selected_row['id']}", use_container_width=True):
+                    run_now_task(act_key, selected_row['id'], selected_row['title'], root_path, context=act_ctx)
 
-            if b5.button("🔄 Full", use_container_width=True):
-                queue_task("full", context={"model": q_model})
 
             # 🛠️ Maintenance / Danger Zone
             with st.expander("🛠️ Advanced / Maintenance"):
@@ -198,3 +292,31 @@ def render_index(engine, root_path):
                     st.cache_data.clear()
                     st.success(f"Successfully reset summaries for: {reset_input}")
                     st.rerun(scope="fragment")
+                
+                st.divider()
+                st.subheader("⚠️ Danger Zone")
+                st.error("Deleting a series is permanent. This destroys all database records associated with the series.")
+
+                delete_col1, delete_col2 = st.columns([3, 1])
+                
+                confirm_text = delete_col1.text_input(
+                    "Type the series title exactly to confirm deletion:", 
+                    placeholder=selected_row['title'],
+                    key=f"del_confirm_{selected_row['id']}"
+                )
+                
+                can_delete = confirm_text == selected_row['title']
+                
+                if delete_col2.button("🚨 Delete Series", use_container_width=True, disabled=not can_delete, type="primary"):
+                    with st.spinner("Purging database records..."):
+                        try:
+                            # 1. Delete from DB (Relies on SQLAlchemy Cascades)
+                            with engine.begin() as conn:
+                                conn.execute(text("DELETE FROM series WHERE id = :id"), {"id": selected_row['id']})
+                                
+                            st.cache_data.clear()
+                            st.success(f"Successfully deleted {selected_row['title']} from the database.")
+                            st.session_state.selected_series_id = None
+                            st.rerun(scope="fragment")
+                        except Exception as e:
+                            st.error(f"Failed to delete series: {e}")
