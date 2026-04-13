@@ -1,35 +1,41 @@
 import os
 import sys
-from pathlib import Path
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
 from alembic import context
 from dotenv import load_dotenv
 
-# 1. Ensure project root is in path for imports
-root_path = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_path))
+# Add project root to sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-# 2. Import your models
+# Import your Base and models so Alembic can read the schema
 from database.models import Base 
 
+# 1. FORCE LOAD THE .ENV FILE
 load_dotenv()
 
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
 
+# Interpret the config file for Python logging.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# 3. Override URL from .env
-db_url = os.getenv("DATABASE_URL")
-if db_url:
-    config.set_main_option("sqlalchemy.url", db_url)
-
+# add your model's MetaData object here
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
+    url = os.getenv("DATABASE_URL")
+    
+    # INTERCEPT AND REWRITE FOR COCKROACHDB
+    if url and url.startswith("postgres") and "cockroach" in url:
+        url = url.replace("postgresql://", "cockroachdb://", 1)
+        url = url.replace("postgres://", "cockroachdb://", 1)
+        
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -40,20 +46,34 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # FIX: Removed 'is_settings=True' argument here
+    
+    # 1. PULL DIRECTLY FROM OS ENVIRONMENT
+    url = os.getenv("DATABASE_URL")
+    
+    if not url:
+        raise ValueError("DATABASE_URL is not set in the .env file!")
+        
+    # 2. INTERCEPT AND REWRITE FOR COCKROACHDB
+    if url.startswith("postgres") and "cockroach" in url:
+        url = url.replace("postgresql://", "cockroachdb://", 1)
+        url = url.replace("postgres://", "cockroachdb://", 1)
+
+    # 3. EXPLICITLY OVERRIDE THE CONFIG DICTIONARY
+    ini_section = config.get_section(config.config_ini_section, {})
+    ini_section["sqlalchemy.url"] = url
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        ini_section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, 
-            target_metadata=target_metadata,
-            compare_type=True 
+            connection=connection, target_metadata=target_metadata
         )
 
         with context.begin_transaction():

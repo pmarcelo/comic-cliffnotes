@@ -7,6 +7,7 @@ from core import config
 from core.intelligence import ai_agent, local_agent
 from database.models import Chapter, ChapterProcessing, Summary, SeriesMetadata
 from core.utils import usage_tracker
+from core.database.sync import push_chapter_to_cloud  # 🎯 NEW: Cloud Sync Utility
 
 
 class SummaryManager:
@@ -187,6 +188,11 @@ class SummaryManager:
                     proc.summary_complete = True
                     self.db.commit()
                     print(f"SUCCESS: Saved Stateful Summary for Chapter {chapter.chapter_number}")
+                    
+                    # 🎯 NEW: Cloud Sync Trigger
+                    print(f"Syncing Chapter {chapter.chapter_number} payload to Cloud Replica...")
+                    push_chapter_to_cloud(str(chapter.id))
+
                 else:
                     # If the agent returned None/Empty without throwing an error
                     raise Exception(f"AI returned empty results for Chapter {chapter.chapter_number}")

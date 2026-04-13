@@ -1,6 +1,6 @@
 import sys
+import os
 from pathlib import Path
-from sqlalchemy import create_engine  
 import streamlit as st  
 
 # This forces Python to look at the root 'comic-cliffnotes' folder before doing anything else.
@@ -9,6 +9,7 @@ if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
 from core import config  # noqa: E402
+from database.session import local_engine, cloud_engine # 🎯 NEW: Import pre-configured engines
 from ui.sidebar import render_pipeline_control, render_active_tasks, render_api_usage # noqa: E402
 from ui.index_tab import render_index # noqa: E402
 from ui.deep_dive_tab import render_deep_dive # noqa: E402
@@ -60,10 +61,19 @@ if 'selected_series_id' not in st.session_state:
 if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
 
-# --- DATABASE CONNECTION ---
-@st.cache_resource
+# --- 🎯 DATABASE CONNECTION (HYBRID ROUTER) ---
 def get_db_engine():
-    return create_engine(config.DATABASE_URL)
+    """
+    Context-Aware Database Router.
+    If deployed to Streamlit Cloud, it uses CockroachDB.
+    If running locally, it uses your standard PostgreSQL master.
+    """
+    IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
+    
+    if IS_ONLINE and cloud_engine:
+        return cloud_engine
+        
+    return local_engine
 
 engine = get_db_engine()
 

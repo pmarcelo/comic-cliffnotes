@@ -11,6 +11,7 @@ sqlalchemy
 alembic
 psycopg2-binary
 pgcli
+sqlalchemy-cockroachdb
 
 # --- Utilities & Networking ---
 python-dotenv
