@@ -1,12 +1,30 @@
 import os
+import streamlit as st
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from core import config
 
 # -------------------------------------------------------------------------
-# 1. Local Database (The Master Record)
+# 🎯 1. SSL BOOTSTRAP (Crucial for Streamlit Cloud)
 # -------------------------------------------------------------------------
-# 🎯 FIXED: Make local engine optional for Cloud deployments
+# CockroachDB verify-full looks for a file at ~/.postgresql/root.crt
+cert_path = os.path.expanduser("~/.postgresql/root.crt")
+
+if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(cert_path), exist_ok=True)
+    
+    # Inject the certificate from secrets into the file system
+    if "COCKROACH_CA_CERT" in st.secrets:
+        with open(cert_path, "w") as f:
+            f.write(st.secrets["COCKROACH_CA_CERT"])
+    else:
+        # If this hits, double-check your Streamlit Secrets TOML
+        st.error("SSL Error: COCKROACH_CA_CERT not found in Secrets.")
+
+# -------------------------------------------------------------------------
+# 2. Local Database Engine (The Command Center)
+# -------------------------------------------------------------------------
 local_engine = None
 SessionLocal = None
 
@@ -14,60 +32,18 @@ if config.DATABASE_URL:
     local_engine = create_engine(config.DATABASE_URL)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=local_engine)
 elif os.getenv("CLIFFNOTES_MODE") != "ONLINE":
-    # Only raise error if we are NOT in online mode and missing the URL
+    # Only crash if we're local and missing the URL
     raise ValueError("DATABASE_URL is not set. Check your local .env file.")
 
 # -------------------------------------------------------------------------
-# 2. Cloud Database (The Read Replica)
+# 3. Cloud Database Engine (The Remote Replica)
 # -------------------------------------------------------------------------
-CLOUD_DB_URL = os.getenv("CLOUD_DATABASE_URL")
-
 cloud_engine = None
-CloudSession = None
 
-if CLOUD_DB_URL:
-    # 🎯 FIXED: Updated the interceptor to catch "cockroach" in the cluster URL
-    if CLOUD_DB_URL.startswith("postgres") and "cockroach" in CLOUD_DB_URL:
-        CLOUD_DB_URL = CLOUD_DB_URL.replace("postgresql://", "cockroachdb://", 1)
-        CLOUD_DB_URL = CLOUD_DB_URL.replace("postgres://", "cockroachdb://", 1)
-
+if config.CLOUD_DATABASE_URL:
     cloud_engine = create_engine(
         config.CLOUD_DATABASE_URL,
         pool_size=5,
         max_overflow=10,
-        pool_pre_ping=True,
-        connect_args={
-            "sslmode": "require"
-        }
+        pool_pre_ping=True
     )
-    CloudSession = sessionmaker(autocommit=False, autoflush=False, bind=cloud_engine)
-
-# -------------------------------------------------------------------------
-# 3. Dependency Generators (The Routers)
-# -------------------------------------------------------------------------
-
-def get_db():
-    """Yields the Master Local Database (PostgreSQL)."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def get_cloud_db():
-    """Yields the Cloud Replica Database (CockroachDB)."""
-    if not CloudSession:
-        raise Exception("CLOUD_DATABASE_URL is not set. Cannot connect to cloud.")
-    db = CloudSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def get_ui_db():
-    """Context-Aware Router for Streamlit UI."""
-    IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
-    
-    if IS_ONLINE and CloudSession:
-        return get_cloud_db()
-    return get_db()
