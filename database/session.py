@@ -6,11 +6,16 @@ from core import config
 # -------------------------------------------------------------------------
 # 1. Local Database (The Master Record)
 # -------------------------------------------------------------------------
-if not config.DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set in the .env file!")
+# 🎯 FIXED: Make local engine optional for Cloud deployments
+local_engine = None
+SessionLocal = None
 
-local_engine = create_engine(config.DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=local_engine)
+if config.DATABASE_URL:
+    local_engine = create_engine(config.DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=local_engine)
+elif os.getenv("CLIFFNOTES_MODE") != "ONLINE":
+    # Only raise error if we are NOT in online mode and missing the URL
+    raise ValueError("DATABASE_URL is not set. Check your local .env file.")
 
 # -------------------------------------------------------------------------
 # 2. Cloud Database (The Read Replica)
