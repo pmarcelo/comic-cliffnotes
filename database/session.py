@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from core import config
 
 # -------------------------------------------------------------------------
-# 🎯 1. SSL BOOTSTRAP (For Streamlit Cloud)
+# 1. SSL BOOTSTRAP (For Streamlit Cloud)
 # -------------------------------------------------------------------------
 cert_path = os.path.expanduser("~/.postgresql/root.crt")
 
@@ -14,12 +14,12 @@ if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
     if "COCKROACH_CA_CERT" in st.secrets:
         with open(cert_path, "w") as f:
             f.write(st.secrets["COCKROACH_CA_CERT"])
-        # Tell the driver where the ID card is
+        # Explicitly tell the driver to use this file
         os.environ["PGSSLROOTCERT"] = cert_path
         st.sidebar.success("🔒 SSL Certificate Injected")
 
 # -------------------------------------------------------------------------
-# 2. ENGINE INITIALIZATION (With Dialect Bypass)
+# 2. ENGINE INITIALIZATION
 # -------------------------------------------------------------------------
 local_engine = None
 cloud_engine = None
@@ -28,10 +28,9 @@ cloud_engine = None
 if os.getenv("CLIFFNOTES_MODE") != "ONLINE" and config.DATABASE_URL:
     local_engine = create_engine(config.DATABASE_URL)
 
-# --- Setup Cloud Engine ---
+# --- Setup Cloud Engine (With Dialect Bypass) ---
 if config.CLOUD_DATABASE_URL:
-    # 🎯 FORCE STANDARD POSTGRES DRIVER 
-    # This bypasses the buggy cockroachdb version check
+    # Force standard postgres driver to bypass the CockroachDB version bug
     raw_url = config.CLOUD_DATABASE_URL
     final_url = raw_url.replace("cockroachdb://", "postgresql+psycopg2://")
     final_url = final_url.replace("postgresql://", "postgresql+psycopg2://")
@@ -47,18 +46,17 @@ if config.CLOUD_DATABASE_URL:
         st.sidebar.error(f"📡 Cloud DB Error: {str(e)}")
 
 # -------------------------------------------------------------------------
-# 3. SESSION FACTORIES (Restoring SessionLocal)
+# 3. EXPORTS (The fix for your ImportError)
 # -------------------------------------------------------------------------
-# This is what your app is trying to import!
-# We bind it to cloud_engine if online, otherwise local_engine.
-
+# We determine which engine to use as the primary based on the environment
 active_engine = cloud_engine if os.getenv("CLIFFNOTES_MODE") == "ONLINE" else local_engine
 
+# This is the line your app is looking for:
 SessionLocal = sessionmaker(
     autocommit=False, 
     autoflush=False, 
     bind=active_engine
 )
 
-# Optional: Dedicated Cloud Session if you need both at once
-CloudSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=cloud_engine)
+# Export engines for direct access if needed (like in render_index)
+engine = active_engine
