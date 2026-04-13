@@ -45,6 +45,8 @@ SUPPORTED_MODELS = [
     "gemini-2.5-flash"
 ]
 
+AVAILABLE_MODELS = ["gemini-3.1-flash-lite-preview", "gemini-2.5-flash"]
+
 
 SCHEMA_VERSION = "2.1"
 

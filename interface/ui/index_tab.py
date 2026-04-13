@@ -6,16 +6,13 @@ import uuid
 import json
 import subprocess
 from sqlalchemy import text
+
+# 🎯 Fixed Imports: Using absolute paths and pulling models from config to avoid circular loops
 from core.extractors.discovery import sync_series_by_id
+from core.config import SUPPORTED_MODELS as AVAILABLE_MODELS
 
 # Detect Mode
 IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
-
-# Local-only imports
-if not IS_ONLINE:
-    from ui.sidebar import AVAILABLE_MODELS
-else:
-    AVAILABLE_MODELS = [] # Placeholder for cloud mode
 
 def run_synchronously(cmd_list, cwd):
     """Local-only: Runs shell commands for real-time log streaming."""
@@ -256,6 +253,7 @@ def render_management_panel(engine, selected_row, root_path):
 
         # Action Panel
         st.caption("Trigger Pipeline Actions")
+        # Grabbing from session state or using the first model from our config-sourced list
         q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0] if AVAILABLE_MODELS else "")
         
         if st.button("🔍 Scan for New Chapters", use_container_width=True, disabled=not selected_row['primary_source']):
