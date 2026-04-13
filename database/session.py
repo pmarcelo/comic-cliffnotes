@@ -4,7 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from core import config
 
-# --- SSL BOOTSTRAP ---
+# -------------------------------------------------------------------------
+# 🎯 1. SSL BOOTSTRAP (For Streamlit Cloud)
+# -------------------------------------------------------------------------
 cert_path = os.path.expanduser("~/.postgresql/root.crt")
 
 if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
@@ -12,18 +14,24 @@ if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
     if "COCKROACH_CA_CERT" in st.secrets:
         with open(cert_path, "w") as f:
             f.write(st.secrets["COCKROACH_CA_CERT"])
+        # Tell the driver where the ID card is
         os.environ["PGSSLROOTCERT"] = cert_path
         st.sidebar.success("🔒 SSL Certificate Injected")
 
-# --- Database Engines ---
+# -------------------------------------------------------------------------
+# 2. ENGINE INITIALIZATION (With Dialect Bypass)
+# -------------------------------------------------------------------------
 local_engine = None
+cloud_engine = None
+
+# --- Setup Local Engine ---
 if os.getenv("CLIFFNOTES_MODE") != "ONLINE" and config.DATABASE_URL:
     local_engine = create_engine(config.DATABASE_URL)
 
-cloud_engine = None
+# --- Setup Cloud Engine ---
 if config.CLOUD_DATABASE_URL:
-    # 🎯 FORCE STANDARD POSTGRES DRIVER
-    # This prevents the buggy cockroachdb dialect from loading
+    # 🎯 FORCE STANDARD POSTGRES DRIVER 
+    # This bypasses the buggy cockroachdb version check
     raw_url = config.CLOUD_DATABASE_URL
     final_url = raw_url.replace("cockroachdb://", "postgresql+psycopg2://")
     final_url = final_url.replace("postgresql://", "postgresql+psycopg2://")
@@ -35,8 +43,22 @@ if config.CLOUD_DATABASE_URL:
             max_overflow=10, 
             pool_pre_ping=True
         )
-        # Immediate test
-        with cloud_engine.connect() as conn:
-            st.sidebar.info("📖 Library: Online & Connected")
     except Exception as e:
-        st.sidebar.error(f"📡 Connection Error: {str(e)}")
+        st.sidebar.error(f"📡 Cloud DB Error: {str(e)}")
+
+# -------------------------------------------------------------------------
+# 3. SESSION FACTORIES (Restoring SessionLocal)
+# -------------------------------------------------------------------------
+# This is what your app is trying to import!
+# We bind it to cloud_engine if online, otherwise local_engine.
+
+active_engine = cloud_engine if os.getenv("CLIFFNOTES_MODE") == "ONLINE" else local_engine
+
+SessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=active_engine
+)
+
+# Optional: Dedicated Cloud Session if you need both at once
+CloudSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=cloud_engine)
