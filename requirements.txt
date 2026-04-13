@@ -2,7 +2,6 @@
 streamlit
 sqlalchemy
 psycopg2-binary
-sqlalchemy-cockroachdb
 python-dotenv
 google-generativeai
 Pillow
