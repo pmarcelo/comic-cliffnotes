@@ -79,8 +79,16 @@ engine = get_db_engine()
 
 # --- RENDER SIDEBAR ---
 with st.sidebar:
-    render_pipeline_control(root_path)
-    render_active_tasks()
+    IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
+    
+    if IS_ONLINE:
+        st.success("🌐 Cloud Read-Only Mode")
+        st.caption("Background workers and local file management are disabled in this view.")
+    else:
+        # Only show these when running on your local machine
+        render_pipeline_control(root_path)
+        render_active_tasks()
+        
     render_api_usage()
 
 # --- MAIN CONTENT ---

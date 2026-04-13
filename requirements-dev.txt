@@ -1,0 +1,24 @@
+# --- AI & OCR Engines ---
+google-genai
+ollama
+easyocr
+opencv-python
+Pillow
+gallery-dl
+
+# --- Database & ORM ---
+sqlalchemy
+alembic
+psycopg2-binary
+pgcli
+sqlalchemy-cockroachdb
+
+# --- Utilities & Networking ---
+python-dotenv
+requests
+gdown
+
+
+# -- Dashboard
+streamlit
+psutil

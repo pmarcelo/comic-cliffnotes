@@ -1,24 +1,9 @@
-# --- AI & OCR Engines ---
-google-genai
-ollama
-easyocr
-opencv-python
-Pillow
-gallery-dl
-
-# --- Database & ORM ---
-sqlalchemy
-alembic
-psycopg2-binary
-pgcli
-sqlalchemy-cockroachdb
-
-# --- Utilities & Networking ---
-python-dotenv
-requests
-gdown
-
-
-# -- Dashboard
+# requirements.txt (Cloud UI)
 streamlit
-psutil
+sqlalchemy
+psycopg2-binary
+sqlalchemy-cockroachdb
+python-dotenv
+google-generativeai
+Pillow
+opencv-python-headless

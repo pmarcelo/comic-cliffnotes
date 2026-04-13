@@ -1,5 +1,4 @@
 import json
-import ollama
 
 # Match the Gemini prompt exactly to ensure consistent DB records
 SUMMARY_PROMPT_TEMPLATE = """
@@ -24,6 +23,14 @@ def generate_summary(ocr_text: str):
     Input: Raw OCR String 
     Output: Dictionary (to be saved by the processor to Postgres)
     """
+    # 🎯 Lazy import to prevent crashes on Streamlit Cloud
+    try:
+        import ollama
+    except ImportError:
+        print("❌ Local Agent Error: 'ollama' library not found.")
+        print("💡 This is expected on Streamlit Cloud, but check your local venv.")
+        return None
+
     if not ocr_text or len(ocr_text.strip()) < 50:
         print("⚠️ OCR text too short/empty for Local AI.")
         return None
@@ -32,6 +39,7 @@ def generate_summary(ocr_text: str):
     
     try:
         # 🚀 Using 'llama3.1' as our narrative engine
+        # Note: Ensure the model is already pulled: 'ollama pull llama3.1'
         response = ollama.chat(
             model='llama3.1', 
             messages=[{'role': 'user', 'content': prompt}],
