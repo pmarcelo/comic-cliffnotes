@@ -1,15 +1,28 @@
 import streamlit as st
 import uuid
+import os
 from sqlalchemy import text
 from core.extractors.discovery import sync_series_by_id
+
+# Detect Mode
+IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
 
 @st.fragment
 def render_discovery(engine):
     """
     Modular fragment for Global Discovery.
-    Importing a new series here won't reset your 'Deep Dive' selection.
     """
-    st.header("🌐 Quick Import: New Series")
+    st.header("🌐 Global Discovery")
+    
+    # 🎯 CLOUD DEFENSE: Disable writes in online mode
+    if IS_ONLINE:
+        st.info("💡 **Discovery is in Read-Only Mode.**")
+        st.markdown("""
+        New series must be added via your local machine to ensure correct processing.
+        Once added and synced locally, they will appear here automatically.
+        """)
+        return
+
     st.caption("Provide a Title and a WeebCentral/MangaBuddy URL to instantly scout and add a series.")
 
     # Use a form to prevent rerun on every keystroke

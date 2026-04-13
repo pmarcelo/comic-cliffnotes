@@ -2,8 +2,22 @@ import streamlit as st
 import subprocess
 import sys
 import os
-import psutil
 from datetime import datetime
+
+# Detect Mode
+IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
+
+# 🎯 CLOUD-SAFE: Only import psutil if we're not online
+# This prevents the ModuleNotFoundError on Streamlit Cloud
+if not IS_ONLINE:
+    try:
+        import psutil
+    except ImportError:
+        psutil = None
+else:
+    psutil = None
+
+# We still need the usage tracker for the local view
 from core.utils import usage_tracker
 
 AVAILABLE_MODELS = [
@@ -12,7 +26,10 @@ AVAILABLE_MODELS = [
 ]
 
 def get_active_tasks():
-    """Scans system processes for active Manga OS workers."""
+    """Local-only: Scans system processes for active Manga OS workers."""
+    if not psutil:
+        return []
+        
     tasks = []
     for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'create_time']):
         try:
@@ -35,7 +52,10 @@ def get_active_tasks():
 
 @st.fragment
 def render_pipeline_control(root_path):
-    """Isolated fragment for launching new processes."""
+    """Local-only: Isolated fragment for launching new processes."""
+    if IS_ONLINE:
+        return # Safety guard
+
     st.header("🛠️ Pipeline Control")
     with st.form("run_processor", clear_on_submit=False):
         st.write("Launch New Process")
@@ -49,25 +69,21 @@ def render_pipeline_control(root_path):
         url_label = "GDrive URL" if ingest_method == "Google Drive" else "GDrive URL (Optional)"
         input_url = st.text_input(url_label)
         
-        # 🎯 THE NEW UX FIX: Checkbox instead of a magic number
         auto_append = st.checkbox(
             "Auto-Append (Continue from latest)", 
             value=True,
-            help="Automatically finds the highest chapter in the database and continues from there."
+            help="Automatically finds the highest chapter in the database."
         )
         
         starting_chapter = st.number_input(
             "Override Starting Chapter", 
             min_value=1, 
-            value=1,
-            help="Only applies if 'Auto-Append' is unchecked. Forces the pipeline to start downloading/overwriting at this specific chapter."
+            value=1
         )
         
-        # 🎯 NEW: Added the Skip Chapters input field
         skip_chapters_input = st.text_input(
             "Chapters to Skip (Optional)",
-            placeholder="e.g., 20, 25-30",
-            help="Comma-separated list of chapters or ranges to completely ignore during GDrive ingestion."
+            placeholder="e.g., 20, 25-30"
         )
         
         selected_model = st.selectbox(
@@ -76,19 +92,16 @@ def render_pipeline_control(root_path):
             key="sidebar_model_select"
         )
         
-        # 🎯 NEW: Split the checkboxes into three distinct pipeline stages
         st.write("Pipeline Stages:")
-        do_extract = st.checkbox("Extract Images", value=True, help="Download and extract images from the source.")
-        do_ocr = st.checkbox("Run OCR", value=True, help="Extract text from the downloaded images.")
-        do_summarize = st.checkbox("Summarize (AI)", value=False, help="Generate chapter summaries using the selected AI model.")
+        do_extract = st.checkbox("Extract Images", value=True)
+        do_ocr = st.checkbox("Run OCR", value=True)
+        do_summarize = st.checkbox("Summarize (AI)", value=False)
         
         submit_btn = st.form_submit_button("🚀 Start Processor")
 
     if submit_btn:
         if not input_title:
             st.error("Series Title is required.")
-        elif ingest_method == "Google Drive" and not input_url:
-            st.error("GDrive URL required for Google Drive ingestion.")
         else:
             mapping = {
                 "Auto-Detect": "auto",
@@ -96,8 +109,6 @@ def render_pipeline_control(root_path):
                 "Web (gallery-dl)": "web_gallery-dl"
             }
             method_flag = mapping[ingest_method]
-            
-            # 🎯 Resolving the final chapter to send to the CLI
             actual_start_chapter = -1 if auto_append else starting_chapter
 
             cmd = [
@@ -109,11 +120,7 @@ def render_pipeline_control(root_path):
             ]
             
             if input_url: cmd.extend(["-u", input_url])
-            
-            # 🎯 NEW: Pass the skip argument to the subprocess
             if skip_chapters_input: cmd.extend(["--skip", skip_chapters_input])
-                
-            # 🎯 NEW: Pass the split flags to the backend
             if do_extract: cmd.append("--extract")
             if do_ocr: cmd.append("--ocr")
             if do_summarize: cmd.append("--summarize")
@@ -123,7 +130,10 @@ def render_pipeline_control(root_path):
 
 @st.fragment
 def render_active_tasks():
-    """Isolated fragment to monitor and kill background PIDs."""
+    """Local-only: Isolated fragment to monitor and kill background PIDs."""
+    if IS_ONLINE:
+        return # Safety guard
+
     st.divider()
     st.header("⏳ Active Tasks")
     active_tasks = get_active_tasks()
@@ -143,18 +153,21 @@ def render_active_tasks():
 
 @st.fragment
 def render_api_usage():
-    """Isolated fragment for request tracking, project-aware (Requests only)."""
+    """Isolated fragment for request tracking."""
     st.divider()
     st.header("📊 API Usage")
     
+    if IS_ONLINE:
+        st.info("Usage tracking is local-only.")
+        return
+
     # Identify Active Project from Env
     active_project = os.getenv("GEMINI_PROJECT", "default")
     
-    # Get current model for tier logic (Flash vs Pro)
+    # Get current model for tier logic
     current_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0])
     stats = usage_tracker.get_today_stats(current_model)
     
-    # Clean Display: Project name and simple request metric
     st.subheader(f"Project: {active_project.upper()}")
     st.metric("Requests Today", f"{stats.get('requests', 0):,}")
 

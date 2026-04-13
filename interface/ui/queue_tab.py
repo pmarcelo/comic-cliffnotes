@@ -1,8 +1,12 @@
 import streamlit as st
 import pandas as pd
+import os
 from sqlalchemy import text, delete
 from database.models import ProcessingQueue, QueueStatus
 from datetime import datetime
+
+# Detect Mode
+IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
 
 def fetch_queue_data(engine):
     """
@@ -37,14 +41,11 @@ def fetch_queue_data(engine):
 def render_queue_tab(engine):
     """
     The Mission Control fragment. 
-    Rerunning this fragment will NOT reset the user to the first tab.
     """
-    # Top Row: Header and Local Refresh
     col_header, col_refresh = st.columns([5, 1])
     with col_header:
         st.subheader("PIPELINE MISSION CONTROL")
     with col_refresh:
-        # 🎯 NEW: Localized refresh button
         if st.button("REFRESH DATA", use_container_width=True):
             st.rerun(scope="fragment")
     
@@ -55,41 +56,43 @@ def render_queue_tab(engine):
     running_count = len(df[df['status'] == 'running'])
 
     if pending_count > 0 and running_count == 0:
-        st.warning(f"WORKER OFFLINE: There are {pending_count} tasks waiting, but no active workers detected.")
+        st.warning(f"WORKER OFFLINE: {pending_count} tasks waiting, but no local workers detected.")
     elif running_count > 0:
-        st.success(f"WORKER ACTIVE: Currently processing {running_count} task(s).")
+        st.success(f"WORKER ACTIVE: Processing {running_count} task(s) on local host.")
     else:
-        st.info("WORKER STATUS: Idle. No pending or running tasks.")
+        st.info("WORKER STATUS: Idle.")
 
     st.divider()
 
-    # 🎯 NEW: Always visible worker commands
-    st.write("### WORKER COMMANDS")
-    st.caption("Run one of these commands in your terminal to start processing tasks in the background.")
-    c_gen, c_ocr, c_sum = st.columns(3)
-    with c_gen:
-        st.caption("Standard (All Tasks)")
-        st.code("python core/pipeline/queue_worker.py", language="bash")
-    with c_ocr:
-        st.caption("OCR Lane Only")
-        st.code("python core/pipeline/queue_worker.py --lane ocr", language="bash")
-    with c_sum:
-        st.caption("Summary Lane Only")
-        st.code("python core/pipeline/queue_worker.py --lane summary", language="bash")
-        
-    st.divider()
+    # 🎯 HIDE WORKER COMMANDS ON CLOUD
+    if not IS_ONLINE:
+        st.write("### WORKER COMMANDS")
+        st.caption("Run these locally to start processing.")
+        c_gen, c_ocr, c_sum = st.columns(3)
+        with c_gen:
+            st.code("python core/pipeline/queue_worker.py", language="bash")
+        with c_ocr:
+            st.code("python core/pipeline/queue_worker.py --lane ocr", language="bash")
+        with c_sum:
+            st.code("python core/pipeline/queue_worker.py --lane summary", language="bash")
+        st.divider()
 
     col_ref_text, col_clear = st.columns([5, 1])
     with col_ref_text:
         st.caption("Monitoring background worker activity and task priority.")
+    
+    # 🎯 DISABLE CLEAR ON CLOUD
     with col_clear:
-        if st.button("CLEAR COMPLETED", use_container_width=True):
-            with engine.begin() as conn:
-                conn.execute(delete(ProcessingQueue).where(ProcessingQueue.status == QueueStatus.COMPLETED))
-            st.rerun(scope="fragment")
+        if not IS_ONLINE:
+            if st.button("CLEAR COMPLETED", use_container_width=True):
+                with engine.begin() as conn:
+                    conn.execute(delete(ProcessingQueue).where(ProcessingQueue.status == QueueStatus.COMPLETED))
+                st.rerun(scope="fragment")
+        else:
+            st.button("READ ONLY", disabled=True, use_container_width=True)
 
     if df.empty:
-        st.info("The queue is currently empty. Add tasks from the Library tab.")
+        st.info("The queue is currently empty.")
         return
 
     df['id'] = df['id'].astype(str)
@@ -106,21 +109,22 @@ def render_queue_tab(engine):
                 minutes = int(run_time.total_seconds() // 60)
                 
                 c1.markdown(f"**{row['title']}** - {row['action'].upper()}")
-                c1.caption(f"Started {minutes}m ago (Local PST/PDT)")
+                c1.caption(f"Started {minutes}m ago")
                 
-                if c2.button("STOP TASK", key=f"stop_{row['id']}", type="primary", use_container_width=True):
-                    with engine.begin() as conn:
-                        conn.execute(text("""
-                            UPDATE processing_queue 
-                            SET status = 'FAILED'::queuestatus, 
-                                error_log = 'Task stopped manually by user.' 
-                            WHERE id = :id
-                        """), {"id": row['id']})
-                    st.toast(f"Stopping {row['title']}...")
-                    st.rerun(scope="fragment")
+                # 🎯 STOP TASK IS LOCAL ONLY
+                if not IS_ONLINE:
+                    if c2.button("STOP TASK", key=f"stop_{row['id']}", type="primary", use_container_width=True):
+                        with engine.begin() as conn:
+                            conn.execute(text("""
+                                UPDATE processing_queue 
+                                SET status = 'FAILED'::queuestatus, 
+                                    error_log = 'Task stopped manually by user.' 
+                                WHERE id = :id
+                            """), {"id": row['id']})
+                        st.rerun(scope="fragment")
 
     # 2. The Full Queue Table
-    st.write("### TASK HISTORY AND BACKLOG")
+    st.write("### TASK HISTORY")
     
     def color_status(val):
         color = 'gray'
@@ -138,7 +142,7 @@ def render_queue_tab(engine):
             "action": "Task",
             "status": "Status",
             "priority": st.column_config.NumberColumn("Priority", format="%d"),
-            "created_at": st.column_config.DatetimeColumn("Queued (Local)", format="h:mm a"),
+            "created_at": st.column_config.DatetimeColumn("Queued", format="h:mm a"),
             "updated_at": None,
             "error_log": "Last Error"
         },
@@ -146,39 +150,35 @@ def render_queue_tab(engine):
         use_container_width=True
     )
 
-    # 3. Task Management
-    st.divider()
-    manage_col1, manage_col2 = st.columns(2)
+    # 3. Task Management (HIDE RECOVERY ON CLOUD)
+    if not IS_ONLINE:
+        st.divider()
+        manage_col1, manage_col2 = st.columns(2)
 
-    with manage_col1:
-        pending_tasks = df[df['status'] == 'pending']
-        if not pending_tasks.empty:
-            st.write("### PENDING TASKS")
-            for _, row in pending_tasks.iterrows():
-                with st.expander(f"Cancel: {row['title']} ({row['action']})"):
-                    if st.button(f"REMOVE FROM QUEUE", key=f"del_pending_{row['id']}", use_container_width=True):
-                        with engine.begin() as conn:
-                            conn.execute(delete(ProcessingQueue).where(ProcessingQueue.id == row['id']))
-                        st.rerun(scope="fragment")
+        with manage_col1:
+            pending_tasks = df[df['status'] == 'pending']
+            if not pending_tasks.empty:
+                st.write("### PENDING TASKS")
+                for _, row in pending_tasks.iterrows():
+                    with st.expander(f"Cancel: {row['title']}"):
+                        if st.button(f"REMOVE", key=f"del_pending_{row['id']}", use_container_width=True):
+                            with engine.begin() as conn:
+                                conn.execute(delete(ProcessingQueue).where(ProcessingQueue.id == row['id']))
+                            st.rerun(scope="fragment")
 
-    with manage_col2:
-        failed_tasks = df[df['status'] == 'failed']
-        if not failed_tasks.empty:
-            st.write("### RECOVERY ACTIONS")
-            for _, row in failed_tasks.iterrows():
-                with st.expander(f"Fix: {row['title']} ({row['action']})"):
-                    st.error(f"Error: {row['error_log']}")
-                    r1, r2 = st.columns(2)
-                    if r1.button(f"RETRY", key=f"retry_{row['id']}", use_container_width=True):
-                        with engine.begin() as conn:
-                            conn.execute(text("""
-                                UPDATE processing_queue 
-                                SET status = 'PENDING'::queuestatus, 
-                                    error_log = NULL 
-                                WHERE id = :id
-                            """), {"id": row['id']})
-                        st.rerun(scope="fragment")
-                    if r2.button(f"REMOVE", key=f"del_failed_{row['id']}", use_container_width=True):
-                        with engine.begin() as conn:
-                            conn.execute(delete(ProcessingQueue).where(ProcessingQueue.id == row['id']))
-                        st.rerun(scope="fragment")
+        with manage_col2:
+            failed_tasks = df[df['status'] == 'failed']
+            if not failed_tasks.empty:
+                st.write("### RECOVERY ACTIONS")
+                for _, row in failed_tasks.iterrows():
+                    with st.expander(f"Fix: {row['title']}"):
+                        st.error(f"Error: {row['error_log']}")
+                        r1, r2 = st.columns(2)
+                        if r1.button(f"RETRY", key=f"retry_{row['id']}", use_container_width=True):
+                            with engine.begin() as conn:
+                                conn.execute(text("UPDATE processing_queue SET status = 'PENDING'::queuestatus, error_log = NULL WHERE id = :id"), {"id": row['id']})
+                            st.rerun(scope="fragment")
+                        if r2.button(f"DEL", key=f"del_failed_{row['id']}", use_container_width=True):
+                            with engine.begin() as conn:
+                                conn.execute(delete(ProcessingQueue).where(ProcessingQueue.id == row['id']))
+                            st.rerun(scope="fragment")
