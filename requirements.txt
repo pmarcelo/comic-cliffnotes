@@ -1,6 +1,6 @@
 # requirements.txt (Cloud UI)
 streamlit
-sqlalchemy
+sqlalchemy>=2.0.0
 psycopg2-binary
 python-dotenv
 google-generativeai
