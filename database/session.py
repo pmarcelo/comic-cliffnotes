@@ -4,54 +4,29 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from core import config
 
-# -------------------------------------------------------------------------
-# 🎯 1. SSL BOOTSTRAP (Crucial for Streamlit Cloud)
-# -------------------------------------------------------------------------
+# --- SSL BOOTSTRAP ---
 cert_path = os.path.expanduser("~/.postgresql/root.crt")
 
 if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
-    # Ensure the directory exists
     os.makedirs(os.path.dirname(cert_path), exist_ok=True)
-    
-    # Inject the certificate from secrets into the file system
     if "COCKROACH_CA_CERT" in st.secrets:
         with open(cert_path, "w") as f:
             f.write(st.secrets["COCKROACH_CA_CERT"])
-        
-        # Force the Postgres driver to use this specific certificate file
         os.environ["PGSSLROOTCERT"] = cert_path
-        
-        # Status check for the sidebar
-        if os.path.exists(cert_path):
-            st.sidebar.success("🔒 SSL Certificate Injected")
-    else:
-        st.sidebar.error("❌ SSL Error: COCKROACH_CA_CERT not found in Secrets.")
+        st.sidebar.success("🔒 SSL Certificate Injected")
 
-# -------------------------------------------------------------------------
-# 2. Local Database Engine (The Command Center)
-# -------------------------------------------------------------------------
+# --- Database Engines ---
 local_engine = None
-SessionLocal = None
+if os.getenv("CLIFFNOTES_MODE") != "ONLINE" and config.DATABASE_URL:
+    local_engine = create_engine(config.DATABASE_URL)
 
-if os.getenv("CLIFFNOTES_MODE") != "ONLINE":
-    if config.DATABASE_URL:
-        local_engine = create_engine(config.DATABASE_URL)
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=local_engine)
-
-# -------------------------------------------------------------------------
-# 3. Cloud Database Engine (The Dialect Bypass Version)
-# -------------------------------------------------------------------------
 cloud_engine = None
-
 if config.CLOUD_DATABASE_URL:
-    # 🎯 BYPASS THE COCKROACHDB DIALECT BUG
-    # We force the URL to use standard postgresql+psycopg2
-    # This avoids the sqlalchemy-cockroachdb library and its broken version check.
+    # 🎯 FORCE STANDARD POSTGRES DRIVER
+    # This prevents the buggy cockroachdb dialect from loading
     raw_url = config.CLOUD_DATABASE_URL
-    if "cockroachdb://" in raw_url:
-        final_url = raw_url.replace("cockroachdb://", "postgresql+psycopg2://")
-    else:
-        final_url = raw_url
+    final_url = raw_url.replace("cockroachdb://", "postgresql+psycopg2://")
+    final_url = final_url.replace("postgresql://", "postgresql+psycopg2://")
 
     try:
         cloud_engine = create_engine(
@@ -60,10 +35,8 @@ if config.CLOUD_DATABASE_URL:
             max_overflow=10, 
             pool_pre_ping=True
         )
-        
-        # Immediate Connection Test to verify the SSL handshake
+        # Immediate test
         with cloud_engine.connect() as conn:
             st.sidebar.info("📖 Library: Online & Connected")
-            
     except Exception as e:
         st.sidebar.error(f"📡 Connection Error: {str(e)}")
