@@ -18,8 +18,14 @@ if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
     if "COCKROACH_CA_CERT" in st.secrets:
         with open(cert_path, "w") as f:
             f.write(st.secrets["COCKROACH_CA_CERT"])
+        
+        # 💡 THE FORCE FIX: Explicitly tell the Postgres driver where to look
+        os.environ["PGSSLROOTCERT"] = cert_path
+        
+        # Optional: Debug check (You can remove this once it works)
+        if os.path.exists(cert_path):
+            st.sidebar.success("🔒 SSL Cert Verified on Disk")
     else:
-        # If this hits, double-check your Streamlit Secrets TOML
         st.error("SSL Error: COCKROACH_CA_CERT not found in Secrets.")
 
 # -------------------------------------------------------------------------
@@ -28,12 +34,16 @@ if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
 local_engine = None
 SessionLocal = None
 
-if config.DATABASE_URL:
-    local_engine = create_engine(config.DATABASE_URL)
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=local_engine)
-elif os.getenv("CLIFFNOTES_MODE") != "ONLINE":
-    # Only crash if we're local and missing the URL
-    raise ValueError("DATABASE_URL is not set. Check your local .env file.")
+# We use a try-except here so the app doesn't crash on Cloud due to local missing vars
+try:
+    if config.DATABASE_URL:
+        local_engine = create_engine(config.DATABASE_URL)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=local_engine)
+    elif os.getenv("CLIFFNOTES_MODE") != "ONLINE":
+        st.warning("Running locally without DATABASE_URL. Check your .env file.")
+except Exception as e:
+    if os.getenv("CLIFFNOTES_MODE") != "ONLINE":
+        st.error(f"Local Engine Error: {e}")
 
 # -------------------------------------------------------------------------
 # 3. Cloud Database Engine (The Remote Replica)
@@ -41,9 +51,12 @@ elif os.getenv("CLIFFNOTES_MODE") != "ONLINE":
 cloud_engine = None
 
 if config.CLOUD_DATABASE_URL:
-    cloud_engine = create_engine(
-        config.CLOUD_DATABASE_URL,
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True
-    )
+    try:
+        cloud_engine = create_engine(
+            config.CLOUD_DATABASE_URL,
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True
+        )
+    except Exception as e:
+        st.error(f"Cloud Engine Error: {e}")
