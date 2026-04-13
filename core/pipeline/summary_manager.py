@@ -43,11 +43,11 @@ class SummaryManager:
             chapters_to_reset = (
                 self.db.query(Chapter).filter(Chapter.series_id == self.series.id).all()
             )
-            print(f"Preparing to reset ALL summaries for {self.title}...")
+            print(f"MAINTENANCE: Preparing to reset ALL summaries for {self.title}...")
         else:
             targets_list = list(parsed_targets)
             if not targets_list:
-                print("No valid chapter targets provided for reset.")
+                print("MAINTENANCE: No valid chapter targets provided for reset.")
                 return
 
             chapters_to_reset = (
@@ -59,10 +59,10 @@ class SummaryManager:
                 .all()
             )
             targets_list.sort()
-            print(f"Preparing to reset summaries for Chapters: {targets_list}...")
+            print(f"MAINTENANCE: Preparing to reset summaries for Chapters: {targets_list}...")
 
         if not chapters_to_reset:
-            print("No matching chapters found in the DB to reset.")
+            print("MAINTENANCE: No matching chapters found in the DB to reset.")
             return
 
         reset_count = 0
@@ -83,7 +83,7 @@ class SummaryManager:
                 reset_count += 1
 
         self.db.commit()
-        print(f"Reset AI status for {reset_count} chapter(s).")
+        print(f"SUCCESS: Reset AI status for {reset_count} chapter(s).")
 
     def _get_previous_context(self, current_chapter_num):
         """
@@ -105,7 +105,7 @@ class SummaryManager:
         if prev_summary and prev_summary.state_snapshot:
             return prev_summary.state_snapshot
 
-        # 2. Fallback: Check global SeriesMetadata (useful for resumes or starting deep in a series)
+        # 2. Fallback: Check global SeriesMetadata
         meta = self.db.query(SeriesMetadata).filter(SeriesMetadata.series_id == self.series.id).first()
         return meta.living_summary if meta else None
 
@@ -122,40 +122,39 @@ class SummaryManager:
         )
 
         if not todo:
-            print("Tier 3: AI summaries complete. Skipping.")
+            print("PHASE 3: AI summaries complete. Skipping.")
             return True
             
         if not model_name:
             model_name = getattr(config, 'DEFAULT_MODEL', 'gemini-3.1-flash-lite-preview')
 
-        # Ensure the metadata record exists for the series
+        # Ensure the metadata record exists
         meta_record = self.db.query(SeriesMetadata).filter(SeriesMetadata.series_id == self.series.id).first()
         if not meta_record:
             meta_record = SeriesMetadata(series_id=self.series.id)
             self.db.add(meta_record)
             self.db.flush()
 
-        print(f"Tier 3: Running Stateful AI Synthesis for {len(todo)} chapters...")
+        print(f"PHASE 3: Running Stateful AI Synthesis for {len(todo)} chapters...")
         
         for count, proc in enumerate(todo, 1):
             chapter = proc.chapter
             ocr_record = chapter.ocr_result
             ocr_text = ocr_record.raw_text if ocr_record else None
 
-            # Skip chapters with no meaningful dialogue
+            # Skip chapters with no meaningful text
             if not ocr_text or len(ocr_text.strip()) < 10:
                 print(f"Ch {chapter.chapter_number} has no meaningful text. Skipping AI call.")
                 proc.summary_complete = True
                 self.db.commit()
                 continue
 
-            # Step 1: Fetch Memory (Previous State)
+            # Fetch Previous State
             prev_snapshot = self._get_previous_context(chapter.chapter_number)
 
             try:
                 if use_local_ai:
                     print(f"Routing Ch {chapter.chapter_number} to Local LLM...")
-                    # Local agent would need to be updated to accept living_summary if used
                     ai_results = local_agent.generate_summary(ocr_text)
                 else:
                     print(f"Summarizing Ch {chapter.chapter_number} with stateful context...")
@@ -169,13 +168,11 @@ class SummaryManager:
                     tokens_used = ai_results.get("_usage_stats", {}).get("total_tokens", 0)
                     usage_tracker.log_success(tokens_used=tokens_used, model_name=model_name)
 
-                    #Step 2: Separate the Chapter Summary from the New World State
+                    # Separate Summary from World State
                     new_snapshot = ai_results.get("updated_living_summary")
-                    
-                    # Remove non-content keys before saving to Chapter Summary
                     clean_results = {k: v for k, v in ai_results.items() if k not in ["_usage_stats", "updated_living_summary"]}
 
-                    # Step 3: Save versioned snapshot to the Summary table
+                    # Save versioned snapshot
                     new_summary = Summary(
                         chapter_id=chapter.id, 
                         content=json.dumps(clean_results, ensure_ascii=False),
@@ -183,24 +180,24 @@ class SummaryManager:
                     )
                     self.db.add(new_summary)
 
-                    # Step 4: Update the Series-wide "Current Head" state
-                    # We update this so the UI/Arc AI always sees the latest evolution
+                    # Update the Series-wide head state
                     if new_snapshot:
                         meta_record.living_summary = new_snapshot
 
                     proc.summary_complete = True
                     self.db.commit()
-                    print(f"Saved Stateful Summary for Chapter {chapter.chapter_number}")
+                    print(f"SUCCESS: Saved Stateful Summary for Chapter {chapter.chapter_number}")
+                else:
+                    # If the agent returned None/Empty without throwing an error
+                    raise Exception(f"AI returned empty results for Chapter {chapter.chapter_number}")
 
             except Exception as e:
                 self.db.rollback()
-                error_msg = str(e).lower()
-                if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg:
-                    print(f"\nAPI QUOTA REACHED on Ch {chapter.chapter_number}! Halting.")
-                    break
-                else:
-                    print(f"\nError on Ch {chapter.chapter_number}: {e}")
-                    continue
+                # 🎯 FAIL FAST: We re-raise the exception to kill the processor loop immediately.
+                # This prevents subsequent chapters from running without the current state.
+                print(f"CRITICAL ERROR on Ch {chapter.chapter_number}: {e}")
+                print("ABORTING: Pipeline halted to maintain context integrity.")
+                raise e
 
             # --- API Pacing ---
             if not use_local_ai and count < len(todo):
