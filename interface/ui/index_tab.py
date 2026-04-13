@@ -7,8 +7,7 @@ import json
 import subprocess
 from sqlalchemy import text
 
-# 🎯 Fixed Imports: Using absolute paths and pulling models from config to avoid circular loops
-from core.extractors.discovery import sync_series_by_id
+# 🎯 Fixed: Models now pull from config to break the sidebar loop
 from core.config import SUPPORTED_MODELS as AVAILABLE_MODELS
 
 # Detect Mode
@@ -174,6 +173,9 @@ def render_index(engine, root_path):
 
 def render_management_panel(engine, selected_row, root_path):
     """Local-only dashboard controls."""
+    # 🎯 Lazy Import: Only pulls discovery when needed to break circular dependency
+    from core.extractors.discovery import sync_series_by_id
+
     st.divider()
     with st.container(border=True):
         st.subheader(f"⚡ Manage: {selected_row['title']}")
@@ -253,7 +255,6 @@ def render_management_panel(engine, selected_row, root_path):
 
         # Action Panel
         st.caption("Trigger Pipeline Actions")
-        # Grabbing from session state or using the first model from our config-sourced list
         q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0] if AVAILABLE_MODELS else "")
         
         if st.button("🔍 Scan for New Chapters", use_container_width=True, disabled=not selected_row['primary_source']):
