@@ -32,10 +32,13 @@ if CLOUD_DB_URL:
         CLOUD_DB_URL = CLOUD_DB_URL.replace("postgres://", "cockroachdb://", 1)
 
     cloud_engine = create_engine(
-        CLOUD_DB_URL, 
-        pool_size=5, 
+        config.CLOUD_DATABASE_URL,
+        pool_size=5,
         max_overflow=10,
-        pool_pre_ping=True
+        pool_pre_ping=True,
+        connect_args={
+            "sslmode": "require"
+        }
     )
     CloudSession = sessionmaker(autocommit=False, autoflush=False, bind=cloud_engine)
 
