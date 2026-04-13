@@ -50,28 +50,34 @@ def render_queue_tab(engine):
     
     df = fetch_queue_data(engine)
 
-    # Health Check
+    # Health Check Status
     pending_count = len(df[df['status'] == 'pending'])
     running_count = len(df[df['status'] == 'running'])
 
     if pending_count > 0 and running_count == 0:
         st.warning(f"WORKER OFFLINE: There are {pending_count} tasks waiting, but no active workers detected.")
-        st.info("To start processing, run one of these commands in your terminal:")
-        
-        c_gen, c_ocr, c_sum = st.columns(3)
-        with c_gen:
-            st.caption("Standard (All Tasks)")
-            st.code("python core/pipeline/queue_worker.py", language="bash")
-        with c_ocr:
-            st.caption("OCR Lane Only")
-            st.code("python core/pipeline/queue_worker.py --lane ocr", language="bash")
-        with c_sum:
-            st.caption("Summary Lane Only")
-            st.code("python core/pipeline/queue_worker.py --lane summary", language="bash")
-        st.divider()
     elif running_count > 0:
         st.success(f"WORKER ACTIVE: Currently processing {running_count} task(s).")
-        st.divider()
+    else:
+        st.info("WORKER STATUS: Idle. No pending or running tasks.")
+
+    st.divider()
+
+    # 🎯 NEW: Always visible worker commands
+    st.write("### WORKER COMMANDS")
+    st.caption("Run one of these commands in your terminal to start processing tasks in the background.")
+    c_gen, c_ocr, c_sum = st.columns(3)
+    with c_gen:
+        st.caption("Standard (All Tasks)")
+        st.code("python core/pipeline/queue_worker.py", language="bash")
+    with c_ocr:
+        st.caption("OCR Lane Only")
+        st.code("python core/pipeline/queue_worker.py --lane ocr", language="bash")
+    with c_sum:
+        st.caption("Summary Lane Only")
+        st.code("python core/pipeline/queue_worker.py --lane summary", language="bash")
+        
+    st.divider()
 
     col_ref_text, col_clear = st.columns([5, 1])
     with col_ref_text:

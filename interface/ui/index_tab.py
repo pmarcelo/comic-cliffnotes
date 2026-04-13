@@ -93,21 +93,29 @@ def render_index(engine, root_path):
             st.cache_data.clear()
             st.rerun(scope="fragment")
 
-    df = fetch_series_index(engine)
+    df_raw = fetch_series_index(engine)
     
-    if df.empty:
+    if df_raw.empty:
         st.info("No series found in database yet.")
         return
 
+    # 🔍 Search Bar
+    search_query = st.text_input("Search Library", placeholder="🔍 Search by series title...", label_visibility="collapsed")
+    
+    # Filter DataFrame based on search
+    df = df_raw.copy()
+    if search_query:
+        df = df[df['title'].str.contains(search_query, case=False, na=False)]
+
     df['id'] = df['id'].astype(str)
 
-    # 🎯 Series-Level Metrics
+    # 🎯 Series-Level Metrics (Updates dynamically with search)
     m_col1, m_col2, m_col3 = st.columns(3)
     total_series = len(df)
     series_extracted = len(df[(df['extracted_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
     series_summarized = len(df[(df['summaries_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
 
-    m_col1.metric("Library Size", f"{total_series} Series")
+    m_col1.metric("Filtered Size", f"{total_series} Series")
     m_col2.metric("Fully Extracted", f"{series_extracted} Series")
     m_col3.metric("Summaries Done", f"{series_summarized} Series")
 
