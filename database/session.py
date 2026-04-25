@@ -2,6 +2,18 @@ import os
 import streamlit as st
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.postgresql.base import PGDialect
+
+# Monkeypatch for CockroachDB version detection bypass
+# CockroachDB v25.4.8 version string fails PostgreSQL regex; return hardcoded tuple
+_original_get_server_version_info = PGDialect._get_server_version_info
+def _patched_get_server_version_info(self, connection):
+    try:
+        return _original_get_server_version_info(self, connection)
+    except (AssertionError, ValueError):
+        # Regex failed on non-standard version string (e.g., CockroachDB)
+        return (13, 0, 0)
+PGDialect._get_server_version_info = _patched_get_server_version_info
 
 # 🎯 STEP 1: Define EVERYTHING at the top level so other files can import them
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
