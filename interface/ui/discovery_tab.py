@@ -1,24 +1,11 @@
 import streamlit as st
 import uuid
-import os
 from sqlalchemy import text
-
-# 🎯 REMOVED: from core.extractors.discovery import sync_series_by_id
-# We move this import inside the local-only logic below.
-
-# Detect Mode
-IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
+from core.extractors.discovery import search_mangadex, sync_series_by_id
 
 def render_discovery(engine):
+    """Admin-only: Series discovery and library sync."""
     st.header("Series Discovery")
-    
-    if IS_ONLINE:
-        st.info("💡 Discovery and syncing are disabled in the Cloud Dashboard.")
-        st.warning("Please use the Local Environment to add new series to the library.")
-        return
-
-    # 🎯 LAZY IMPORT: Only loads when actually running locally
-    from core.extractors.discovery import search_mangadex, sync_series_by_id
 
     st.subheader("Add New Series")
     search_query = st.text_input("Search MangaDex", placeholder="Enter series title...")

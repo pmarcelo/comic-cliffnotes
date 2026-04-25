@@ -1,88 +1,83 @@
 import streamlit as st
 import pandas as pd
-import os
 from sqlalchemy import text
 
-# Detect Mode
-IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
-
 @st.cache_data(ttl=30)
-def fetch_series_stats(_engine, series_title):
-    """
-    🎯 HYBRID LOGIC: 
-    If Online, we check for the existence of summary/ocr records directly.
-    If Local, we use the 'chapter_processing' metadata table.
-    """
-    if IS_ONLINE:
-        query = text("""
-            SELECT COUNT(c.id) as total,
-                   COUNT(ocr.id) as ocr_done,
-                   COUNT(summ.id) as summaries_done,
-                   0 as errors -- Error tracking is local-only
-            FROM chapters c 
-            JOIN series s ON c.series_id = s.id
-            LEFT JOIN summaries summ ON c.id = summ.chapter_id
-            LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
-            WHERE s.title = :title
-        """)
-    else:
-        query = text("""
-            SELECT COUNT(c.id) as total,
-                   SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END) as ocr_done,
-                   SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END) as summaries_done,
-                   SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END) as errors
-            FROM chapters c 
-            JOIN series s ON c.series_id = s.id
-            JOIN chapter_processing cp ON c.id = cp.chapter_id 
-            WHERE s.title = :title
-        """)
+def fetch_series_stats_admin(_engine, series_title):
+    """Admin view: Full pipeline stats with error tracking."""
+    query = text("""
+        SELECT COUNT(c.id) as total,
+               SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END) as ocr_done,
+               SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END) as summaries_done,
+               SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END) as errors
+        FROM chapters c
+        JOIN series s ON c.series_id = s.id
+        JOIN chapter_processing cp ON c.id = cp.chapter_id
+        WHERE s.title = :title
+    """)
     return pd.read_sql(query, _engine, params={"title": series_title})
 
 @st.cache_data(ttl=30)
-def fetch_chapter_details(_engine, series_title):
-    """
-    Fetches chapter-by-chapter content.
-    """
-    if IS_ONLINE:
-        query = text("""
-            SELECT c.chapter_number, c.url, 
-                   (summ.id IS NOT NULL) as summary_complete, 
-                   (ocr.id IS NOT NULL) as ocr_extracted,
-                   summ.content as summary_json, ocr.raw_text as ocr_text
-            FROM chapters c 
-            JOIN series ser ON c.series_id = ser.id
-            LEFT JOIN summaries summ ON c.id = summ.chapter_id
-            LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
-            WHERE ser.title = :title 
-            ORDER BY c.chapter_number ASC
-        """)
-    else:
-        query = text("""
-            SELECT c.chapter_number, c.url, cp.ocr_extracted, cp.summary_complete, 
-                   s.content as summary_json, ocr.raw_text as ocr_text
-            FROM chapters c 
-            JOIN series ser ON c.series_id = ser.id
-            JOIN chapter_processing cp ON c.id = cp.chapter_id
-            LEFT JOIN summaries s ON c.id = s.chapter_id
-            LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
-            WHERE ser.title = :title 
-            ORDER BY c.chapter_number ASC
-        """)
+def fetch_series_stats_reader(_engine, series_title):
+    """Cloud read-only view: Summary counts only."""
+    query = text("""
+        SELECT COUNT(c.id) as total,
+               COUNT(ocr.id) as ocr_done,
+               COUNT(summ.id) as summaries_done,
+               0 as errors
+        FROM chapters c
+        JOIN series s ON c.series_id = s.id
+        LEFT JOIN summaries summ ON c.id = summ.chapter_id
+        LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
+        WHERE s.title = :title
+    """)
+    return pd.read_sql(query, _engine, params={"title": series_title})
+
+@st.cache_data(ttl=30)
+def fetch_chapter_details_admin(_engine, series_title):
+    """Admin view: Full chapter details with processing metadata."""
+    query = text("""
+        SELECT c.chapter_number, c.url, cp.ocr_extracted, cp.summary_complete,
+               s.content as summary_json, ocr.raw_text as ocr_text
+        FROM chapters c
+        JOIN series ser ON c.series_id = ser.id
+        JOIN chapter_processing cp ON c.id = cp.chapter_id
+        LEFT JOIN summaries s ON c.id = s.chapter_id
+        LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
+        WHERE ser.title = :title
+        ORDER BY c.chapter_number ASC
+    """)
+    return pd.read_sql(query, _engine, params={"title": series_title})
+
+@st.cache_data(ttl=30)
+def fetch_chapter_details_reader(_engine, series_title):
+    """Cloud read-only view: Chapter content and summaries only."""
+    query = text("""
+        SELECT c.chapter_number, c.url,
+               (summ.id IS NOT NULL) as summary_complete,
+               (ocr.id IS NOT NULL) as ocr_extracted,
+               summ.content as summary_json, ocr.raw_text as ocr_text
+        FROM chapters c
+        JOIN series ser ON c.series_id = ser.id
+        LEFT JOIN summaries summ ON c.id = summ.chapter_id
+        LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
+        WHERE ser.title = :title
+        ORDER BY c.chapter_number ASC
+    """)
     return pd.read_sql(query, _engine, params={"title": series_title})
 
 def move_chapter(key, new_val):
     st.session_state[key] = new_val
 
 @st.fragment
-def render_deep_dive(engine):
-    # 1. Fetch Full Series List
+def render_deep_dive(engine: object, is_admin: bool = False) -> None:
+    """Render series deep dive. Pass is_admin=True for full pipeline stats."""
     titles_df = pd.read_sql("SELECT id, title FROM series ORDER BY title ASC", engine)
-    
+
     if titles_df.empty:
         st.warning("Database empty. Sync data from your local machine to begin.")
         return
 
-    # 2. Search & Select Layout
     col_search, col_select = st.columns([1, 2])
     with col_search:
         search_term = st.text_input("🔍 Search Series", placeholder="Filter...", label_visibility="collapsed")
@@ -93,7 +88,7 @@ def render_deep_dive(engine):
         if filtered_df.empty:
             st.error("No matches.")
             return
-            
+
         default_ix = 0
         if st.session_state.selected_series_id:
             match = filtered_df[filtered_df['id'].astype(str) == str(st.session_state.selected_series_id)]
@@ -101,33 +96,35 @@ def render_deep_dive(engine):
                 default_ix = int(filtered_df.index.get_loc(match.index[0]))
 
         target_title = st.selectbox("Select Series", filtered_df['title'], index=default_ix, label_visibility="collapsed")
-    
-    # 3. Render Stats
-    stats_res = fetch_series_stats(engine, target_title)
+
+    # Render Stats
+    fetch_stats = fetch_series_stats_admin if is_admin else fetch_series_stats_reader
+    stats_res = fetch_stats(engine, target_title)
     if not stats_res.empty:
         stats = stats_res.iloc[0]
         total = stats['total'] or 0
-        
-        # Mobile-friendly columns: Use 2x2 for metrics on cloud
-        if IS_ONLINE:
+
+        col_layout = (4 if is_admin else 2) if not is_admin else 4
+        if is_admin:
+            m1, m2, m3, m4 = st.columns(4)
+        else:
             m1, m2 = st.columns(2)
             m3, m4 = st.columns(2)
-        else:
-            m1, m2, m3, m4 = st.columns(4)
 
         m1.metric("Chapters", total)
         m2.metric("OCR", f"{int((stats['ocr_done']/total)*100 if total > 0 else 0)}%")
         m3.metric("Summarized", f"{int(stats['summaries_done'] or 0)}")
-        
-        if not IS_ONLINE:
+
+        if is_admin:
             m4.metric("Errors", f"{int(stats['errors'] or 0)}", delta_color="inverse")
         else:
             m4.metric("Mode", "Remote")
 
     st.divider()
 
-    # 4. Fetch Chapter Data
-    df_details = fetch_chapter_details(engine, target_title)
+    # Fetch Chapter Data
+    fetch_details = fetch_chapter_details_admin if is_admin else fetch_chapter_details_reader
+    df_details = fetch_details(engine, target_title)
     if df_details.empty:
         st.info("No content found for this series.")
         return
