@@ -4,101 +4,78 @@ import sys
 import os
 import uuid
 import json
-import subprocess
 from sqlalchemy import text
 
-# 🎯 Fixed: Models now pull from config to break the sidebar loop
 from core.config import SUPPORTED_MODELS as AVAILABLE_MODELS
 
-# Detect Mode
-IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
-
-def run_synchronously(cmd_list, cwd):
-    """Local-only: Runs shell commands for real-time log streaming."""
-    env = {**os.environ, "PYTHONUTF8": "1", "PYTHONPATH": str(cwd)}
-    process = subprocess.Popen(
-        cmd_list,
-        cwd=cwd,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding='utf-8',
-        errors='replace',
-        bufsize=1,
-        universal_newlines=True
-    )
-    for line in process.stdout:
-        yield line.strip()
-    process.wait()
-    if process.returncode != 0:
-        raise Exception(f"Process failed with exit code {process.returncode}")
-
 @st.cache_data(ttl=60)
-def fetch_series_index(_engine):
-    """
-    Cached database query. 
-    🎯 HYBRID LOGIC: Cloud mode joins directly to 'summaries' since 
-    'chapter_processing' metadata isn't synced to the cloud replica.
-    """
-    if IS_ONLINE:
-        query = text("""
-            SELECT 
-                s.id, s.title, s.created_at, ss.url as primary_source,
-                COUNT(c.id) as total_chapters,
-                COUNT(summ.id) as summaries_done
-            FROM series s
-            LEFT JOIN series_sources ss ON s.id = ss.series_id AND ss.priority = 1
-            LEFT JOIN chapters c ON s.id = c.series_id
-            LEFT JOIN summaries summ ON c.id = summ.chapter_id
-            GROUP BY s.id, s.title, s.created_at, ss.url
-            ORDER BY s.created_at DESC
-        """)
-    else:
-        query = text("""
-            SELECT 
-                s.id, s.title, s.created_at, ss.url as primary_source,
-                COUNT(c.id) as total_chapters,
-                COALESCE(SUM(CASE WHEN cp.is_extracted THEN 1 ELSE 0 END), 0) as extracted_done,
-                COALESCE(SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END), 0) as ocr_done,
-                COALESCE(SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END), 0) as summaries_done,
-                COALESCE(SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END), 0) as errors
-            FROM series s
-            LEFT JOIN series_sources ss ON s.id = ss.series_id AND ss.priority = 1
-            LEFT JOIN chapters c ON s.id = c.series_id
-            LEFT JOIN chapter_processing cp ON c.id = cp.chapter_id
-            GROUP BY s.id, s.title, s.created_at, ss.url
-            ORDER BY s.created_at DESC
-        """)
+def fetch_series_index_admin(_engine):
+    """Admin view: Full pipeline status with extracted/ocr/summary tracking."""
+    query = text("""
+        SELECT
+            s.id, s.title, s.created_at, ss.url as primary_source,
+            COUNT(c.id) as total_chapters,
+            COALESCE(SUM(CASE WHEN cp.is_extracted THEN 1 ELSE 0 END), 0) as extracted_done,
+            COALESCE(SUM(CASE WHEN cp.ocr_extracted THEN 1 ELSE 0 END), 0) as ocr_done,
+            COALESCE(SUM(CASE WHEN cp.summary_complete THEN 1 ELSE 0 END), 0) as summaries_done,
+            COALESCE(SUM(CASE WHEN cp.has_error THEN 1 ELSE 0 END), 0) as errors
+        FROM series s
+        LEFT JOIN series_sources ss ON s.id = ss.series_id AND ss.priority = 1
+        LEFT JOIN chapters c ON s.id = c.series_id
+        LEFT JOIN chapter_processing cp ON c.id = cp.chapter_id
+        GROUP BY s.id, s.title, s.created_at, ss.url
+        ORDER BY s.created_at DESC
+    """)
     return pd.read_sql(query, _engine)
 
-def highlight_discrepancies(row):
-    """Styles the dataframe based on pipeline progress."""
+@st.cache_data(ttl=60)
+def fetch_series_index_reader(_engine):
+    """Cloud read-only view: Summary count only."""
+    query = text("""
+        SELECT
+            s.id, s.title, s.created_at, ss.url as primary_source,
+            COUNT(c.id) as total_chapters,
+            COUNT(summ.id) as summaries_done
+        FROM series s
+        LEFT JOIN series_sources ss ON s.id = ss.series_id AND ss.priority = 1
+        LEFT JOIN chapters c ON s.id = c.series_id
+        LEFT JOIN summaries summ ON c.id = summ.chapter_id
+        GROUP BY s.id, s.title, s.created_at, ss.url
+        ORDER BY s.created_at DESC
+    """)
+    return pd.read_sql(query, _engine)
+
+def highlight_discrepancies_admin(row):
+    """Admin view: Full pipeline status colors."""
     styles = [''] * len(row)
     if row['total_chapters'] == 0:
         return styles
 
-    # Mobile/Cloud View: Just show green when 100% summarized
-    if IS_ONLINE:
-        if row['summaries_done'] >= row['total_chapters']:
-            idx = row.index.get_loc('summaries_done')
-            styles[idx] = 'background-color: rgba(46, 204, 113, 0.2);'
-        return styles
-
-    # Local View: Full pipeline status colors
     if row['extracted_done'] < row['total_chapters']:
         idx = row.index.get_loc('extracted_done')
-        styles[idx] = 'background-color: rgba(231, 76, 60, 0.2);' 
+        styles[idx] = 'background-color: rgba(231, 76, 60, 0.2);'
     elif row['ocr_done'] < row['total_chapters']:
         idx = row.index.get_loc('ocr_done')
-        styles[idx] = 'background-color: rgba(241, 196, 15, 0.2);' 
+        styles[idx] = 'background-color: rgba(241, 196, 15, 0.2);'
     elif row['summaries_done'] < row['total_chapters']:
         idx = row.index.get_loc('summaries_done')
         styles[idx] = 'background-color: rgba(52, 152, 219, 0.2);'
     return styles
 
+def highlight_discrepancies_reader(row):
+    """Cloud read-only view: Show green when 100% summarized."""
+    styles = [''] * len(row)
+    if row['total_chapters'] == 0:
+        return styles
+
+    if row['summaries_done'] >= row['total_chapters']:
+        idx = row.index.get_loc('summaries_done')
+        styles[idx] = 'background-color: rgba(46, 204, 113, 0.2);'
+    return styles
+
 @st.fragment
-def render_index(engine, root_path):
+def render_index(engine: object, is_admin: bool = False, root_path: str = None) -> None:
+    """Render series index. Pass is_admin=True for full admin controls."""
     col_header, col_ref = st.columns([5, 1])
     with col_header:
         st.subheader("Library Status")
@@ -107,7 +84,7 @@ def render_index(engine, root_path):
             st.cache_data.clear()
             st.rerun(scope="fragment")
 
-    df_raw = fetch_series_index(engine)
+    df_raw = fetch_series_index_admin(engine) if is_admin else fetch_series_index_reader(engine)
     if df_raw.empty:
         st.info("No series found in database yet.")
         return
@@ -122,11 +99,11 @@ def render_index(engine, root_path):
     # Dynamic Metrics
     m_col1, m_col2, m_col3 = st.columns(3)
     m_col1.metric("Series", f"{len(df)}")
-    
+
     summarized_count = len(df[(df['summaries_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
     m_col2.metric("Summaries Done", f"{summarized_count}")
-    
-    if not IS_ONLINE:
+
+    if is_admin:
         extracted_count = len(df[(df['extracted_done'] >= df['total_chapters']) & (df['total_chapters'] > 0)])
         m_col3.metric("Images Local", f"{extracted_count}")
     else:
@@ -137,27 +114,28 @@ def render_index(engine, root_path):
         "id": None,
         "title": "Series Title",
         "created_at": st.column_config.DatetimeColumn("Added", format="D MMM YYYY"),
-        "primary_source": None if IS_ONLINE else st.column_config.LinkColumn("Source"),
+        "primary_source": None if not is_admin else st.column_config.LinkColumn("Source"),
         "total_chapters": "Total",
-        "summaries_done": "Read ✅" if IS_ONLINE else "Summaries 📝"
+        "summaries_done": "Read ✅" if not is_admin else "Summaries 📝"
     }
-    
-    if not IS_ONLINE:
+
+    if is_admin:
         column_config.update({
             "extracted_done": "Images 📥",
             "ocr_done": "OCR ✅",
             "errors": st.column_config.NumberColumn("Errors ⚠️", format="%d")
         })
 
+    highlight_fn = highlight_discrepancies_admin if is_admin else highlight_discrepancies_reader
     event = st.dataframe(
-        df.style.apply(highlight_discrepancies, axis=1),
+        df.style.apply(highlight_fn, axis=1),
         column_config=column_config,
         width="stretch",
-        height=400 if IS_ONLINE else 450,
+        height=450 if is_admin else 400,
         hide_index=True,
         on_select="rerun",
         selection_mode="single-row",
-        key="index_table_widget" 
+        key="index_table_widget"
     )
 
     if len(event.selection.rows) > 0:
@@ -165,21 +143,42 @@ def render_index(engine, root_path):
         st.session_state.selected_series_id = selected_row['id']
         st.session_state.selected_series_title = selected_row['title']
 
-        if IS_ONLINE:
+        if is_admin:
+            render_management_panel(engine, selected_row, root_path)
+        else:
             st.success(f"Selected: **{selected_row['title']}**")
             st.info("📖 Switch to **Deep Dive** to read.")
-        else:
-            render_management_panel(engine, selected_row, root_path)
 
-def render_management_panel(engine, selected_row, root_path):
-    """Local-only dashboard controls."""
-    # 🎯 Lazy Import: Only pulls discovery when needed to break circular dependency
+def render_management_panel(engine, selected_row, root_path: str) -> None:
+    """Admin-only dashboard controls."""
+    import subprocess
     from core.extractors.discovery import sync_series_by_id
+
+    def run_synchronously(cmd_list, cwd):
+        """Runs shell commands for real-time log streaming."""
+        env = {**os.environ, "PYTHONUTF8": "1", "PYTHONPATH": str(cwd)}
+        process = subprocess.Popen(
+            cmd_list,
+            cwd=cwd,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            bufsize=1,
+            universal_newlines=True
+        )
+        for line in process.stdout:
+            yield line.strip()
+        process.wait()
+        if process.returncode != 0:
+            raise Exception(f"Process failed with exit code {process.returncode}")
 
     st.divider()
     with st.container(border=True):
         st.subheader(f"⚡ Manage: {selected_row['title']}")
-        
+
         edit_col1, edit_col2 = st.columns(2)
         new_title = edit_col1.text_input("Edit Title", value=selected_row['title'])
         new_url = edit_col2.text_input("Edit Source URL", value=selected_row['primary_source'] or "")
@@ -198,8 +197,7 @@ def render_management_panel(engine, selected_row, root_path):
                 st.error(f"Error: {e}")
 
         st.divider()
-        
-        # Action Helpers
+
         def queue_task(action, context=None):
             try:
                 with engine.begin() as conn:
@@ -230,7 +228,7 @@ def render_management_panel(engine, selected_row, root_path):
                 elif action == "ocr": cmd.append("--ocr")
                 elif action == "summary": cmd.append("--summarize")
                 elif action == "full": cmd.extend(["--extract", "--ocr", "--summarize"])
-                
+
                 if context and "model" in context and action in ["summary", "full"]:
                     cmd.extend(["--model", context["model"]])
 
@@ -253,10 +251,9 @@ def render_management_panel(engine, selected_row, root_path):
                     conn.execute(text("UPDATE processing_queue SET status = 'FAILED'::queuestatus, updated_at = now() WHERE id = :id"), {"id": task_id})
                 st.error(f"Failed: {e}")
 
-        # Action Panel
         st.caption("Trigger Pipeline Actions")
         q_model = st.session_state.get("sidebar_model_select", AVAILABLE_MODELS[0] if AVAILABLE_MODELS else "")
-        
+
         if st.button("🔍 Scan for New Chapters", use_container_width=True, disabled=not selected_row['primary_source']):
             with st.spinner("Scouting..."):
                 sync_series_by_id(selected_row['id'])
@@ -278,18 +275,17 @@ def render_management_panel(engine, selected_row, root_path):
             if col_run.button("Run Now", type="primary", key=f"run_{act_key}_{selected_row['id']}", use_container_width=True):
                 run_now_task(act_key, selected_row['id'], selected_row['title'], root_path, context=act_ctx)
 
-        # Danger Zone
         with st.expander("🛠️ Advanced / Maintenance"):
             st.warning("Destructive Actions below.")
             reset_col1, reset_col2 = st.columns([3, 1])
             reset_input = reset_col1.text_input("Chapters (all, 1-10)", value="all", key=f"reset_field_{selected_row['id']}")
-            
+
             if reset_col2.button("🗑️ Reset", use_container_width=True):
                 cmd = [sys.executable, "processor.py", "-t", selected_row['title'], "--reset-summaries", reset_input]
                 subprocess.run(cmd, env={"PYTHONPATH": str(root_path), **os.environ})
                 st.cache_data.clear()
                 st.rerun(scope="fragment")
-            
+
             st.divider()
             st.error("Permanent Deletion")
             delete_col1, delete_col2 = st.columns([3, 1])
