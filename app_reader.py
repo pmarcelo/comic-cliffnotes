@@ -7,63 +7,74 @@ root_path = Path(__file__).resolve().parent
 if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
-from core import config
-from database.session import cloud_engine
-from interface.ui.sidebar_reader import render_api_usage
-from interface.ui.index_tab import render_index
-from interface.ui.deep_dive_tab import render_deep_dive
+from database.session import cloud_engine, local_engine
+from interface.ui.reader_index_tab import render_reader_index
+from interface.ui.reader_deep_dive_tab import render_reader_deep_dive
 
-def inject_mobile_ui():
-    st.markdown("""
-    <style>
+IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
+
+# Premium Typography & Layout
+st.set_page_config(page_title="Comic CliffNotes", layout="wide", initial_sidebar_state="collapsed")
+
+# Custom CSS: Inter globally, Merriweather for blockquotes
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+
+    blockquote {
+        font-family: 'Merriweather', Georgia, serif !important;
+        font-style: italic;
+        border-left: 4px solid #ccc;
+        padding-left: 1rem;
+        margin: 1.5rem 0;
+        color: #555;
+    }
+
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        max-width: 900px !important;
+    }
+
+    @media (max-width: 768px) {
         .block-container {
-            padding-top: 2rem !important;
-            padding-bottom: 2rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
         }
-        @media (max-width: 768px) {
-            .stButton > button {
-                width: 100% !important;
-                min-height: 50px !important;
-                font-weight: bold !important;
-            }
-            html, body, [class*="css"] {
-                font-size: 14px;
-            }
-            .stTextInput>div>div>input, .stSelectbox>div>div>div {
-                min-height: 45px !important;
-            }
+        .stButton > button {
+            min-height: 48px !important;
+            font-weight: 500 !important;
         }
-    </style>
-    """, unsafe_allow_html=True)
+    }
+</style>
+""", unsafe_allow_html=True)
 
-inject_mobile_ui()
-
-st.set_page_config(page_title="Manga OS", layout="wide", initial_sidebar_state="expanded")
-
+# Initialize session state
 if 'selected_series_id' not in st.session_state:
     st.session_state.selected_series_id = None
 if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
 
-engine = cloud_engine
-if not engine:
-    st.error("🌐 Cloud database connection failed. Check CLOUD_DATABASE_URL.")
-    st.stop()
+# Get database engine
+engine = cloud_engine if (IS_ONLINE and cloud_engine) else local_engine
 
-with st.sidebar:
-    st.success("🌐 Cloud Read-Only Mode")
-    st.caption("Background workers and local file management are disabled.")
-    render_api_usage()
+# Header
+st.markdown("# 📚 Comic CliffNotes")
 
-st.title("📖 Manga Processing Dashboard")
+# Tabs: Index & Deep Dive
+tab_library, tab_reader = st.tabs(["📚 Library", "📖 Reader"])
 
-tabs = st.tabs(["📚 Series Index", "🔍 Series Deep Dive"])
-tab_index, tab_details = tabs
+with tab_library:
+    render_reader_index(engine)
 
-with tab_index:
-    render_index(engine, is_admin=False)
-
-with tab_details:
-    render_deep_dive(engine, is_admin=False)
+with tab_reader:
+    if st.session_state.selected_series_id:
+        render_reader_deep_dive(engine)
+    else:
+        st.info("Select a series from the Library to begin reading.")
