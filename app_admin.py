@@ -8,10 +8,12 @@ if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
 from core import config
-from database.session import cloud_engine
-from interface.ui.sidebar_reader import render_api_usage
+from database.session import local_engine
+from interface.ui.sidebar_admin import render_pipeline_control, render_active_tasks, render_api_usage
 from interface.ui.index_tab import render_index
 from interface.ui.deep_dive_tab import render_deep_dive
+from interface.ui.discovery_tab import render_discovery
+from interface.ui.queue_tab import render_queue_tab
 
 def inject_mobile_ui():
     st.markdown("""
@@ -47,23 +49,29 @@ if 'selected_series_id' not in st.session_state:
 if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
 
-engine = cloud_engine
+engine = local_engine
 if not engine:
-    st.error("🌐 Cloud database connection failed. Check CLOUD_DATABASE_URL.")
+    st.error("📦 Local database connection failed. Check DATABASE_URL.")
     st.stop()
 
 with st.sidebar:
-    st.success("🌐 Cloud Read-Only Mode")
-    st.caption("Background workers and local file management are disabled.")
+    render_pipeline_control(root_path)
+    render_active_tasks()
     render_api_usage()
 
 st.title("📖 Manga Processing Dashboard")
 
-tabs = st.tabs(["📚 Series Index", "🔍 Series Deep Dive"])
-tab_index, tab_details = tabs
+tabs = st.tabs(["📚 Series Index", "🔍 Series Deep Dive", "🌐 Global Discovery", "📋 Pipeline Queue"])
+tab_index, tab_details, tab_discover, tab_queue = tabs
 
 with tab_index:
-    render_index(engine, is_admin=False)
+    render_index(engine, is_admin=True, root_path=root_path)
 
 with tab_details:
-    render_deep_dive(engine, is_admin=False)
+    render_deep_dive(engine, is_admin=True)
+
+with tab_discover:
+    render_discovery(engine)
+
+with tab_queue:
+    render_queue_tab(engine)
