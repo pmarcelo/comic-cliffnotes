@@ -20,3 +20,6 @@ venv/
 
 *cookies.txt
 *.log
+
+
+service_account.json

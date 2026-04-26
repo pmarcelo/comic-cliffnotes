@@ -9,7 +9,6 @@ if str(root_path) not in sys.path:
 
 from database.session import cloud_engine, local_engine
 from interface.ui.reader_index_tab import render_reader_index
-from interface.ui.reader_deep_dive_tab import render_reader_deep_dive
 
 IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
 
@@ -67,14 +66,5 @@ engine = cloud_engine if (IS_ONLINE and cloud_engine) else local_engine
 # Header
 st.markdown("# 📚 Comic CliffNotes")
 
-# Tabs: Index & Deep Dive
-tab_library, tab_reader = st.tabs(["📚 Library", "📖 Reader"])
-
-with tab_library:
-    render_reader_index(engine)
-
-with tab_reader:
-    if st.session_state.selected_series_id:
-        render_reader_deep_dive(engine)
-    else:
-        st.info("Select a series from the Library to begin reading.")
+# Render library (reader is now a separate page via pages/reader.py)
+render_reader_index(engine)
