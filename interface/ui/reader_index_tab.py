@@ -76,4 +76,4 @@ def render_reader_index(engine):
                 if st.button("📖 Read", key=f"read_{row['id']}", use_container_width=True):
                     st.session_state.selected_series_id = row['id']
                     st.session_state.selected_series_title = row['title']
-                    st.rerun()
+                    st.switch_page("pages/reader.py")
