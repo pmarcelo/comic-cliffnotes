@@ -59,9 +59,16 @@ if 'selected_series_id' not in st.session_state:
     st.session_state.selected_series_id = None
 if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
+if 'navigate_to_reader' not in st.session_state:
+    st.session_state.navigate_to_reader = False
 
 # Get database engine
 engine = cloud_engine if (IS_ONLINE and cloud_engine) else local_engine
+
+# Check if should navigate to reader page
+if st.session_state.navigate_to_reader:
+    st.session_state.navigate_to_reader = False
+    st.switch_page("pages/reader.py")
 
 # Header
 st.markdown("# 📚 Comic CliffNotes")
