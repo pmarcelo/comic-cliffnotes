@@ -23,6 +23,23 @@ def fetch_series_index(_engine):
 
 @st.fragment
 def render_reader_index(engine):
+    # Sticky header CSS (targets first 4 Streamlit containers: title, search, sort radio, spacer)
+    st.markdown("""
+    <style>
+        /* Make header and filter controls sticky at top while scrolling */
+        .stVerticalBlockBQ > .element-container:nth-child(1),
+        .stVerticalBlockBQ > .element-container:nth-child(2),
+        .stVerticalBlockBQ > .element-container:nth-child(3) {
+            position: sticky !important;
+            top: 0 !important;
+            background: rgba(14, 17, 23, 0.98) !important;
+            z-index: 100 !important;
+            padding: 0.5rem 0 !important;
+            border-bottom: 1px solid #333 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.subheader("Library")
 
     df_raw = fetch_series_index(engine)
@@ -77,3 +94,4 @@ def render_reader_index(engine):
                     st.session_state.selected_series_id = row['id']
                     st.session_state.selected_series_title = row['title']
                     st.session_state.navigate_to_reader = True
+                    st.rerun()
