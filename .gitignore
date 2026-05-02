@@ -22,4 +22,7 @@ venv/
 *.log
 
 
+# Google cloud env creds
 service_account.json
+credentials.json
+token.json

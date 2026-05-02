@@ -140,6 +140,9 @@ class Chapter(Base, TimestampMixin):
     # Stores the direct link to the specific chapter reader page
     url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Google Drive file ID for migrated OCR text
+    drive_file_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
     # Relationships
     series: Mapped["Series"] = relationship(back_populates="chapters")
     
