@@ -8,7 +8,7 @@ if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
 from database.session import SessionLocal
-from database.models import Chapter, ChapterProcessing, OCRResult
+from database.models import Chapter, ChapterProcessing
 
 def cleanup_chapter_zeros():
     db = SessionLocal()
@@ -25,14 +25,11 @@ def cleanup_chapter_zeros():
         deleted_count = 0
         for chap in zero_chapters:
             print(f"🗑️ Deleting Chapter 0 from Series ID: {chap.series_id}")
-            
-            # 1. Delete OCR Results (if any exist)
-            db.query(OCRResult).filter(OCRResult.chapter_id == chap.id).delete()
-            
-            # 2. Delete Processing Status
+
+            # Delete Processing Status
             db.query(ChapterProcessing).filter(ChapterProcessing.chapter_id == chap.id).delete()
-            
-            # 3. Delete the actual Chapter
+
+            # Delete the actual Chapter
             db.delete(chap)
             deleted_count += 1
 
