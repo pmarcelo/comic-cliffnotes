@@ -5,9 +5,13 @@ from sqlalchemy import text
 
 IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_series_index(_engine):
-    """Fetch series with chapter counts and summary progress."""
+    """Fetch series with chapter counts and summary progress.
+
+    Cached for 1 hour to reduce load on remote CockroachDB.
+    Use cache_manager.clear_library_cache() to manually refresh.
+    """
     query = text("""
         SELECT
             s.id, s.title, s.created_at,
@@ -42,6 +46,13 @@ def render_reader_index(engine):
 
     st.subheader("Library")
 
+    # Refresh button (top right)
+    col_title, col_refresh = st.columns([4, 1])
+    with col_refresh:
+        if st.button("🔄", help="Refresh library from database (clears cache)"):
+            st.cache_data.clear()
+            st.rerun()
+
     df_raw = fetch_series_index(engine)
     if df_raw.empty:
         st.info("No series found yet.")
@@ -57,6 +68,10 @@ def render_reader_index(engine):
     )
 
     df = df_raw.copy()
+
+    # Convert numeric columns to int to remove floats
+    df['total_chapters'] = df['total_chapters'].astype(int)
+    df['summaries_done'] = df['summaries_done'].astype(int)
 
     # Apply search
     if search_query:

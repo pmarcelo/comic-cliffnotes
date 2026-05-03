@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import text
 
-@st.cache_data(ttl=30)
+@st.cache_data(ttl=3600)
 def fetch_series_stats_admin(_engine, series_title):
     """Admin view: Full pipeline stats with error tracking."""
     query = text("""
@@ -17,7 +17,7 @@ def fetch_series_stats_admin(_engine, series_title):
     """)
     return pd.read_sql(query, _engine, params={"title": series_title})
 
-@st.cache_data(ttl=30)
+@st.cache_data(ttl=3600)
 def fetch_series_stats_reader(_engine, series_title):
     """Cloud read-only view: Summary counts only."""
     query = text("""
@@ -32,7 +32,7 @@ def fetch_series_stats_reader(_engine, series_title):
     """)
     return pd.read_sql(query, _engine, params={"title": series_title})
 
-@st.cache_data(ttl=30)
+@st.cache_data(ttl=3600)
 def fetch_chapter_details_admin(_engine, series_title):
     """Admin view: Full chapter details with processing metadata."""
     query = text("""
@@ -47,7 +47,7 @@ def fetch_chapter_details_admin(_engine, series_title):
     """)
     return pd.read_sql(query, _engine, params={"title": series_title})
 
-@st.cache_data(ttl=30)
+@st.cache_data(ttl=3600)
 def fetch_chapter_details_reader(_engine, series_title):
     """Cloud read-only view: Chapter content and summaries only."""
     query = text("""
@@ -129,16 +129,19 @@ def render_deep_dive(engine: object, is_admin: bool = False) -> None:
     sub_tab_inspect, sub_tab_grid = st.tabs(["🔍 Inspector", "📊 Chapter List"])
 
     with sub_tab_grid:
+        # Convert chapter_number to string without decimals for display
+        df_display = df_details[['chapter_number', 'summary_complete', 'ocr_extracted']].copy()
+        df_display['chapter_number'] = df_display['chapter_number'].astype(int).astype(str)
+
         st.dataframe(
-            df_details[['chapter_number', 'summary_complete', 'ocr_extracted']].astype({'chapter_number': 'int32'}),
+            df_display,
             column_config={
-                "chapter_number": st.column_config.NumberColumn("Ch #", format="%d"),
+                "chapter_number": "Ch #",
                 "summary_complete": "Summary ✅",
                 "ocr_extracted": "OCR ✅"
             },
-            width="stretch",
-            hide_index=True,
-            use_container_width=True
+            use_container_width=True,
+            hide_index=True
         )
 
     with sub_tab_inspect:

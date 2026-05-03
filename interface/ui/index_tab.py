@@ -115,14 +115,14 @@ def render_index(engine: object, is_admin: bool = False, root_path: str = None) 
         "title": "Series Title",
         "created_at": st.column_config.DatetimeColumn("Added", format="D MMM YYYY"),
         "primary_source": None if not is_admin else st.column_config.LinkColumn("Source"),
-        "total_chapters": "Total",
-        "summaries_done": "Read ✅" if not is_admin else "Summaries 📝"
+        "total_chapters": st.column_config.NumberColumn("Total", format="%d"),
+        "summaries_done": st.column_config.NumberColumn("Read ✅" if not is_admin else "Summaries 📝", format="%d")
     }
 
     if is_admin:
         column_config.update({
-            "extracted_done": "Images 📥",
-            "ocr_done": "OCR ✅",
+            "extracted_done": st.column_config.NumberColumn("Images 📥", format="%d"),
+            "ocr_done": st.column_config.NumberColumn("OCR ✅", format="%d"),
             "errors": st.column_config.NumberColumn("Errors ⚠️", format="%d")
         })
 
