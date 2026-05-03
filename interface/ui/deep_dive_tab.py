@@ -108,9 +108,9 @@ def render_deep_dive(engine: object, is_admin: bool = False) -> None:
             m1, m2 = st.columns(2)
             m3, m4 = st.columns(2)
 
-        m1.metric("Chapters", total)
+        m1.metric("Chapters", int(total))
         m2.metric("OCR", f"{int((stats['ocr_done']/total)*100 if total > 0 else 0)}%")
-        m3.metric("Summarized", f"{int(stats['summaries_done'] or 0)}")
+        m3.metric("Summarized", int(stats['summaries_done'] or 0))
 
         if is_admin:
             m4.metric("Errors", f"{int(stats['errors'] or 0)}", delta_color="inverse")
@@ -130,14 +130,14 @@ def render_deep_dive(engine: object, is_admin: bool = False) -> None:
 
     with sub_tab_grid:
         st.dataframe(
-            df_details[['chapter_number', 'summary_complete', 'ocr_extracted']], 
+            df_details[['chapter_number', 'summary_complete', 'ocr_extracted']].astype({'chapter_number': 'int32'}),
             column_config={
-                "chapter_number": "Ch #",
+                "chapter_number": st.column_config.NumberColumn("Ch #", format="%d"),
                 "summary_complete": "Summary ✅",
                 "ocr_extracted": "OCR ✅"
             },
-            width="stretch", 
-            hide_index=True, 
+            width="stretch",
+            hide_index=True,
             use_container_width=True
         )
 

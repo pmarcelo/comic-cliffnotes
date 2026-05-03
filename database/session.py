@@ -30,14 +30,18 @@ def initialize_database():
         st.error("DATABASE_URL not set in .env")
         return
 
-    # SSL setup for cloud databases
+    # SSL setup for cloud databases (optional - only if secrets file exists)
     cert_path = os.path.expanduser("~/.postgresql/root.crt")
     if "cockroach" in config.DATABASE_URL.lower() or "postgresql" in config.DATABASE_URL.lower():
-        os.makedirs(os.path.dirname(cert_path), exist_ok=True)
-        if "COCKROACH_CA_CERT" in st.secrets:
-            with open(cert_path, "w") as f:
-                f.write(st.secrets["COCKROACH_CA_CERT"])
-            os.environ["PGSSLROOTCERT"] = cert_path
+        try:
+            os.makedirs(os.path.dirname(cert_path), exist_ok=True)
+            if "COCKROACH_CA_CERT" in st.secrets:
+                with open(cert_path, "w") as f:
+                    f.write(st.secrets["COCKROACH_CA_CERT"])
+                os.environ["PGSSLROOTCERT"] = cert_path
+        except Exception:
+            # Secrets not configured - skip SSL cert setup (OK for local dev)
+            pass
 
     # Normalize the database URL for CockroachDB
     final_url = config.DATABASE_URL
