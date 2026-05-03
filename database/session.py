@@ -15,57 +15,46 @@ def _patched_get_server_version_info(self, connection):
         return (13, 0, 0)
 PGDialect._get_server_version_info = _patched_get_server_version_info
 
-# 🎯 STEP 1: Define EVERYTHING at the top level so other files can import them
+# 🎯 Define engine at module level so other files can import it
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
-local_engine = None
-cloud_engine = None
-engine = None  # Global shorthand for the active engine
+engine = None
 
 def initialize_database():
-    """Logic to setup engines and bind the session factory."""
-    global local_engine, cloud_engine, engine
-    
+    """Initialize the database engine and bind the session factory."""
+    global engine
+
     # We import config INSIDE the function to prevent circular import loops
     from core import config
-    
-    # --- 1. SSL Setup ---
+
+    if not config.DATABASE_URL:
+        st.error("DATABASE_URL not set in .env")
+        return
+
+    # SSL setup for cloud databases
     cert_path = os.path.expanduser("~/.postgresql/root.crt")
-    if os.getenv("CLIFFNOTES_MODE") == "ONLINE":
+    if "cockroach" in config.DATABASE_URL.lower() or "postgresql" in config.DATABASE_URL.lower():
         os.makedirs(os.path.dirname(cert_path), exist_ok=True)
         if "COCKROACH_CA_CERT" in st.secrets:
             with open(cert_path, "w") as f:
                 f.write(st.secrets["COCKROACH_CA_CERT"])
             os.environ["PGSSLROOTCERT"] = cert_path
 
-    # --- 2. Setup Local Engine ---
-    if os.getenv("CLIFFNOTES_MODE") != "ONLINE" and config.DATABASE_URL:
-        try:
-            local_engine = create_engine(config.DATABASE_URL)
-        except Exception as e:
-            st.error(f"Local DB Error: {e}")
+    # Normalize the database URL for CockroachDB
+    final_url = config.DATABASE_URL
+    final_url = final_url.replace("cockroachdb://", "postgresql+psycopg2://")
+    final_url = final_url.replace("postgresql://", "postgresql+psycopg2://")
 
-    # --- 3. Setup Cloud Engine (With Dialect Bypass) ---
-    if config.CLOUD_DATABASE_URL:
-        # We replace the prefix to avoid the buggy cockroachdb version check
-        raw_url = config.CLOUD_DATABASE_URL
-        final_url = raw_url.replace("cockroachdb://", "postgresql+psycopg2://")
-        final_url = final_url.replace("postgresql://", "postgresql+psycopg2://")
-        
-        try:
-            cloud_engine = create_engine(
-                final_url,
-                pool_size=5,
-                max_overflow=10,
-                pool_pre_ping=True,
-                connect_args={"client_encoding": "utf8"}
-            )
-        except Exception as e:
-            st.sidebar.error(f"Cloud DB Connection Error: {e}")
-
-    # --- 4. Final Binding ---
-    engine = cloud_engine if os.getenv("CLIFFNOTES_MODE") == "ONLINE" else local_engine
-    if engine:
+    try:
+        engine = create_engine(
+            final_url,
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,
+            connect_args={"client_encoding": "utf8"}
+        )
         SessionLocal.configure(bind=engine)
+    except Exception as e:
+        st.error(f"Database Connection Error: {e}")
 
 # Run the initialization
 initialize_database()

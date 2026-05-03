@@ -8,7 +8,7 @@ if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
 from core import config
-from database.session import local_engine
+from database.session import engine
 from interface.ui.sidebar_admin import render_pipeline_control, render_active_tasks, render_api_usage
 from interface.ui.index_tab import render_index
 from interface.ui.deep_dive_tab import render_deep_dive
@@ -49,9 +49,8 @@ if 'selected_series_id' not in st.session_state:
 if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
 
-engine = local_engine
 if not engine:
-    st.error("📦 Local database connection failed. Check DATABASE_URL.")
+    st.error("📦 Database connection failed. Check DATABASE_URL in .env")
     st.stop()
 
 with st.sidebar:

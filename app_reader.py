@@ -7,10 +7,8 @@ root_path = Path(__file__).resolve().parent
 if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
-from database.session import cloud_engine, local_engine
+from database.session import engine
 from interface.ui.reader_index_tab import render_reader_index
-
-IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
 
 # Premium Typography & Layout
 st.set_page_config(page_title="Comic CliffNotes", layout="wide", initial_sidebar_state="collapsed")
@@ -61,9 +59,6 @@ if 'selected_series_title' not in st.session_state:
     st.session_state.selected_series_title = None
 if 'navigate_to_reader' not in st.session_state:
     st.session_state.navigate_to_reader = False
-
-# Get database engine
-engine = cloud_engine if (IS_ONLINE and cloud_engine) else local_engine
 
 # Check if should navigate to reader page
 if st.session_state.navigate_to_reader:
