@@ -22,13 +22,12 @@ def fetch_series_stats_reader(_engine, series_title):
     """Cloud read-only view: Summary counts only."""
     query = text("""
         SELECT COUNT(c.id) as total,
-               COUNT(ocr.id) as ocr_done,
+               SUM(CASE WHEN c.drive_file_id IS NOT NULL THEN 1 ELSE 0 END) as ocr_done,
                COUNT(summ.id) as summaries_done,
                0 as errors
         FROM chapters c
         JOIN series s ON c.series_id = s.id
         LEFT JOIN summaries summ ON c.id = summ.chapter_id
-        LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
         WHERE s.title = :title
     """)
     return pd.read_sql(query, _engine, params={"title": series_title})
@@ -37,13 +36,12 @@ def fetch_series_stats_reader(_engine, series_title):
 def fetch_chapter_details_admin(_engine, series_title):
     """Admin view: Full chapter details with processing metadata."""
     query = text("""
-        SELECT c.chapter_number, c.url, cp.ocr_extracted, cp.summary_complete,
-               s.content as summary_json, ocr.raw_text as ocr_text
+        SELECT c.chapter_number, c.url, c.drive_file_id, cp.ocr_extracted, cp.summary_complete,
+               s.content as summary_json
         FROM chapters c
         JOIN series ser ON c.series_id = ser.id
         JOIN chapter_processing cp ON c.id = cp.chapter_id
         LEFT JOIN summaries s ON c.id = s.chapter_id
-        LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
         WHERE ser.title = :title
         ORDER BY c.chapter_number ASC
     """)
@@ -53,14 +51,13 @@ def fetch_chapter_details_admin(_engine, series_title):
 def fetch_chapter_details_reader(_engine, series_title):
     """Cloud read-only view: Chapter content and summaries only."""
     query = text("""
-        SELECT c.chapter_number, c.url,
+        SELECT c.chapter_number, c.url, c.drive_file_id,
                (summ.id IS NOT NULL) as summary_complete,
-               (ocr.id IS NOT NULL) as ocr_extracted,
-               summ.content as summary_json, ocr.raw_text as ocr_text
+               (c.drive_file_id IS NOT NULL) as ocr_extracted,
+               summ.content as summary_json
         FROM chapters c
         JOIN series ser ON c.series_id = ser.id
         LEFT JOIN summaries summ ON c.id = summ.chapter_id
-        LEFT JOIN ocr_results ocr ON c.id = ocr.chapter_id
         WHERE ser.title = :title
         ORDER BY c.chapter_number ASC
     """)
@@ -189,6 +186,5 @@ def render_deep_dive(engine: object, is_admin: bool = False) -> None:
         else:
             st.info("Summary not yet generated.")
 
-        if row['ocr_text']:
-            with st.expander("📄 Raw Transcript", expanded=False):
-                st.text(row['ocr_text'])
+        if row.get('drive_file_id'):
+            st.info(f"📄 Raw OCR text stored in Google Drive: `{row['drive_file_id']}`")
