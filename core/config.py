@@ -33,9 +33,7 @@ USE_GPU = os.getenv("USE_GPU", "False").lower() == "true"
 GEMINI_MAX_RPM = int(os.getenv("GEMINI_MAX_RPM", 8))
 
 # --- DATABASE SETTINGS ---
-# Crucial: This maps the string from your .env so session.py can see it
 DATABASE_URL = os.getenv("DATABASE_URL")
-CLOUD_DATABASE_URL= os.getenv("CLOUD_DATABASE_URL")
 
 # --- MODEL SETTINGS ---
 # TARGET_MODEL = "gemini-2.5-flash"

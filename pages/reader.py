@@ -11,9 +11,7 @@ root_path = Path(__file__).resolve().parent.parent
 if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
-from database.session import cloud_engine, local_engine
-
-IS_ONLINE = os.getenv("CLIFFNOTES_MODE") == "ONLINE"
+from database.session import engine
 
 # Page config
 st.set_page_config(page_title="Reader - Comic CliffNotes", layout="wide", initial_sidebar_state="collapsed")
@@ -165,9 +163,6 @@ if not st.session_state.get('selected_series_id'):
 
 series_id = st.session_state.selected_series_id
 series_title = st.session_state.selected_series_title
-
-# Get database engine
-engine = cloud_engine if (IS_ONLINE and cloud_engine) else local_engine
 
 # Header with back button
 col_header, col_back = st.columns([4, 1])
